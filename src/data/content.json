@@ -1,0 +1,93 @@
+{
+  "site": {
+    "title": "SIKAP",
+    "fullName": "Sistem Kerjasama Tana Tidung",
+    "description": "Sistem kerjasama berbasis digital Kabupaten Tana Tidung, yang akuntabel dan transparan"
+  },
+  "hero": {
+    "title": "Platform Kerjasama Digital Terpercaya",
+    "subtitle": "SIKAP - Sistem Kerjasama Tana Tidung",
+    "description": "Memfasilitasi kerjasama strategis antara Pemerintah Kabupaten Tana Tidung dengan berbagai pihak untuk pembangunan daerah yang berkelanjutan dan transparansi yang tinggi.",
+    "cta": {
+      "primary": "Mulai Kerjasama",
+      "secondary": "Pelajari Lebih Lanjut"
+    },
+    "stats": [
+      {
+        "number": "150+",
+        "label": "Kerjasama Aktif",
+        "description": "Berbagai bentuk kerjasama yang sedang berjalan"
+      },
+      {
+        "number": "85%",
+        "label": "Tingkat Kepuasan",
+        "description": "Kepuasan mitra dalam proses kerjasama"
+      },
+      {
+        "number": "50+",
+        "label": "Mitra Strategis",
+        "description": "Lembaga dan organisasi yang terpercaya"
+      }
+    ]
+  },
+  "navigation": {
+    "home": "Beranda",
+    "about": "Tentang",
+    "cooperation": "Jenis Kerjasama",
+    "sop": "SOP",
+    "download": "Download",
+    "contact": "Kontak"
+  },
+  "contact": {
+    "title": "Hubungi Kami",
+    "address": "Jl. Ahmad Yani, No. 1, Kec. Sesayap, Kabupaten Tana Tidung, Kalimantan Utara, Kode Pos 77152",
+    "phone": "+62 822 1234 567",
+    "email": "tapem@tanatidungkab.go.id",
+    "whatsapp": "Whatsapp Kami",
+    "location": "Lihat Lokasi"
+  },
+  "download": {
+    "title": "Download & Form Kerjasama",
+    "subtitle": "Unduh formulir dan dokumen yang diperlukan untuk memulai proses kerjasama dengan Pemerintah Kabupaten Tana Tidung",
+    "helpSection": {
+      "title": "Butuh Bantuan Pengisian Form?",
+      "description": "Tim kami siap membantu Anda dalam proses pengisian formulir dan prosedur kerjasama. Hubungi kami untuk konsultasi gratis.",
+      "cta": {
+        "primary": "Konsultasi Gratis",
+        "secondary": "Lihat FAQ"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 - SIKAP - Tana Tidung",
+    "sections": {
+      "product": {
+        "title": "Kerjasama Terbaru",
+        "links": [
+          "SaaS Web Builder",
+          "Copywriting Templates",
+          "Automation Tools",
+          "Users Tracking Behavior"
+        ]
+      },
+      "company": {
+        "title": "Jenis Kerjasana",
+        "links": [
+          "Privacy Policy",
+          "Help Center",
+          "Terms Conditions",
+          "About Us"
+        ]
+      },
+      "developer": {
+        "title": "Link Terkait",
+        "links": [
+          "API Documentations",
+          "Product Knowledges",
+          "Ticketing Support",
+          "Pricing"
+        ]
+      }
+    }
+  }
+}

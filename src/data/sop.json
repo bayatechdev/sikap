@@ -1,0 +1,42 @@
+{
+  "dalam_negeri": {
+    "title": "Standar Operasional Prosedur Kerjasama Dalam Negeri",
+    "category": "Prosedur Domestik",
+    "description": "Panduan lengkap untuk proses kerjasama dengan pemerintah daerah, lembaga negara, BUMN, swasta nasional, dan organisasi dalam negeri lainnya. Mencakup tahapan dari inisiasi hingga evaluasi kerjasama.",
+    "image": "/assets/images/kesber_domestik.png",
+    "features": [
+      "Prosedur administrasi sederhana",
+      "Timeline 14-30 hari kerja",
+      "Dokumen persyaratan standar",
+      "Koordinasi instansi terkait"
+    ],
+    "downloadInfo": {
+      "fileName": "SOP-Kerjasama-Dalam-Negeri.pdf",
+      "fileSize": "3.2 MB",
+      "fileType": "PDF",
+      "lastUpdated": "15 Januari 2025",
+      "url": "#"
+    },
+    "color": "primary"
+  },
+  "luar_negeri": {
+    "title": "Standar Operasional Prosedur Kerjasama Luar Negeri",
+    "category": "Prosedur Internasional",
+    "description": "Panduan komprehensif untuk kerjasama internasional dengan pemerintah asing, organisasi internasional, NGO internasional, dan investor asing. Termasuk koordinasi dengan Kementerian Luar Negeri dan persyaratan khusus.",
+    "image": "/assets/images/kesber_inter.png",
+    "features": [
+      "Koordinasi Kemlu & instansi pusat",
+      "Timeline 30-60 hari kerja",
+      "Legalisasi & apostille",
+      "Compliance internasional"
+    ],
+    "downloadInfo": {
+      "fileName": "SOP-Kerjasama-Luar-Negeri.pdf",
+      "fileSize": "4.1 MB",
+      "fileType": "PDF",
+      "lastUpdated": "10 Januari 2025",
+      "url": "#"
+    },
+    "color": "blue"
+  }
+}

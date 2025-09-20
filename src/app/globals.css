@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0b251c;
+  --primary: #b7eb38;
+  --tab-off: #abb4b1;
+  --section: #edf3f1;
+}
+
+@theme inline {
+  --font-raleway: "Raleway", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-tab-off: var(--tab-off);
+  --color-section: var(--section);
+  --drop-shadow-custom: 0 12px 30px rgba(4, 6, 36, 0.11);
+  --shadow-primary: 0 4px 10px 0 rgba(183, 235, 56, 0.8);
+  --shadow-secondary: 0 4px 10px 0 rgba(255, 255, 255, 0.8);
+
+  --animate-fill-arrow: fillAnimation 2s infinite;
+
+  @keyframes fillAnimation {
+    0% {
+      fill: transparent;
+    }
+    50% {
+      fill: currentColor;
+    }
+    100% {
+      fill: transparent;
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-raleway;
+  }
+}
+
+@layer components {
+  /* Section Animation Classes */
+  .section-animate {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .section-animate.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-animate-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .section-animate-left.animate-in {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .section-animate-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .section-animate-right.animate-in {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .section-animate-scale {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .section-animate-scale.animate-in {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .icon-crown {
+    -webkit-mask-image: url("/assets/images/icons/crown.svg");
+    mask-image: url("/assets/images/icons/crown.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+
+  .icon-note {
+    -webkit-mask-image: url("/assets/images/icons/note-2.svg");
+    mask-image: url("/assets/images/icons/note-2.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+
+  .icon-message {
+    -webkit-mask-image: url("/assets/images/icons/device-message.svg");
+    mask-image: url("/assets/images/icons/device-message.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+
+  .icon-lock {
+    -webkit-mask-image: url("/assets/images/icons/lock.svg");
+    mask-image: url("/assets/images/icons/lock.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+
+  .icon-check {
+    -webkit-mask-image: url("/assets/images/icons/ic_check.svg");
+    mask-image: url("/assets/images/icons/ic_check.svg");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "mou": {
+    "title": "Memorandum of Understanding (MOU)",
+    "description": "Perjanjian tidak mengikat secara hukum yang menetapkan kerangka kerjasama antara Pemerintah Tana Tidung dengan mitra. MOU berfungsi sebagai dokumen awal yang menguraikan niat, ruang lingkup, dan prinsip-prinsip dasar kerjasama sebelum memasuki perjanjian yang lebih formal.",
+    "features": [
+      "Fleksibilitas tinggi dalam implementasi",
+      "Tidak mengikat secara hukum namun bermakna politis",
+      "Masa berlaku biasanya 2-5 tahun",
+      "Dapat diperpanjang atau direvisi sesuai kebutuhan"
+    ],
+    "examples": [
+      "Kerjasama Pendidikan dengan Universitas Mulawarman untuk program beasiswa mahasiswa Tana Tidung",
+      "Kerjasama Pariwisata dengan Dinas Pariwisata Provinsi Kaltara untuk promosi wisata daerah",
+      "Kerjasama Kesehatan dengan RSUD Tarakan untuk rujukan medis dan pelatihan tenaga kesehatan",
+      "MOU dengan LSM lingkungan untuk konservasi hutan dan pengelolaan sampah"
+    ],
+    "downloadInfo": {
+      "fileName": "Form Pengajuan MOU.pdf",
+      "fileSize": "2.3 MB",
+      "fileType": "PDF",
+      "docType": "Form",
+      "color": "primary",
+      "icon": "/assets/images/icons/note-2.svg"
+    }
+  },
+  "pks": {
+    "title": "Perjanjian Kerjasama (PKS)",
+    "description": "Perjanjian formal yang mengikat secara hukum dengan kewajiban dan hak yang jelas bagi semua pihak. PKS memuat detail implementasi, timeline, anggaran, indikator keberhasilan, dan sanksi jika terjadi pelanggaran. Dokumen ini lebih spesifik dan operasional dibanding MOU.",
+    "features": [
+      "Mengikat secara hukum dengan sanksi jelas",
+      "Target output dan outcome terukur",
+      "Timeline implementasi yang detail",
+      "Monitoring dan evaluasi berkala",
+      "Mekanisme penyelesaian sengketa"
+    ],
+    "examples": [
+      "PKS dengan PT. Bank Kaltara untuk program KUR (Kredit Usaha Rakyat) bagi UMKM lokal",
+      "Perjanjian dengan Perusahaan Swasta untuk CSR pembangunan infrastruktur desa",
+      "PKS dengan NGO Internasional untuk program pemberdayaan masyarakat pesisir",
+      "Kerjasama dengan Developer untuk pembangunan perumahan bersubsidi"
+    ],
+    "downloadInfo": {
+      "fileName": "Template PKS.docx",
+      "fileSize": "1.8 MB",
+      "fileType": "DOCX",
+      "docType": "Template",
+      "color": "blue",
+      "icon": "/assets/images/icons/crown.svg"
+    }
+  },
+  "surat_kuasa": {
+    "title": "Surat Kuasa Kerjasama",
+    "description": "Dokumen legal yang memberikan wewenang kepada pihak tertentu untuk mewakili Pemerintah Tana Tidung dalam proses negosiasi, penandatanganan, atau pelaksanaan kerjasama. Surat kuasa diperlukan ketika pejabat yang berwenang tidak dapat hadir secara langsung dalam proses kerjasama.",
+    "features": [
+      "Perwakilan resmi dengan landasan hukum kuat",
+      "Mempercepat proses administrasi dan birokrasi",
+      "Fleksibilitas dalam penjadwalan pertemuan",
+      "Dokumentasi yang lengkap dan terstruktur"
+    ],
+    "examples": [
+      "Kuasa untuk Kepala BAPPEDA menandatangani MOU dengan investor asing",
+      "Delegasi wewenang kepada Kepala Dinas untuk negosiasi teknis dengan mitra",
+      "Perwakilan dalam forum kerjasama antar daerah di tingkat regional",
+      "Kuasa khusus untuk penandatanganan kontrak pembangunan infrastruktur"
+    ],
+    "downloadInfo": {
+      "fileName": "Template Surat Kuasa.pdf",
+      "fileSize": "1.2 MB",
+      "fileType": "PDF",
+      "docType": "Template",
+      "color": "green",
+      "icon": "/assets/images/icons/device-message.svg"
+    }
+  },
+  "nota_kesepakatan": {
+    "title": "Nota Kesepakatan",
+    "description": "Dokumen awal yang memuat kesepahaman dasar antara para pihak sebelum menyusun perjanjian formal. Nota kesepakatan berfungsi sebagai jembatan antara diskusi informal dan perjanjian resmi, memuat garis besar komitmen dan framework kerjasama yang akan dikembangkan.",
+    "features": [
+      "Komitmen awal yang lebih formal dari sekedar diskusi",
+      "Framework dasar untuk perjanjian yang lebih detail",
+      "Tahap penting dalam proses negosiasi",
+      "Dapat dijadikan dasar legal jika diperlukan"
+    ],
+    "examples": [
+      "Nota kesepakatan dengan Kementerian PUPR untuk pembangunan jalan trans-Kalimantan",
+      "Kesepahaman dengan perusahaan tambang untuk program community development",
+      "Nota dengan organisasi internasional untuk program sustainable development",
+      "Kesepakatan awal dengan investor untuk pembangunan kawasan industri"
+    ],
+    "downloadInfo": {
+      "fileName": "Form Nota Kesepakatan.pdf",
+      "fileSize": "1.5 MB",
+      "fileType": "PDF",
+      "docType": "Form",
+      "color": "orange",
+      "icon": "/assets/images/icons/lock.svg"
+    }
+  }
+}

@@ -1,0 +1,154 @@
+"use client";
+
+import React from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { HeroSection as HeroData } from "@/types";
+
+interface HeroSectionProps {
+  data: HeroData;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function HeroSection({ data }: HeroSectionProps) {
+  // const containerVariants = {
+  //   hidden: { opacity: 0 },
+  //   visible: {
+  //     opacity: 1,
+  //     transition: {
+  //       staggerChildren: 0.3,
+  //       delayChildren: 0.2,
+  //     },
+  //   },
+  // };
+
+  const leftVariants = {
+    hidden: { opacity: 0, x: -60 },
+    visible: {
+      opacity: 1,
+      x: 0,
+    },
+  };
+
+  const rightVariants = {
+    hidden: { opacity: 0, x: 60 },
+    visible: {
+      opacity: 1,
+      x: 0,
+    },
+  };
+
+  const scaleVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+    },
+  };
+
+  return (
+    <header id="home" className="bg-section w-full pb-[70px] pt-[200px]">
+      <div className="relative flex justify-center">
+        <div className="flex flex-col gap-[30px] px-4 md:px-[75px] max-w-[1280px] w-full">
+          {/* Main Hero Content */}
+          <div className="flex flex-col lg:flex-row gap-[30px]">
+            {/* Left Content */}
+            <motion.div
+              className="flex flex-col gap-[30px] w-full lg:w-[550px] shrink-0 py-8 lg:py-[92px]"
+              variants={leftVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            >
+              <h1 className="text-[32px] md:text-6xl font-extrabold leading-tight md:leading-[70px]">
+                Selamat datang di Website{" "}
+                <span className="bg-primary inline-flex -mx-1 items-center justify-center px-3 py-2 md:h-14 rounded">
+                  SIKAP
+                </span>
+              </h1>
+              <p className="max-w-[484px] text-lg leading-8 font-medium text-gray-700">
+                Sistem kerjasama berbasis digital Kabupaten Tana Tidung yang
+                akuntabel dan transparan
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3.5">
+                <button className="px-[30px] py-[20px] rounded-[100px] bg-primary text-[16px] font-bold leading-[19px] transition-all duration-300 hover:shadow-primary hover:-translate-y-1">
+                  Ajukan Kerjasama
+                </button>
+                <button className="px-[30px] py-[20px] rounded-[100px] border border-foreground text-[16px] font-bold leading-[19px] transition-all duration-300 hover:ring-2 hover:ring-primary hover:bg-primary hover:border-primary hover:text-foreground">
+                  Lihat Data
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Right Content - Images */}
+            <motion.div
+              className="relative shrink-0 w-full lg:w-[550px] h-[400px] lg:h-[507px]"
+              variants={rightVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            >
+              {/* Main UI Image with rounded corners - positioned in center */}
+              <div className="absolute ml-4 mr-4 lg:ml-[52px] lg:mr-[51px] w-[calc(100%-32px)] lg:w-[447px] h-full lg:h-[506px] rounded-[26px] overflow-hidden">
+                <Image
+                  src="/assets/images/thumbnails/ui.png"
+                  alt="SIKAP Interface"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+
+              {/* Review Card - overflow on the left side */}
+              <div className="absolute bottom-[20px] lg:bottom-[68px] left-0 w-[200px] lg:w-[316px] h-auto z-10">
+                <Image
+                  src="/assets/images/thumbnails/review.png"
+                  alt="Review"
+                  width={316}
+                  height={150}
+                  className="drop-shadow-custom w-auto h-auto"
+                />
+              </div>
+
+              {/* Badge Card - overflow on the right side */}
+              <div className="absolute top-[20px] lg:top-[77px] right-0 w-[80px] lg:w-[136px] h-auto z-10">
+                <Image
+                  src="/assets/images/thumbnails/badge.png"
+                  alt="Badge"
+                  width={136}
+                  height={120}
+                  className="drop-shadow-custom w-auto h-auto"
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Partners Section */}
+          <motion.div
+            className="flex flex-col gap-[30px] items-center mt-16"
+            variants={scaleVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ duration: 0.8, ease: "easeInOut", delay: 0.6 }}
+          >
+            <h2 className="max-w-[370px] font-bold text-[24px] md:text-[32px] leading-[46px] text-center">
+              Partner Kami
+            </h2>
+            <div className="flex w-full justify-center gap-8 lg:gap-[70px] h-[42px]">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="relative flex-1">
+                  <Image
+                    src={`/assets/images/icons/logoipsum-${i}.svg`}
+                    alt={`Partner ${i}`}
+                    fill
+                    className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
+                  />
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </header>
+  );
+}

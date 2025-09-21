@@ -195,7 +195,7 @@ export default function PermohonanPage() {
       } else {
         throw new Error('Gagal mengirim permohonan');
       }
-    } catch (error) {
+    } catch {
       setSubmissionStatus({
         type: 'error',
         message: 'Terjadi kesalahan saat mengirim permohonan. Silakan coba lagi atau hubungi admin.',

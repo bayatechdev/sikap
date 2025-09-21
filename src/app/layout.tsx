@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import contentData from '@/data/content.json';
-import { ContentData } from '@/types';
-
-const content = contentData as ContentData;
 
 export const metadata: Metadata = {
   title: "SIKAP - Sistem Kerjasama Tana Tidung",
@@ -28,11 +22,7 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning={true}>
       <body className="antialiased">
-        <Header navigation={content.navigation} />
-        <main>
-          {children}
-        </main>
-        <Footer footerData={content.footer} />
+        {children}
       </body>
     </html>
   );

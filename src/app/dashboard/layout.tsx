@@ -3,9 +3,12 @@
 import "./dashboard.css"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Home, Users, FileText, Settings, BarChart3 } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Menu, Home, Users, FileText, Settings, BarChart3, LogOut, User } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 const menuItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
@@ -21,6 +24,26 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [open, setOpen] = useState(false)
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false })
+    router.push('/auth/signin')
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    router.push('/auth/signin')
+    return null
+  }
 
   return (
     <div className="dashboard-theme flex h-screen bg-muted/20">
@@ -42,6 +65,26 @@ export default function DashboardLayout({
               </Link>
             ))}
           </nav>
+          {/* User Menu */}
+          <div className="p-4 border-t">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-2">
+                  <User className="h-5 w-5" />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">{session.user?.name}</span>
+                    <span className="text-xs text-muted-foreground">{session.user?.username}</span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -51,7 +94,27 @@ export default function DashboardLayout({
         <header className="lg:hidden bg-card border-b px-4 py-3">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold text-foreground">SIKAP Admin</h1>
-            <Sheet open={open} onOpenChange={setOpen}>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5 text-sm font-medium">
+                    {session.user?.name}
+                  </div>
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                    {session.user?.username}
+                  </div>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
                   <Menu className="h-4 w-4" />
@@ -77,7 +140,8 @@ export default function DashboardLayout({
                   </nav>
                 </div>
               </SheetContent>
-            </Sheet>
+              </Sheet>
+            </div>
           </div>
         </header>
 

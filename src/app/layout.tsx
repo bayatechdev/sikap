@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
+import AuthProvider from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: "SIKAP - Sistem Kerjasama Tana Tidung",
@@ -23,9 +24,11 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning={true}>
       <body className="antialiased">
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            {children}
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

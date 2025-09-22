@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "SIKAP - Sistem Kerjasama Tana Tidung",
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning={true}>
       <body className="antialiased">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

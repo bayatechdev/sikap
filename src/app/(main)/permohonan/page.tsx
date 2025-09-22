@@ -2,27 +2,42 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { AutocompleteInput } from "@/components/ui/autocomplete-input";
+import { CategorySelector } from "@/components/ui/category-selector";
+import { SecureFileUpload } from "@/components/ui/secure-file-upload";
+import { useCreateApplication } from "@/hooks/use-applications";
 
 interface FormData {
   nama: string;
   email: string;
   contactPerson: string;
   instansi: string;
+  cooperationCategoryId?: number;
+  institutionId?: number;
   keperluan: string;
   tentang: string;
   catatan: string;
 }
 
-interface FileData {
-  [key: string]: File | null;
+interface Institution {
+  id: number;
+  name: string;
+  type: string;
+  code: string;
+  contactPerson: string | null;
+  phone: string | null;
+  email: string | null;
 }
 
 interface FormErrors {
   [key: string]: string;
 }
 
-interface SubmissionStatus {
-  type: 'success' | 'error' | null;
+interface SubmissionResult {
+  success: boolean;
+  trackingNumber: string;
+  publicToken: string;
+  applicationId: string;
   message: string;
 }
 
@@ -79,13 +94,12 @@ export default function PermohonanPage() {
     tentang: "",
     catatan: "",
   });
-  const [fileData, setFileData] = useState<FileData>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>({
-    type: null,
-    message: "",
-  });
+  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
+
+  // React Query hooks
+  const createApplicationMutation = useCreateApplication();
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -110,20 +124,6 @@ export default function PermohonanPage() {
       newErrors.contactPerson = "Format nomor telepon tidak valid";
     }
 
-    // File validation
-    currentTab.files.forEach(file => {
-      if (file.required && !fileData[file.key]) {
-        newErrors[file.key] = `${file.label} wajib diunggah`;
-      }
-    });
-
-    // File size validation
-    Object.entries(fileData).forEach(([key, file]) => {
-      if (file && file.size > 5 * 1024 * 1024) { // 5MB limit
-        newErrors[key] = "Ukuran file tidak boleh lebih dari 5MB";
-      }
-    });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -143,65 +143,75 @@ export default function PermohonanPage() {
     }
   };
 
-  const handleFileChange = (fileKey: string, file: File | null) => {
-    setFileData(prev => ({
+  const handleInstitutionChange = (value: string) => {
+    setFormData(prev => ({
       ...prev,
-      [fileKey]: file,
+      instansi: value,
     }));
 
-    // Clear error when file is selected
-    if (errors[fileKey] && file) {
+    // Clear error when user types
+    if (errors.instansi) {
       setErrors(prev => ({
         ...prev,
-        [fileKey]: "",
+        instansi: "",
       }));
     }
   };
 
+  const handleInstitutionSelect = (institution: Institution | null) => {
+    setSelectedInstitution(institution);
+    setFormData(prev => ({
+      ...prev,
+      institutionId: institution?.id,
+    }));
+  };
+
+  const handleCategoryChange = (categoryId: number | undefined) => {
+    setFormData(prev => ({
+      ...prev,
+      cooperationCategoryId: categoryId,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmissionStatus({ type: null, message: "" });
 
     if (!validateForm()) {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simulate random success/failure for demo
-      const isSuccess = Math.random() > 0.2; // 80% success rate
-
-      if (isSuccess) {
-        setSubmissionStatus({
-          type: 'success',
-          message: 'Permohonan berhasil dikirim! Tim kami akan meninjau dan memberikan respons dalam 2-3 hari kerja.',
-        });
-
-        // Reset form on success
-        setFormData({
-          nama: "",
-          email: "",
-          contactPerson: "",
-          instansi: "",
-          keperluan: "",
-          tentang: "",
-          catatan: "",
-        });
-        setFileData({});
-      } else {
-        throw new Error('Gagal mengirim permohonan');
-      }
-    } catch {
-      setSubmissionStatus({
-        type: 'error',
-        message: 'Terjadi kesalahan saat mengirim permohonan. Silakan coba lagi atau hubungi admin.',
+      const result = await createApplicationMutation.mutateAsync({
+        applicationTypeCode: activeTab,
+        cooperationCategoryId: formData.cooperationCategoryId,
+        institutionId: selectedInstitution?.id,
+        institutionName: formData.instansi,
+        title: `${currentTab.title} - ${formData.instansi}`,
+        description: formData.tentang,
+        purpose: formData.keperluan,
+        about: formData.tentang,
+        notes: formData.catatan || undefined,
+        contactPerson: formData.nama,
+        contactEmail: formData.email,
+        contactPhone: formData.contactPerson,
       });
-    } finally {
-      setIsSubmitting(false);
+
+      setSubmissionResult(result);
+
+      // Reset form on success
+      setFormData({
+        nama: "",
+        email: "",
+        contactPerson: "",
+        instansi: "",
+        keperluan: "",
+        tentang: "",
+        catatan: "",
+      });
+      setSelectedInstitution(null);
+
+    } catch (error) {
+      console.error('Submission error:', error);
     }
   };
 
@@ -271,9 +281,7 @@ export default function PermohonanPage() {
                           setActiveTab(key as keyof typeof tabsConfig);
                           // Clear errors and submission status when changing tabs
                           setErrors({});
-                          setSubmissionStatus({ type: null, message: "" });
-                          // Reset file data for new tab
-                          setFileData({});
+                          setSubmissionResult(null);
                         }}
                         className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                           activeTab === key
@@ -299,22 +307,50 @@ export default function PermohonanPage() {
                   </p>
                 </div>
 
-                {/* Submission Status */}
-                {submissionStatus.type && (
-                  <div className={`p-4 rounded-lg border ${
-                    submissionStatus.type === 'success'
-                      ? 'bg-green-50 border-green-200 text-green-800'
-                      : 'bg-red-50 border-red-200 text-red-800'
-                  }`}>
+                {/* Submission Result */}
+                {submissionResult && (
+                  <div className="p-6 rounded-lg border bg-green-50 border-green-200 text-green-800">
+                    <div className="flex items-start gap-3">
+                      <Image
+                        src="/assets/images/icons/ic_check.svg"
+                        alt="Success"
+                        width={24}
+                        height={24}
+                        className="text-green-600 mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-green-900 mb-2">
+                          Permohonan Berhasil Dikirim!
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <p>
+                            <strong>Nomor Tracking:</strong>
+                            <span className="ml-2 px-2 py-1 bg-green-100 rounded font-mono">
+                              {submissionResult.trackingNumber}
+                            </span>
+                          </p>
+                          <p>Simpan nomor tracking di atas untuk melacak status permohonan Anda.</p>
+                          <p>Tim kami akan meninjau permohonan dan memberikan update melalui email.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Status */}
+                {createApplicationMutation.isError && (
+                  <div className="p-4 rounded-lg border bg-red-50 border-red-200 text-red-800">
                     <div className="flex items-center gap-2">
                       <Image
-                        src={`/assets/images/icons/${submissionStatus.type === 'success' ? 'ic_check' : 'ic_close'}.svg`}
-                        alt={submissionStatus.type}
+                        src="/assets/images/icons/ic_close.svg"
+                        alt="Error"
                         width={16}
                         height={16}
-                        className={submissionStatus.type === 'success' ? '' : 'text-red-500'}
+                        className="text-red-500"
                       />
-                      <p className="font-medium">{submissionStatus.message}</p>
+                      <p className="font-medium">
+                        {createApplicationMutation.error?.message || 'Terjadi kesalahan saat mengirim permohonan'}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -383,20 +419,25 @@ export default function PermohonanPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Instansi <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        required
+                      <AutocompleteInput
                         value={formData.instansi}
-                        onChange={(e) => handleInputChange("instansi", e.target.value)}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 ${
-                          errors.instansi ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        onChange={handleInstitutionChange}
+                        onInstitutionSelect={handleInstitutionSelect}
                         placeholder="Masukkan nama instansi"
+                        error={errors.instansi}
+                        required
                       />
-                      {errors.instansi && (
-                        <p className="text-red-500 text-sm mt-1">{errors.instansi}</p>
-                      )}
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kategori Kerjasama
+                    </label>
+                    <CategorySelector
+                      value={formData.cooperationCategoryId}
+                      onChange={handleCategoryChange}
+                    />
                   </div>
 
                   <div>
@@ -458,36 +499,19 @@ export default function PermohonanPage() {
                     <div className="space-y-4">
                       {currentTab.files.map((file) => (
                         <div key={file.key}>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {file.label} {file.required && <span className="text-red-500">*</span>}
-                          </label>
-                          <div className="flex items-center gap-4">
-                            <input
-                              type="file"
-                              accept=".pdf,.doc,.docx"
-                              onChange={(e) => handleFileChange(file.key, e.target.files?.[0] || null)}
-                              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-foreground hover:file:bg-primary/90 ${
-                                errors[file.key] ? 'border-red-500' : 'border-gray-300'
-                              }`}
-                            />
-                            {fileData[file.key] && (
-                              <div className="flex items-center gap-2 text-sm text-green-600">
-                                <Image
-                                  src="/assets/images/icons/ic_check.svg"
-                                  alt="check"
-                                  width={16}
-                                  height={16}
-                                />
-                                Terpilih
-                              </div>
-                            )}
-                          </div>
-                          {errors[file.key] && (
-                            <p className="text-red-500 text-sm mt-1">{errors[file.key]}</p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-1">
-                            Format yang didukung: PDF, DOC, DOCX (Maks. 5MB)
-                          </p>
+                          <SecureFileUpload
+                            label={file.label}
+                            required={file.required}
+                            documentType={file.key}
+                            accept=".pdf,.doc,.docx"
+                            maxSize={5 * 1024 * 1024} // 5MB
+                            onUploadSuccess={(result) => {
+                              console.log(`File uploaded for ${file.key}:`, result);
+                            }}
+                            onUploadError={(error) => {
+                              console.error(`Upload error for ${file.key}:`, error);
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -498,13 +522,13 @@ export default function PermohonanPage() {
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                       <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={createApplicationMutation.isPending}
                         className="w-full sm:w-auto px-8 py-4 bg-primary text-foreground font-semibold rounded-lg hover:shadow-lg hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                       >
-                        {isSubmitting && (
+                        {createApplicationMutation.isPending && (
                           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-foreground"></div>
                         )}
-                        {isSubmitting ? "Mengirim..." : "Kirim Permohonan"}
+                        {createApplicationMutation.isPending ? "Mengirim..." : "Kirim Permohonan"}
                       </button>
 
                       <div className="text-sm text-gray-500">

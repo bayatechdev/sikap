@@ -7,7 +7,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Users, FileText, CheckCircle, Clock, RefreshCw, TrendingUp, Activity, Calendar } from "lucide-react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Pie, PieChart, Cell } from "recharts"
+import { Area, AreaChart, XAxis, YAxis, CartesianGrid } from "recharts"
 
 interface DashboardStats {
   totalApplications: number;
@@ -46,11 +46,6 @@ const monthlyData = [
   { month: "Jun", applications: 120, approved: 98 },
 ]
 
-const statusData = [
-  { name: "Disetujui", value: 65, fill: "#10b981" },
-  { name: "Pending", value: 25, fill: "#f59e0b" },
-  { name: "Ditolak", value: 10, fill: "#ef4444" },
-]
 
 const chartConfig = {
   applications: {

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { CategorySelector } from "@/components/ui/category-selector";
-import { SecureFileUpload } from "@/components/ui/secure-file-upload";
+import { FilePicker } from "@/components/ui/file-picker";
 import { useCreateApplication } from "@/hooks/use-applications";
 
 interface FormData {
@@ -17,6 +17,15 @@ interface FormData {
   keperluan: string;
   tentang: string;
   catatan: string;
+}
+
+interface SelectedFile {
+  file: File;
+  documentType: string;
+  isUploading: boolean;
+  uploadProgress: number;
+  error?: string;
+  uploaded?: boolean;
 }
 
 interface Institution {
@@ -97,6 +106,8 @@ export default function PermohonanPage() {
   const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // React Query hooks
   const createApplicationMutation = useCreateApplication();
@@ -173,6 +184,68 @@ export default function PermohonanPage() {
     }));
   };
 
+  const handleFileSelect = (file: File, documentType: string) => {
+    setSelectedFiles(prev => {
+      // Remove existing file of same document type
+      const filtered = prev.filter(f => f.documentType !== documentType);
+      // Add new file
+      return [...filtered, {
+        file,
+        documentType,
+        isUploading: false,
+        uploadProgress: 0,
+        uploaded: false,
+      }];
+    });
+  };
+
+  const handleFileRemove = (documentType: string) => {
+    setSelectedFiles(prev => prev.filter(f => f.documentType !== documentType));
+  };
+
+  const uploadFile = async (selectedFile: SelectedFile, applicationId: string): Promise<void> => {
+    // Update file status to uploading
+    setSelectedFiles(prev => prev.map(f =>
+      f.documentType === selectedFile.documentType
+        ? { ...f, isUploading: true, uploadProgress: 0, error: undefined }
+        : f
+    ));
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile.file);
+      formData.append('applicationId', applicationId);
+      formData.append('documentType', selectedFile.documentType);
+
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+
+      // Mark as uploaded successfully
+      setSelectedFiles(prev => prev.map(f =>
+        f.documentType === selectedFile.documentType
+          ? { ...f, isUploading: false, uploadProgress: 100, uploaded: true, error: undefined }
+          : f
+      ));
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      // Update file with error status
+      setSelectedFiles(prev => prev.map(f =>
+        f.documentType === selectedFile.documentType
+          ? { ...f, isUploading: false, uploadProgress: 0, error: errorMessage }
+          : f
+      ));
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -180,7 +253,23 @@ export default function PermohonanPage() {
       return;
     }
 
+    // Check required files
+    const requiredFiles = currentTab.files.filter(file => file.required);
+    const missingRequiredFiles = requiredFiles.filter(required =>
+      !selectedFiles.some(selected => selected.documentType === required.key)
+    );
+
+    if (missingRequiredFiles.length > 0) {
+      setErrors({
+        files: `Dokumen wajib belum dilengkapi: ${missingRequiredFiles.map(f => f.label).join(', ')}`
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
+      // Step 1: Create application
       const result = await createApplicationMutation.mutateAsync({
         applicationTypeCode: activeTab,
         cooperationCategoryId: formData.cooperationCategoryId,
@@ -196,22 +285,47 @@ export default function PermohonanPage() {
         contactPhone: formData.contactPerson,
       });
 
-      setSubmissionResult(result);
+      // Step 2: Upload all selected files
+      const uploadPromises = selectedFiles.map(file => uploadFile(file, result.applicationId));
 
-      // Reset form on success
-      setFormData({
-        nama: "",
-        email: "",
-        contactPerson: "",
-        instansi: "",
-        keperluan: "",
-        tentang: "",
-        catatan: "",
-      });
-      setSelectedInstitution(null);
+      try {
+        await Promise.all(uploadPromises);
+
+        // All files uploaded successfully
+        setSubmissionResult(result);
+
+        // Reset form on success
+        setFormData({
+          nama: "",
+          email: "",
+          contactPerson: "",
+          instansi: "",
+          keperluan: "",
+          tentang: "",
+          catatan: "",
+        });
+        setSelectedInstitution(null);
+        setSelectedFiles([]);
+        setErrors({});
+
+      } catch (uploadError) {
+        // Some files failed to upload, but application was created
+        console.error('File upload error:', uploadError);
+        setErrors({
+          files: 'Beberapa dokumen gagal diupload. Anda dapat mengupload ulang dokumen setelah aplikasi dibuat.'
+        });
+
+        // Still show success for application creation
+        setSubmissionResult(result);
+      }
 
     } catch (error) {
       console.error('Submission error:', error);
+      setErrors({
+        submit: error instanceof Error ? error.message : 'Terjadi kesalahan saat mengirim permohonan'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -329,8 +443,32 @@ export default function PermohonanPage() {
                               {submissionResult.trackingNumber}
                             </span>
                           </p>
+                          {/* File upload status summary */}
+                          {selectedFiles.length > 0 && (
+                            <div className="mt-3">
+                              <p className="font-medium">Status Upload Dokumen:</p>
+                              <div className="mt-1 space-y-1">
+                                {selectedFiles.map(file => (
+                                  <div key={file.documentType} className="flex items-center justify-between text-xs">
+                                    <span>{currentTab.files.find(f => f.key === file.documentType)?.label}</span>
+                                    <span className={file.uploaded ? 'text-green-600' : file.error ? 'text-red-600' : 'text-orange-600'}>
+                                      {file.uploaded ? '✓ Berhasil' : file.error ? '✗ Gagal' : '⌛ Menunggu'}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           <p>Simpan nomor tracking di atas untuk melacak status permohonan Anda.</p>
                           <p>Tim kami akan meninjau permohonan dan memberikan update melalui email.</p>
+                          <div className="mt-4">
+                            <a
+                              href={`/track/${submissionResult.trackingNumber}`}
+                              className="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                            >
+                              Lacak Status Sekarang
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -338,7 +476,7 @@ export default function PermohonanPage() {
                 )}
 
                 {/* Error Status */}
-                {createApplicationMutation.isError && (
+                {(createApplicationMutation.isError || errors.submit) && (
                   <div className="p-4 rounded-lg border bg-red-50 border-red-200 text-red-800">
                     <div className="flex items-center gap-2">
                       <Image
@@ -349,7 +487,7 @@ export default function PermohonanPage() {
                         className="text-red-500"
                       />
                       <p className="font-medium">
-                        {createApplicationMutation.error?.message || 'Terjadi kesalahan saat mengirim permohonan'}
+                        {errors.submit || createApplicationMutation.error?.message || 'Terjadi kesalahan saat mengirim permohonan'}
                       </p>
                     </div>
                   </div>
@@ -497,24 +635,43 @@ export default function PermohonanPage() {
                       Dokumen Pendukung
                     </h3>
                     <div className="space-y-4">
-                      {currentTab.files.map((file) => (
-                        <div key={file.key}>
-                          <SecureFileUpload
-                            label={file.label}
-                            required={file.required}
-                            documentType={file.key}
-                            accept=".pdf,.doc,.docx"
-                            maxSize={5 * 1024 * 1024} // 5MB
-                            onUploadSuccess={(result) => {
-                              console.log(`File uploaded for ${file.key}:`, result);
-                            }}
-                            onUploadError={(error) => {
-                              console.error(`Upload error for ${file.key}:`, error);
-                            }}
-                          />
-                        </div>
-                      ))}
+                      {currentTab.files.map((file) => {
+                        const selectedFile = selectedFiles.find(f => f.documentType === file.key);
+                        return (
+                          <div key={file.key}>
+                            <FilePicker
+                              documentType={file.key}
+                              label={file.label}
+                              required={file.required}
+                              onFileSelect={handleFileSelect}
+                              onFileRemove={handleFileRemove}
+                              selectedFile={selectedFile?.file || null}
+                              isUploading={selectedFile?.isUploading || false}
+                              uploadProgress={selectedFile?.uploadProgress || 0}
+                              error={selectedFile?.error}
+                              uploaded={selectedFile?.uploaded || false}
+                              maxSizeMB={5}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
+
+                    {/* File upload errors */}
+                    {errors.files && (
+                      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <Image
+                            src="/assets/images/icons/ic_close.svg"
+                            alt="Error"
+                            width={16}
+                            height={16}
+                            className="text-red-500"
+                          />
+                          <p className="text-sm text-red-700">{errors.files}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Submit Button */}
@@ -522,13 +679,13 @@ export default function PermohonanPage() {
                     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                       <button
                         type="submit"
-                        disabled={createApplicationMutation.isPending}
+                        disabled={isSubmitting || createApplicationMutation.isPending}
                         className="w-full sm:w-auto px-8 py-4 bg-primary text-foreground font-semibold rounded-lg hover:shadow-lg hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                       >
-                        {createApplicationMutation.isPending && (
+                        {(isSubmitting || createApplicationMutation.isPending) && (
                           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-foreground"></div>
                         )}
-                        {createApplicationMutation.isPending ? "Mengirim..." : "Kirim Permohonan"}
+                        {isSubmitting ? "Mengirim & Upload Dokumen..." : createApplicationMutation.isPending ? "Mengirim..." : "Kirim Permohonan"}
                       </button>
 
                       <div className="text-sm text-gray-500">

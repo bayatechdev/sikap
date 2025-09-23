@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { CategorySelector } from "@/components/ui/category-selector";
 import { FilePicker } from "@/components/ui/file-picker";
@@ -376,6 +377,15 @@ export default function PermohonanPage() {
                 </p>
               </div>
             </div>
+
+            <div className="mt-6">
+              <Link
+                href="/track"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                🔍 Lacak Status Permohonan Anda
+              </Link>
+            </div>
           </div>
 
           {/* Main Content */}
@@ -461,13 +471,22 @@ export default function PermohonanPage() {
                           )}
                           <p>Simpan nomor tracking di atas untuk melacak status permohonan Anda.</p>
                           <p>Tim kami akan meninjau permohonan dan memberikan update melalui email.</p>
-                          <div className="mt-4">
+                          <div className="mt-6 flex flex-col sm:flex-row gap-3">
                             <a
                               href={`/track/${submissionResult.trackingNumber}`}
-                              className="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                              className="flex-1 px-4 py-3 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors text-center"
                             >
-                              Lacak Status Sekarang
+                              🔍 Lacak Status Permohonan
                             </a>
+                            <button
+                              onClick={() => {
+                                setSubmissionResult(null);
+                                setErrors({});
+                              }}
+                              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                              📝 Buat Permohonan Baru
+                            </button>
                           </div>
                         </div>
                       </div>

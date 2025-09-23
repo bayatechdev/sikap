@@ -112,11 +112,10 @@ export function FilePicker({
       {!selectedFile && (
         <div
           className={cn(
-            'relative border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer',
+            'relative border-2 border-dashed rounded-lg p-6 text-center transition-colors',
             error ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400',
             isUploading && 'pointer-events-none opacity-50'
           )}
-          onClick={() => fileInputRef.current?.click()}
         >
           <input
             ref={fileInputRef}

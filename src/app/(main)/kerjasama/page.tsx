@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface TableRowData {
   no: number;
@@ -247,6 +248,15 @@ export default function KerjasamaPage() {
                     Data terupdate real-time
                   </p>
                 </div>
+              </div>
+
+              <div className="mt-6">
+                <Link
+                  href="/track"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                  🔍 Lacak Status Permohonan Anda
+                </Link>
               </div>
             </div>
 

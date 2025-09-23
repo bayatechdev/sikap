@@ -119,12 +119,6 @@ export default function Header({ navigation }: HeaderProps) {
           >
             Permohonan
           </a>
-          <Link
-            href="/track"
-            className="hover:text-primary hover:underline text-white text-[16px] font-semibold transition-all duration-300"
-          >
-            Lacak Status
-          </Link>
           <a
             href="/kerjasama"
             className="hover:text-primary hover:underline text-white text-[16px] font-semibold transition-all duration-300"

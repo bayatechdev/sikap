@@ -58,6 +58,11 @@ const getSikapData = (session: { user?: { name?: string; email?: string } } | nu
       label: "Data Management",
       items: [
         {
+          title: "Kerjasama",
+          url: "/dashboard/kerjasama",
+          icon: FileText,
+        },
+        {
           title: "Users",
           url: "#",
           icon: Settings,

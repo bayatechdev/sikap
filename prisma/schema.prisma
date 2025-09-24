@@ -135,6 +135,7 @@ model Application {
   statusHistory         ApplicationStatusHistory[]
   publicSubmission      PublicSubmission?
   emailNotifications    EmailNotification[]
+  cooperations          Cooperation[] @relation("ApplicationCooperations")
 
   @@map("applications")
 }
@@ -505,4 +506,54 @@ enum InstitutionType {
   OTHER
 
   @@map("institution_type")
+}
+
+// Cooperation Management
+model Cooperation {
+  id                    String   @id @default(cuid())
+  applicationId         String?  @map("application_id") // Optional reference to Application
+
+  // Core cooperation data
+  title                 String   // Tentang kerjasama
+  cooperationType       String   // MOU, PKS, NK
+  cooperationTypeColor  String   @map("cooperation_type_color") // primary, blue, green for badge
+  orgUnit               String   @map("org_unit") // OPD yang menangani
+  partnerInstitution    String   @map("partner_institution") // Nama instansi partner
+
+  // Dates
+  cooperationDate       DateTime @map("cooperation_date") // Tanggal penandatanganan
+  startDate             DateTime? @map("start_date") // Mulai berlaku
+  endDate               DateTime? @map("end_date") // Berakhir
+
+  // Location & Details
+  location              String   // Tempat penandatanganan
+  description           String?  // Deskripsi lengkap
+  objectives            String?  // Tujuan kerjasama
+  scope                 String?  // Ruang lingkup
+
+  // Documents
+  documentPath          String?  @map("document_path") // Path file dokumen MOU/PKS
+  documentNumber        String?  @map("document_number") // Nomor dokumen resmi
+  documentSize          Int?     @map("document_size") // File size
+  documentMimeType      String?  @map("document_mime_type") // MIME type
+
+  // Status & Metadata
+  status                CooperationStatus @default(ACTIVE)
+  notes                 String?  // Catatan admin
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  application           Application? @relation("ApplicationCooperations", fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@map("cooperations")
+}
+
+enum CooperationStatus {
+  ACTIVE      // Kerjasama aktif
+  EXPIRED     // Sudah berakhir
+  TERMINATED  // Dibatalkan
+  DRAFT       // Draft belum publish
+
+  @@map("cooperation_status")
 }

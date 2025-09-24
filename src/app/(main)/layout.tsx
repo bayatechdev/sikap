@@ -11,12 +11,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="sikap-theme">
       <Header navigation={content.navigation} />
       <main>
         {children}
       </main>
       <Footer footerData={content.footer} />
-    </>
+    </div>
   );
 }

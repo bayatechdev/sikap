@@ -1,94 +1,40 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-interface TableRowData {
-  no: number;
-  tentang: string;
-  jenis: string;
-  jenisColor: string;
-  opd: string;
-  waktu: string;
-  tempat: string;
+interface CooperationData {
+  id: string;
+  title: string;
+  cooperationType: string;
+  cooperationTypeColor: string;
+  orgUnit: string;
+  partnerInstitution: string;
+  cooperationDate: string;
+  location: string;
+  application?: {
+    id: string;
+    title: string;
+    trackingNumber: string;
+  } | null;
 }
 
-const tableData: TableRowData[] = [
-  {
-    no: 1,
-    tentang:
-      "Kerjasama Bidang Pendidikan dan Kesehatan Lorem ipsum dolor sit amet consectetur adipisicing elit. Repudiandae, tempora temporibus. Quidem explicabo nulla nihil praesentium aspernatur numquam, ut optio.",
-    jenis: "MOU",
-    jenisColor: "primary",
-    opd: "Dinas Pendidikan dan Kebudayaan dan Kesehatan dan Kesejahteraan Rakyat",
-    waktu: "2024-01-15",
-    tempat: "Tana Tidung",
-  },
-  {
-    no: 2,
-    tentang: "Kerjasama Bidang Kesehatan",
-    jenis: "PKS",
-    jenisColor: "blue",
-    opd: "Dinas Kesehatan",
-    waktu: "2024-02-20",
-    tempat: "Sesayap",
-  },
-  {
-    no: 3,
-    tentang: "Kerjasama Pembangunan Infrastruktur",
-    jenis: "NK",
-    jenisColor: "green",
-    opd: "PUPR",
-    waktu: "2024-03-10",
-    tempat: "Tana Tidung",
-  },
-  {
-    no: 4,
-    tentang: "Kerjasama Bidang Pertanian",
-    jenis: "MOU",
-    jenisColor: "primary",
-    opd: "Dinas Pertanian",
-    waktu: "2024-04-05",
-    tempat: "Sesayap",
-  },
-  {
-    no: 5,
-    tentang: "Kerjasama Bidang Pariwisata",
-    jenis: "PKS",
-    jenisColor: "blue",
-    opd: "Dinas Pariwisata",
-    waktu: "2024-05-12",
-    tempat: "Tana Tidung",
-  },
-  {
-    no: 6,
-    tentang: "Kerjasama Pembangunan Jalan",
-    jenis: "NK",
-    jenisColor: "green",
-    opd: "PUPR",
-    waktu: "2024-06-18",
-    tempat: "Sesayap",
-  },
-  {
-    no: 7,
-    tentang: "Kerjasama Bidang Sosial",
-    jenis: "MOU",
-    jenisColor: "primary",
-    opd: "Dinas Sosial",
-    waktu: "2024-07-22",
-    tempat: "Tana Tidung",
-  },
-  {
-    no: 8,
-    tentang: "Kerjasama Bidang Lingkungan Hidup",
-    jenis: "PKS",
-    jenisColor: "blue",
-    opd: "DLH",
-    waktu: "2024-08-30",
-    tempat: "Sesayap",
-  },
-];
+interface ApiResponse {
+  cooperations: CooperationData[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+  filters: {
+    cooperationType: string[];
+    orgUnit: string[];
+    location: string[];
+    year: string[];
+  };
+}
 
 const ITEMS_PER_PAGE = 5;
 
@@ -96,10 +42,10 @@ export default function KerjasamaPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
-    jenis: "",
-    opd: "",
-    tempat: "",
-    tahun: "",
+    cooperationType: "",
+    orgUnit: "",
+    location: "",
+    year: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleColumns, setVisibleColumns] = useState({
@@ -111,6 +57,9 @@ export default function KerjasamaPage() {
     file: true,
   });
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+  const [data, setData] = useState<ApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const getBadgeClasses = (color: string) => {
     switch (color) {
@@ -125,47 +74,49 @@ export default function KerjasamaPage() {
     }
   };
 
-  const uniqueValues = useMemo(
-    () => ({
-      jenis: [...new Set(tableData.map((item) => item.jenis))],
-      opd: [...new Set(tableData.map((item) => item.opd))],
-      tempat: [...new Set(tableData.map((item) => item.tempat))],
-      tahun: [...new Set(tableData.map((item) => item.waktu.substring(0, 4)))],
-    }),
-    []
-  );
+  // Fetch data from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: ITEMS_PER_PAGE.toString(),
+          ...(searchTerm && { search: searchTerm }),
+          ...(filters.cooperationType && { cooperationType: filters.cooperationType }),
+          ...(filters.orgUnit && { orgUnit: filters.orgUnit }),
+          ...(filters.location && { location: filters.location }),
+          ...(filters.year && { year: filters.year }),
+        });
 
-  const filteredData = useMemo(() => {
-    return tableData.filter((item) => {
-      const matchesSearch =
-        item.tentang.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.jenis.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.opd.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tempat.toLowerCase().includes(searchTerm.toLowerCase());
+        const response = await fetch(`/api/cooperations?${params}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch cooperations');
+        }
 
-      const matchesJenis = !filters.jenis || item.jenis === filters.jenis;
-      const matchesOpd = !filters.opd || item.opd === filters.opd;
-      const matchesTempat = !filters.tempat || item.tempat === filters.tempat;
-      const matchesTahun =
-        !filters.tahun || item.waktu.substring(0, 4) === filters.tahun;
+        const result: ApiResponse = await response.json();
+        setData(result);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error fetching cooperations:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      return (
-        matchesSearch &&
-        matchesJenis &&
-        matchesOpd &&
-        matchesTempat &&
-        matchesTahun
-      );
-    });
-  }, [searchTerm, filters]);
+    fetchData();
+  }, [currentPage, searchTerm, filters]);
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return filteredData.slice(startIndex, endIndex);
-  }, [filteredData, currentPage]);
-
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const cooperations = data?.cooperations || [];
+  const totalPages = data?.pagination.pages || 1;
+  const totalCount = data?.pagination.total || 0;
+  const uniqueValues = data?.filters || {
+    cooperationType: [],
+    orgUnit: [],
+    location: [],
+    year: [],
+  };
 
   const handleFilterChange = (
     filterType: keyof typeof filters,
@@ -180,10 +131,10 @@ export default function KerjasamaPage() {
 
   const clearFilters = () => {
     setFilters({
-      jenis: "",
-      opd: "",
-      tempat: "",
-      tahun: "",
+      cooperationType: "",
+      orgUnit: "",
+      location: "",
+      year: "",
     });
     setCurrentPage(1);
   };
@@ -361,16 +312,16 @@ export default function KerjasamaPage() {
                             Jenis Kerjasama
                           </label>
                           <select
-                            value={filters.jenis}
+                            value={filters.cooperationType}
                             onChange={(e) =>
-                              handleFilterChange("jenis", e.target.value)
+                              handleFilterChange("cooperationType", e.target.value)
                             }
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           >
                             <option value="">Semua Jenis</option>
-                            {uniqueValues.jenis.map((jenis) => (
-                              <option key={jenis} value={jenis}>
-                                {jenis}
+                            {uniqueValues.cooperationType.map((type) => (
+                              <option key={type} value={type}>
+                                {type}
                               </option>
                             ))}
                           </select>
@@ -381,16 +332,16 @@ export default function KerjasamaPage() {
                             OPD Terkait
                           </label>
                           <select
-                            value={filters.opd}
+                            value={filters.orgUnit}
                             onChange={(e) =>
-                              handleFilterChange("opd", e.target.value)
+                              handleFilterChange("orgUnit", e.target.value)
                             }
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           >
                             <option value="">Semua OPD</option>
-                            {uniqueValues.opd.map((opd) => (
-                              <option key={opd} value={opd}>
-                                {opd}
+                            {uniqueValues.orgUnit.map((unit) => (
+                              <option key={unit} value={unit}>
+                                {unit}
                               </option>
                             ))}
                           </select>
@@ -401,16 +352,16 @@ export default function KerjasamaPage() {
                             Tempat
                           </label>
                           <select
-                            value={filters.tempat}
+                            value={filters.location}
                             onChange={(e) =>
-                              handleFilterChange("tempat", e.target.value)
+                              handleFilterChange("location", e.target.value)
                             }
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           >
                             <option value="">Semua Tempat</option>
-                            {uniqueValues.tempat.map((tempat) => (
-                              <option key={tempat} value={tempat}>
-                                {tempat}
+                            {uniqueValues.location.map((loc) => (
+                              <option key={loc} value={loc}>
+                                {loc}
                               </option>
                             ))}
                           </select>
@@ -421,16 +372,16 @@ export default function KerjasamaPage() {
                             Tahun
                           </label>
                           <select
-                            value={filters.tahun}
+                            value={filters.year}
                             onChange={(e) =>
-                              handleFilterChange("tahun", e.target.value)
+                              handleFilterChange("year", e.target.value)
                             }
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           >
                             <option value="">Semua Tahun</option>
-                            {uniqueValues.tahun.map((tahun) => (
-                              <option key={tahun} value={tahun}>
-                                {tahun}
+                            {uniqueValues.year.map((yr) => (
+                              <option key={yr} value={yr}>
+                                {yr}
                               </option>
                             ))}
                           </select>
@@ -568,8 +519,11 @@ export default function KerjasamaPage() {
 
               {/* Results Count */}
               <div className="text-sm text-gray-600">
-                Menampilkan {paginatedData.length} dari {filteredData.length}{" "}
-                data
+                {loading ? (
+                  "Loading..."
+                ) : (
+                  `Menampilkan ${cooperations.length} dari ${totalCount} data`
+                )}
               </div>
             </div>
           </div>
@@ -619,23 +573,58 @@ export default function KerjasamaPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.length > 0 ? (
-                    paginatedData.map((row, index) => (
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={getVisibleColumnCount()}
+                        className="px-6 py-8 text-center text-gray-500"
+                      >
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                        Loading data...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td
+                        colSpan={getVisibleColumnCount()}
+                        className="px-6 py-8 text-center text-red-500"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <svg
+                            className="h-12 w-12 text-red-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <p className="text-lg font-medium">Error loading data</p>
+                          <p className="text-sm">{error}</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : cooperations.length > 0 ? (
+                    cooperations.map((row, index) => (
                       <tr
-                        key={row.no}
+                        key={row.id}
                         className={`border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200 ${
-                          index === paginatedData.length - 1 ? "border-b-0" : ""
+                          index === cooperations.length - 1 ? "border-b-0" : ""
                         } group`}
                       >
                         {visibleColumns.no && (
                           <td className="px-6 py-4 text-[14px] font-semibold text-gray-900">
-                            {row.no}
+                            {index + 1}
                           </td>
                         )}
                         {visibleColumns.tentang && (
                           <td className="px-6 py-4 text-[14px] text-gray-800 font-medium">
                             <div className="line-clamp-3 leading-relaxed w-[450px] max-w-[450px]">
-                              {row.tentang}
+                              {row.title}
                             </div>
                           </td>
                         )}
@@ -643,17 +632,17 @@ export default function KerjasamaPage() {
                           <td className="px-6 py-4">
                             <span
                               className={`inline-flex items-center px-3 py-1 rounded-full text-[12px] font-semibold ${getBadgeClasses(
-                                row.jenisColor
+                                row.cooperationTypeColor
                               )}`}
                             >
-                              {row.jenis}
+                              {row.cooperationType}
                             </span>
                           </td>
                         )}
                         {visibleColumns.opd && (
                           <td className="px-6 py-4 text-[14px] text-gray-800">
                             <div className="line-clamp-2 leading-relaxed w-[350px]">
-                              {row.opd}
+                              {row.orgUnit}
                             </div>
                           </td>
                         )}
@@ -661,10 +650,10 @@ export default function KerjasamaPage() {
                           <td className="px-6 py-4 text-[14px] text-gray-700">
                             <div className="flex flex-col gap-1">
                               <div className="font-medium text-nowrap">
-                                {row.waktu}
+                                {new Date(row.cooperationDate).toLocaleDateString('id-ID')}
                               </div>
                               <div className="text-gray-600 text-xs">
-                                {row.tempat}
+                                {row.location}
                               </div>
                             </div>
                           </td>

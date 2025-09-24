@@ -11,6 +11,7 @@ import {
 import { useSession } from "next-auth/react"
 
 import { NavMain } from "@/components/nav-main"
+import { NavLink } from "@/components/nav-link"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -40,58 +41,100 @@ const getSikapData = (session: { user?: { name?: string; email?: string } } | nu
       title: "Dashboard",
       url: "/dashboard",
       icon: Home,
-      isActive: true,
     },
+  ],
+  navGroups: [
     {
-      title: "Management",
-      url: "#",
-      icon: FileText,
+      label: "Applications",
       items: [
         {
           title: "Permohonan",
           url: "/dashboard/permohonan",
-        },
-        {
-          title: "Users",
-          url: "/dashboard/users",
-        },
-        {
-          title: "Documents",
-          url: "/dashboard/documents",
+          icon: FileText,
         },
       ],
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: BarChart3,
+      label: "Data Management",
+      items: [
+        {
+          title: "Users",
+          url: "#",
+          icon: Settings,
+          items: [
+            {
+              title: "User Management",
+              url: "/dashboard/users",
+            },
+            {
+              title: "Roles & Permissions",
+              url: "/dashboard/roles",
+            },
+          ],
+        },
+        {
+          title: "Documents",
+          url: "#",
+          icon: FileText,
+          items: [
+            {
+              title: "Document Library",
+              url: "/dashboard/documents",
+            },
+            {
+              title: "Templates",
+              url: "/dashboard/templates",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: "Reports & Analytics",
       items: [
         {
           title: "Statistics",
           url: "/dashboard/stats",
+          icon: BarChart3,
         },
         {
           title: "Reports",
-          url: "/dashboard/reports",
+          url: "#",
+          icon: FileText,
+          items: [
+            {
+              title: "Monthly Reports",
+              url: "/dashboard/reports/monthly",
+            },
+            {
+              title: "Annual Reports",
+              url: "/dashboard/reports/annual",
+            },
+          ],
         },
       ],
     },
     {
-      title: "System",
-      url: "#",
-      icon: Settings,
+      label: "System",
       items: [
         {
           title: "Settings",
-          url: "/dashboard/settings",
-        },
-        {
-          title: "Configuration",
-          url: "/dashboard/config",
-        },
-        {
-          title: "Logs",
-          url: "/dashboard/logs",
+          url: "#",
+          icon: Settings,
+          items: [
+            {
+              title: "General Settings",
+              url: "/dashboard/settings",
+            },
+            {
+              title: "Configuration",
+              url: "/dashboard/config",
+            },
+            {
+              title: "System Logs",
+              url: "/dashboard/logs",
+            },
+          ],
         },
       ],
     },
@@ -108,7 +151,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavLink items={data.navMain} />
+        {data.navGroups.map((group) => (
+          <NavMain key={group.label} label={group.label} items={group.items} />
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

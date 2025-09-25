@@ -10,7 +10,7 @@ import ContactSection from "@/components/sections/ContactSection";
 import contentData from "@/data/content.json";
 import kerjasamaData from "@/data/kerjasama.json";
 import sopData from "@/data/sop.json";
-import { dasarHukumData } from "@/data/dasarHukumData";
+// import { dasarHukumData } from "@/data/dasarHukumData"; // Now using API
 
 // Type the imported data
 import { ContentData, KerjasamaData, SOPData } from "@/types";
@@ -26,7 +26,7 @@ export default function Home() {
       <StatsSection />
       <TestimonialSection />
       <KerjasamaSection data={kerjasama} />
-      <DasarHukumSection data={dasarHukumData} />
+      <DasarHukumSection />
       <SOPSection data={sop} />
       {/* <DownloadSection /> */}
       <ContactSection data={content.contact} />

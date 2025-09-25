@@ -50,7 +50,7 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
     }
   };
 
-  const colors = getColorClasses(data.downloadInfo.color);
+  const colors = getColorClasses(data?.downloadInfo?.color || "primary");
 
   return (
     <div className="bg-white rounded-[20px] p-6 md:p-8 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300">
@@ -59,7 +59,7 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
           className={`flex items-center justify-center w-[60px] h-[60px] rounded-full ${colors.icon}`}
         >
           <Image
-            src={data.downloadInfo.icon}
+            src={data?.downloadInfo?.icon || "/assets/images/icons/note-2.svg"}
             alt="document icon"
             width={24}
             height={24}
@@ -69,13 +69,13 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
           <div
             className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium mb-2 ${colors.badge}`}
           >
-            {data.downloadInfo.docType}
+            {data?.downloadInfo?.docType || "Document"}
           </div>
           <h3 className="text-lg font-bold text-foreground mb-1">
-            {data.downloadInfo.fileName}
+            {data?.downloadInfo?.fileName || "Loading..."}
           </h3>
           <p className="text-[14px] text-gray-500">
-            {data.downloadInfo.fileType} • {data.downloadInfo.fileSize}
+            {data?.downloadInfo?.fileType || "PDF"} • {data?.downloadInfo?.fileSize || "Loading..."}
           </p>
         </div>
       </div>
@@ -128,6 +128,8 @@ export default function TabSystem({ data }: TabSystemProps) {
 
   // Auto-select the first available sub tab when activeTab changes
   useEffect(() => {
+    if (!activeData) return;
+
     const hasCharacteristics = Array.isArray(activeData.features) && activeData.features.length > 0;
     const hasExamples = Array.isArray(activeData.examples) && activeData.examples.length > 0;
 
@@ -229,15 +231,15 @@ export default function TabSystem({ data }: TabSystemProps) {
                 {/* Title and Description */}
                 <div className="space-y-4 pb-6">
                   <h2 className="text-[24px] md:text-[32px] font-bold text-foreground leading-tight">
-                    {activeData.title}
+                    {activeData?.title || 'Loading...'}
                   </h2>
                   <p className="text-[16px] leading-7 text-gray-700">
-                    {activeData.description}
+                    {activeData?.description || 'Please wait while we load the content...'}
                   </p>
                 </div>
 
                 {/* Sub Tabs - Only show if there's data */}
-                {((Array.isArray(activeData.features) && activeData.features.length > 0) ||
+                {activeData && ((Array.isArray(activeData.features) && activeData.features.length > 0) ||
                   (Array.isArray(activeData.examples) && activeData.examples.length > 0)) && (
                   <div className="border-b border-gray-200">
                     <div className="flex gap-6">
@@ -270,7 +272,7 @@ export default function TabSystem({ data }: TabSystemProps) {
                 )}
 
                 {/* Sub Tab Content - Only show if there's data */}
-                {((Array.isArray(activeData.features) && activeData.features.length > 0) ||
+                {activeData && ((Array.isArray(activeData.features) && activeData.features.length > 0) ||
                   (Array.isArray(activeData.examples) && activeData.examples.length > 0)) && (
                   <AnimatePresence mode="wait">
                     <motion.div

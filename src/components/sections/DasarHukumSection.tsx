@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { DasarHukumData, DasarHukumCategory } from "@/types";
 
 interface DasarHukumSectionProps {
-  data: DasarHukumData;
+  // Optional initial data, will fetch from API if not provided
+  data?: DasarHukumData;
 }
 
 interface AccordionItemProps {
@@ -145,10 +146,47 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   );
 };
 
-export default function DasarHukumSection({ data }: DasarHukumSectionProps) {
-  const [openAccordions, setOpenAccordions] = useState<Set<string>>(
-    new Set([data.categories[0]?.id]) // Default pertama terbuka
-  );
+export default function DasarHukumSection({ data: initialData }: DasarHukumSectionProps) {
+  const [data, setData] = useState<DasarHukumData | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
+  const [error, setError] = useState<string | null>(null);
+  const [openAccordions, setOpenAccordions] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!initialData) {
+      fetchLegalDocuments();
+    } else {
+      // Set default open accordion if data is provided
+      setOpenAccordions(new Set([initialData.categories[0]?.id]));
+    }
+  }, [initialData]);
+
+  const fetchLegalDocuments = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/legal-documents/homepage');
+      if (!response.ok) {
+        throw new Error('Failed to fetch legal documents');
+      }
+
+      const apiData = await response.json();
+
+      // Transform API data to match expected interface
+      const transformedData: DasarHukumData = {
+        categories: apiData.categories
+      };
+
+      setData(transformedData);
+      // Set default open accordion
+      if (transformedData.categories.length > 0) {
+        setOpenAccordions(new Set([transformedData.categories[0].id]));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleAccordion = (categoryId: string) => {
     setOpenAccordions((prev) => {
@@ -161,6 +199,45 @@ export default function DasarHukumSection({ data }: DasarHukumSectionProps) {
       return newSet;
     });
   };
+
+  if (loading) {
+    return (
+      <AnimatedSection className="py-[60px] md:py-[100px]" animationType="fadeUp">
+        <div id="dasar-hukum"></div>
+        <div className="mx-auto px-4 md:px-[75px] max-w-[1280px]">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-500">Memuat dokumen hukum...</div>
+          </div>
+        </div>
+      </AnimatedSection>
+    );
+  }
+
+  if (error) {
+    return (
+      <AnimatedSection className="py-[60px] md:py-[100px]" animationType="fadeUp">
+        <div id="dasar-hukum"></div>
+        <div className="mx-auto px-4 md:px-[75px] max-w-[1280px]">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-red-500">Error: {error}</div>
+          </div>
+        </div>
+      </AnimatedSection>
+    );
+  }
+
+  if (!data || !data.categories.length) {
+    return (
+      <AnimatedSection className="py-[60px] md:py-[100px]" animationType="fadeUp">
+        <div id="dasar-hukum"></div>
+        <div className="mx-auto px-4 md:px-[75px] max-w-[1280px]">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-500">Tidak ada dokumen hukum tersedia.</div>
+          </div>
+        </div>
+      </AnimatedSection>
+    );
+  }
 
   return (
     <AnimatedSection className="py-[60px] md:py-[100px]" animationType="fadeUp">

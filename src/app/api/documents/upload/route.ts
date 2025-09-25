@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const type = formData.get('type') as string; // 'application' or 'legal-document'
     const applicationId = formData.get('applicationId') as string;
     const documentType = formData.get('documentType') as string;
 
@@ -27,46 +28,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!applicationId) {
+    if (!type) {
       return NextResponse.json(
-        { error: 'Application ID is required' },
+        { error: 'Upload type is required' },
         { status: 400 }
       );
     }
 
-    if (!documentType) {
-      return NextResponse.json(
-        { error: 'Document type is required' },
-        { status: 400 }
-      );
+    // Validate based on upload type
+    if (type === 'application') {
+      if (!applicationId) {
+        return NextResponse.json(
+          { error: 'Application ID is required for application uploads' },
+          { status: 400 }
+        );
+      }
+
+      if (!documentType) {
+        return NextResponse.json(
+          { error: 'Document type is required for application uploads' },
+          { status: 400 }
+        );
+      }
     }
 
-    // Check if application exists
-    const application = await prisma.application.findUnique({
-      where: { id: applicationId },
-      include: {
-        cooperationType: {
-          select: { requiredDocumentsJson: true },
+    // Check if application exists (only for application type)
+    let application = null;
+    if (type === 'application') {
+      application = await prisma.application.findUnique({
+        where: { id: applicationId },
+        include: {
+          cooperationType: {
+            select: { requiredDocumentsJson: true },
+          },
         },
-      },
-    });
+      });
 
-    if (!application) {
-      return NextResponse.json(
-        { error: 'Application not found' },
-        { status: 404 }
-      );
+      if (!application) {
+        return NextResponse.json(
+          { error: 'Application not found' },
+          { status: 404 }
+        );
+      }
     }
 
-    // Validate document type against application requirements
-    const requiredDocuments = JSON.parse(application.cooperationType.requiredDocumentsJson as string);
-    const isValidDocumentType = requiredDocuments.some((doc: { key: string; required: boolean }) => doc.key === documentType);
+    // Validate document type against application requirements (only for application type)
+    if (type === 'application' && application) {
+      const requiredDocuments = JSON.parse(application.cooperationType.requiredDocumentsJson as string);
+      const isValidDocumentType = requiredDocuments.some((doc: { key: string; required: boolean }) => doc.key === documentType);
 
-    if (!isValidDocumentType) {
-      return NextResponse.json(
-        { error: 'Invalid document type for this application' },
-        { status: 400 }
-      );
+      if (!isValidDocumentType) {
+        return NextResponse.json(
+          { error: 'Invalid document type for this application' },
+          { status: 400 }
+        );
+      }
     }
 
     // Check file size before processing
@@ -102,24 +118,31 @@ export async function POST(request: NextRequest) {
     // Calculate file hash for integrity
     const fileHash = calculateFileHash(buffer);
 
-    // Check for duplicate files
-    const existingDocument = await prisma.document.findFirst({
-      where: {
-        applicationId,
-        documentType,
-        fileHash,
-      },
-    });
+    // Check for duplicate files (only for application type)
+    if (type === 'application') {
+      const existingDocument = await prisma.document.findFirst({
+        where: {
+          applicationId,
+          documentType,
+          fileHash,
+        },
+      });
 
-    if (existingDocument) {
-      return NextResponse.json(
-        { error: 'This file has already been uploaded for this document type' },
-        { status: 409 }
-      );
+      if (existingDocument) {
+        return NextResponse.json(
+          { error: 'This file has already been uploaded for this document type' },
+          { status: 409 }
+        );
+      }
     }
 
-    // Create upload directory structure
-    const uploadPath = createUploadPath(validation.sanitizedFilename!);
+    // Create upload directory structure based on type
+    let uploadPath: string;
+    if (type === 'legal-document') {
+      uploadPath = `uploads/legal-documents/${validation.sanitizedFilename!}`;
+    } else {
+      uploadPath = createUploadPath(validation.sanitizedFilename!);
+    }
     const fullUploadPath = path.join(getUploadDir(), uploadPath);
     const uploadDir = path.dirname(fullUploadPath);
 
@@ -133,67 +156,89 @@ export async function POST(request: NextRequest) {
     // Get relative path for database storage
     const relativePath = getRelativePath(fullUploadPath);
 
-    // Get system user for public uploads
-    const systemUser = await prisma.user.findUnique({
-      where: { username: 'system' }
-    });
+    // Save document record to database (only for application type)
+    let document = null;
+    if (type === 'application') {
+      // Get system user for public uploads
+      const systemUser = await prisma.user.findUnique({
+        where: { username: 'system' }
+      });
 
-    if (!systemUser) {
-      return NextResponse.json(
-        { error: 'System user not found. Please run database seed.' },
-        { status: 500 }
-      );
+      if (!systemUser) {
+        return NextResponse.json(
+          { error: 'System user not found. Please run database seed.' },
+          { status: 500 }
+        );
+      }
+
+      document = await prisma.document.create({
+        data: {
+          application: {
+            connect: { id: applicationId }
+          },
+          originalFilename: file.name,
+          storedFilename: validation.sanitizedFilename!,
+          relativePath: relativePath,
+          fileSize: file.size,
+          mimeType: validation.detectedMimeType!,
+          fileHash,
+          virusScanResult: JSON.stringify({
+            isClean: virusScanResult.isClean,
+            scanTime: virusScanResult.scanTime,
+            threat: virusScanResult.threat,
+          }),
+          uploader: {
+            connect: { id: systemUser.id }
+          }, // Use system user for public submissions
+          documentType,
+        },
+      });
     }
 
-    // Save document record to database
-    const document = await prisma.document.create({
-      data: {
-        application: {
-          connect: { id: applicationId }
+    // Create activity log (only for application type)
+    if (type === 'application' && document) {
+      // Get system user for activity log
+      const systemUser = await prisma.user.findUnique({
+        where: { username: 'system' }
+      });
+
+      if (systemUser) {
+        await prisma.activityLog.create({
+          data: {
+            userId: systemUser.id,
+            entityType: 'document',
+            entityId: document.id,
+            action: 'UPLOAD',
+            description: `Document uploaded: ${file.name} for application ${applicationId}`,
+            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+            userAgent: request.headers.get('user-agent') || 'unknown',
+          },
+        });
+      }
+
+      return NextResponse.json({
+        success: true,
+        document: {
+          id: document.id,
+          originalFilename: document.originalFilename,
+          fileSize: document.fileSize,
+          mimeType: document.mimeType,
+          documentType: document.documentType,
+          uploadedAt: document.uploadedAt,
         },
-        originalFilename: file.name,
-        storedFilename: validation.sanitizedFilename!,
+        message: 'File uploaded successfully',
+      });
+    } else {
+      // For legal documents, just return file info
+      return NextResponse.json({
+        success: true,
         relativePath: relativePath,
+        originalFilename: file.name,
         fileSize: file.size,
         mimeType: validation.detectedMimeType!,
-        fileHash,
-        virusScanResult: JSON.stringify({
-          isClean: virusScanResult.isClean,
-          scanTime: virusScanResult.scanTime,
-          threat: virusScanResult.threat,
-        }),
-        uploader: {
-          connect: { id: systemUser.id }
-        }, // Use system user for public submissions
-        documentType,
-      },
-    });
-
-    // Create activity log
-    await prisma.activityLog.create({
-      data: {
-        userId: systemUser.id,
-        entityType: 'document',
-        entityId: document.id,
-        action: 'UPLOAD',
-        description: `Document uploaded: ${file.name} for application ${applicationId}`,
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown',
-      },
-    });
-
-    return NextResponse.json({
-      success: true,
-      document: {
-        id: document.id,
-        originalFilename: document.originalFilename,
-        fileSize: document.fileSize,
-        mimeType: document.mimeType,
-        documentType: document.documentType,
-        uploadedAt: document.uploadedAt,
-      },
-      message: 'File uploaded successfully',
-    });
+        message: 'File uploaded successfully',
+      });
+    }
 
   } catch (error) {
     console.error('File upload error:', error);

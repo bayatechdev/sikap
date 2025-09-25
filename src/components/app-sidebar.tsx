@@ -68,6 +68,11 @@ const getSikapData = (session: { user?: { name?: string; email?: string } } | nu
           icon: FileText,
         },
         {
+          title: "Dasar Hukum",
+          url: "/dashboard/dasar-hukum",
+          icon: FileText,
+        },
+        {
           title: "Users",
           url: "#",
           icon: Settings,

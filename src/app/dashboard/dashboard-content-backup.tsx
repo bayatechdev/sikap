@@ -29,7 +29,7 @@ interface RecentApplication {
   submittedAt: string;
   contactPerson: string;
   institutionName: string;
-  applicationType: {
+  cooperationType: {
     name: string;
   };
 }
@@ -237,7 +237,7 @@ export default function DashboardContent() {
                       {application.trackingNumber}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {application.title} - {application.applicationType.name}
+                      {application.title} - {application.cooperationType.name}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {application.contactPerson} ({application.institutionName})

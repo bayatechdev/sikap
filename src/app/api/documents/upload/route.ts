@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
       include: {
-        applicationType: {
+        cooperationType: {
           select: { requiredDocumentsJson: true },
         },
       },
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate document type against application requirements
-    const requiredDocuments = JSON.parse(application.applicationType.requiredDocumentsJson as string);
+    const requiredDocuments = JSON.parse(application.cooperationType.requiredDocumentsJson as string);
     const isValidDocumentType = requiredDocuments.some((doc: { key: string; required: boolean }) => doc.key === documentType);
 
     if (!isValidDocumentType) {

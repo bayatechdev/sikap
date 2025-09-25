@@ -19,7 +19,7 @@ interface Application {
   contactPerson: string;
   contactEmail: string;
   institutionName: string;
-  applicationType: {
+  cooperationType: {
     code: string;
     name: string;
   };
@@ -257,7 +257,7 @@ export default function ApplicationManagementPage() {
                           {application.title}
                         </div>
                       </TableCell>
-                      <TableCell>{application.applicationType.name}</TableCell>
+                      <TableCell>{application.cooperationType.name}</TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">{application.contactPerson}</div>

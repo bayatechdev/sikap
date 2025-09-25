@@ -19,7 +19,7 @@ export async function GET(
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
       include: {
-        applicationType: {
+        cooperationType: {
           select: {
             code: true,
             name: true,

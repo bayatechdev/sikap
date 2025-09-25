@@ -31,7 +31,7 @@ interface Application {
   institutionName: string;
   contactEmail: string;
   submittedAt: string;
-  applicationType: {
+  cooperationType: {
     code: string;
     name: string;
   };

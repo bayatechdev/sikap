@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { KerjasamaData, KerjasamaType } from "@/types";
@@ -126,6 +126,18 @@ export default function TabSystem({ data }: TabSystemProps) {
 
   const activeData = data[activeTab];
 
+  // Auto-select the first available sub tab when activeTab changes
+  useEffect(() => {
+    const hasCharacteristics = Array.isArray(activeData.features) && activeData.features.length > 0;
+    const hasExamples = Array.isArray(activeData.examples) && activeData.examples.length > 0;
+
+    if (hasCharacteristics) {
+      setActiveSubTab("characteristics");
+    } else if (hasExamples) {
+      setActiveSubTab("examples");
+    }
+  }, [activeTab, activeData]);
+
   const tabContentVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -224,68 +236,79 @@ export default function TabSystem({ data }: TabSystemProps) {
                   </p>
                 </div>
 
-                {/* Sub Tabs */}
-                <div className="border-b border-gray-200">
-                  <div className="flex gap-6">
-                    <button
-                      onClick={() => setActiveSubTab("characteristics")}
-                      className={`pb-3 text-lg font-semibold transition-colors duration-300 ${
-                        activeSubTab === "characteristics"
-                          ? "text-foreground font-semibold border-b-2 border-primary"
-                          : "text-gray-600 hover:text-primary"
-                      }`}
-                    >
-                      Karakteristik
-                    </button>
-                    <button
-                      onClick={() => setActiveSubTab("examples")}
-                      className={`pb-3 text-lg font-semibold transition-colors duration-300 ${
-                        activeSubTab === "examples"
-                          ? "text-foreground font-semibold border-b-2 border-primary"
-                          : "text-gray-600 hover:text-primary"
-                      }`}
-                    >
-                      Contoh Implementasi
-                    </button>
+                {/* Sub Tabs - Only show if there's data */}
+                {((Array.isArray(activeData.features) && activeData.features.length > 0) ||
+                  (Array.isArray(activeData.examples) && activeData.examples.length > 0)) && (
+                  <div className="border-b border-gray-200">
+                    <div className="flex gap-6">
+                      {Array.isArray(activeData.features) && activeData.features.length > 0 && (
+                        <button
+                          onClick={() => setActiveSubTab("characteristics")}
+                          className={`pb-3 text-lg font-semibold transition-colors duration-300 ${
+                            activeSubTab === "characteristics"
+                              ? "text-foreground font-semibold border-b-2 border-primary"
+                              : "text-gray-600 hover:text-primary"
+                          }`}
+                        >
+                          Karakteristik
+                        </button>
+                      )}
+                      {Array.isArray(activeData.examples) && activeData.examples.length > 0 && (
+                        <button
+                          onClick={() => setActiveSubTab("examples")}
+                          className={`pb-3 text-lg font-semibold transition-colors duration-300 ${
+                            activeSubTab === "examples"
+                              ? "text-foreground font-semibold border-b-2 border-primary"
+                              : "text-gray-600 hover:text-primary"
+                          }`}
+                        >
+                          Contoh Implementasi
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Sub Tab Content */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeSubTab}
-                    variants={tabContentVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="py-4"
-                  >
-                    {activeSubTab === "characteristics" ? (
-                      <div className="space-y-4">
-                        {activeData.features.map((feature, index) => (
-                          <div key={index} className="flex gap-3 items-center">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-3 shrink-0"></div>
-                            <p className="text-[16px] leading-7 text-gray-700">
-                              {feature}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {activeData.examples.map((example, index) => (
-                          <div key={index} className="flex gap-3 items-start">
-                            <div className="w-2 h-2 bg-primary rounded-full mt-3 shrink-0"></div>
-                            <p className="text-[16px] leading-7 text-gray-700">
-                              {example}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                {/* Sub Tab Content - Only show if there's data */}
+                {((Array.isArray(activeData.features) && activeData.features.length > 0) ||
+                  (Array.isArray(activeData.examples) && activeData.examples.length > 0)) && (
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeSubTab}
+                      variants={tabContentVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="py-4"
+                    >
+                      {activeSubTab === "characteristics" && Array.isArray(activeData.features) && activeData.features.length > 0 && (
+                        <div className="space-y-4">
+                          {activeData.features.map((feature, index) => (
+                            <div key={index} className="flex gap-3 items-start">
+                              <div className="w-3 h-3 bg-primary rounded-full mt-2 shrink-0"></div>
+                              <p className="text-[16px] leading-7 text-gray-700">
+                                {feature}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {activeSubTab === "examples" && Array.isArray(activeData.examples) && activeData.examples.length > 0 && (
+                        <div className="space-y-4">
+                          {activeData.examples.map((example, index) => (
+                            <div key={index} className="flex gap-3 items-start">
+                              <div className="w-3 h-3 bg-primary rounded-full mt-2 shrink-0"></div>
+                              <p className="text-[16px] leading-7 text-gray-700">
+                                {example}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                )}
               </div>
             </div>
           </motion.div>

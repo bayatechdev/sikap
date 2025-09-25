@@ -73,7 +73,7 @@ export async function GET() {
         submittedAt: true,
         contactPerson: true,
         institutionName: true,
-        applicationType: {
+        cooperationType: {
           select: {
             name: true
           }

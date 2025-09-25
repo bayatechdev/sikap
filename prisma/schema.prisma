@@ -78,7 +78,7 @@ model UserRole {
 model Application {
   id                    String            @id @default(cuid())
   userId                String?           @map("user_id") // Nullable for public submissions
-  applicationTypeId     Int               @map("application_type_id")
+  cooperationTypeId     Int               @map("cooperation_type_id")
   institutionId         Int?              @map("institution_id")
   cooperationCategoryId Int?              @map("cooperation_category_id")
 
@@ -123,7 +123,7 @@ model Application {
 
   // Relations
   user                  User?             @relation("Submitter", fields: [userId], references: [id], onDelete: SetNull)
-  applicationType       ApplicationType   @relation(fields: [applicationTypeId], references: [id])
+  cooperationType       CooperationType   @relation(fields: [cooperationTypeId], references: [id])
   institution           Institution?      @relation(fields: [institutionId], references: [id], onDelete: SetNull)
   cooperationCategory   CooperationCategory? @relation(fields: [cooperationCategoryId], references: [id], onDelete: SetNull)
   assignedUser          User?             @relation("AssignedTo", fields: [assignedTo], references: [id], onDelete: SetNull)
@@ -140,11 +140,24 @@ model Application {
   @@map("applications")
 }
 
-model ApplicationType {
+model CooperationType {
   id                     Int                 @id @default(autoincrement())
   code                   String              @unique
   name                   String
   description            String?
+
+  // Homepage display fields
+  displayTitle           String?             @map("display_title")
+  longDescription        String?             @map("long_description")
+  features               Json?               // Array of features for homepage
+  examples               Json?               // Array of examples for homepage
+  downloadInfo           Json?               @map("download_info") // Download file info
+  color                  String?             // Badge color (primary, blue, green, orange)
+  icon                   String?             // Icon path
+  displayOrder           Int                 @default(0) @map("display_order")
+  showOnHomepage         Boolean             @default(true) @map("show_on_homepage")
+
+  // Workflow fields (existing)
   requiredDocumentsJson  Json                @map("required_documents_json")
   workflowStepsJson      Json                @map("workflow_steps_json")
   active                 Boolean             @default(true)
@@ -155,7 +168,7 @@ model ApplicationType {
   applications           Application[]
   documentRequirements   DocumentRequirement[]
 
-  @@map("application_types")
+  @@map("cooperation_types")
 }
 
 model ApplicationData {
@@ -269,7 +282,7 @@ model Document {
 
 model DocumentRequirement {
   id                Int               @id @default(autoincrement())
-  applicationTypeId Int               @map("application_type_id")
+  cooperationTypeId Int               @map("cooperation_type_id")
   documentName      String            @map("document_name")
   isRequired        Boolean           @map("is_required")
   allowedFormats    String            @map("allowed_formats")
@@ -279,7 +292,7 @@ model DocumentRequirement {
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
   // Relations
-  applicationType   ApplicationType   @relation(fields: [applicationTypeId], references: [id], onDelete: Cascade)
+  cooperationType   CooperationType   @relation(fields: [cooperationTypeId], references: [id], onDelete: Cascade)
   documents         Document[]
 
   @@map("document_requirements")

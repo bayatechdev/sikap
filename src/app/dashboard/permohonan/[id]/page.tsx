@@ -25,7 +25,7 @@ interface ApplicationDetail {
   contactEmail: string;
   contactPhone: string;
   institutionName: string;
-  applicationType: {
+  cooperationType: {
     code: string;
     name: string;
   };
@@ -261,7 +261,7 @@ export default function ApplicationDetailPage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Application Type</label>
-                <p className="text-sm">{application.applicationType.name}</p>
+                <p className="text-sm">{application.cooperationType.name}</p>
               </div>
 
               <Separator />

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const applicationTypes = await prisma.applicationType.findMany({
+    const applicationTypes = await prisma.cooperationType.findMany({
       where: { active: true },
       select: {
         id: true,

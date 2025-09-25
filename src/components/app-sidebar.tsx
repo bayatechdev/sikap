@@ -63,6 +63,11 @@ const getSikapData = (session: { user?: { name?: string; email?: string } } | nu
           icon: FileText,
         },
         {
+          title: "Jenis Kerjasama",
+          url: "/dashboard/jenis-kerjasama",
+          icon: FileText,
+        },
+        {
           title: "Users",
           url: "#",
           icon: Settings,

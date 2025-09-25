@@ -35,7 +35,7 @@ interface ApplicationData {
   status: string;
   submittedAt: string;
   updatedAt: string;
-  applicationType: {
+  cooperationType: {
     name: string;
     code: string;
   };
@@ -327,7 +327,7 @@ export default function TrackingDetailPage() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-500">Jenis</label>
-                    <p className="text-gray-900">{application.applicationType.name}</p>
+                    <p className="text-gray-900">{application.cooperationType.name}</p>
                   </div>
                   {application.institution && (
                     <div>

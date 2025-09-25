@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         contactPhone: true,
         trackingNumber: true,
         approvedAt: true,
-        applicationType: {
+        cooperationType: {
           select: {
             name: true,
           },

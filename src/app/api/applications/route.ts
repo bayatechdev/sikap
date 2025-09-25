@@ -44,14 +44,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get application type
-    const applicationType = await prisma.applicationType.findUnique({
+    // Get cooperation type
+    const cooperationType = await prisma.cooperationType.findUnique({
       where: { code: applicationTypeCode },
     });
 
-    if (!applicationType) {
+    if (!cooperationType) {
       return NextResponse.json(
-        { error: 'Invalid application type' },
+        { error: 'Invalid cooperation type' },
         { status: 400 }
       );
     }
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       // Create application
       const application = await tx.application.create({
         data: {
-          applicationTypeId: applicationType.id,
+          cooperationTypeId: cooperationType.id,
           institutionId: institutionId || null,
           cooperationCategoryId: cooperationCategoryId || null,
           trackingNumber,
@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (type) {
-      where.applicationType = {
+      where.cooperationType = {
         code: type,
       };
     }
@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
       prisma.application.findMany({
         where,
         include: {
-          applicationType: {
+          cooperationType: {
             select: { code: true, name: true },
           },
           institution: {

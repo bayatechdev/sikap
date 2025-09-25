@@ -45,7 +45,7 @@ interface ApprovedApplication {
   contactPhone: string;
   trackingNumber: string;
   approvedAt: string;
-  applicationType: {
+  cooperationType: {
     name: string;
   };
   cooperationCategory?: {
@@ -255,10 +255,10 @@ export default function CooperationManagementPage() {
       title: application.title,
       partnerInstitution: application.institutionName,
       description: application.description,
-      cooperationType: application.applicationType.name === 'MOU' ? 'MOU' :
-                      application.applicationType.name === 'PKS' ? 'PKS' : 'NK',
-      cooperationTypeColor: application.applicationType.name === 'MOU' ? 'primary' :
-                           application.applicationType.name === 'PKS' ? 'blue' : 'green',
+      cooperationType: application.cooperationType.name === 'MOU' ? 'MOU' :
+                      application.cooperationType.name === 'PKS' ? 'PKS' : 'NK',
+      cooperationTypeColor: application.cooperationType.name === 'MOU' ? 'primary' :
+                           application.cooperationType.name === 'PKS' ? 'blue' : 'green',
     });
     setIsBrowseModalOpen(false);
   };
@@ -1005,7 +1005,7 @@ export default function CooperationManagementPage() {
                             <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                               <span>#{application.trackingNumber}</span>
                               <span>{application.institutionName}</span>
-                              <span>{application.applicationType.name}</span>
+                              <span>{application.cooperationType.name}</span>
                             </div>
                           </div>
                           <Badge variant="default">Approved</Badge>

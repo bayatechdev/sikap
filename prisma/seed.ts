@@ -213,9 +213,9 @@ async function main() {
     ],
   });
 
-  // Create application types
-  console.log('Creating application types...');
-  await prisma.applicationType.createMany({
+  // Create cooperation types
+  console.log('Creating cooperation types...');
+  await prisma.cooperationType.createMany({
     data: [
       {
         code: 'mou',

@@ -30,7 +30,7 @@ export async function GET(
     const application = await prisma.application.findUnique({
       where: { trackingNumber },
       include: {
-        applicationType: {
+        cooperationType: {
           select: { name: true, code: true }
         },
         institution: {
@@ -89,7 +89,7 @@ export async function GET(
       status: application.status,
       submittedAt: application.submittedAt,
       updatedAt: application.updatedAt,
-      applicationType: application.applicationType,
+      cooperationType: application.cooperationType,
       institution: application.institution,
       cooperationCategory: application.cooperationCategory,
       contact: {

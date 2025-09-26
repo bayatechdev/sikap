@@ -14,7 +14,7 @@ model User {
   passwordHash         String                     @map("password_hash")
   fullName             String                     @map("full_name")
   phone                String?
-  status               UserStatus                 @default("PENDING_VERIFICATION")
+  status               UserStatus                 @default(PENDING_VERIFICATION)
   emailVerifiedAt      DateTime?                  @map("email_verified_at")
   createdAt            DateTime                   @default(now()) @map("created_at")
   updatedAt            DateTime                   @updatedAt @map("updated_at")
@@ -74,8 +74,8 @@ model Application {
   contactEmail          String                     @map("contact_email")
   contactPhone          String                     @map("contact_phone")
   institutionName       String                     @map("institution_name")
-  status                ApplicationStatus          @default("DRAFT")
-  priority              Priority                   @default("NORMAL")
+  status                ApplicationStatus          @default(DRAFT)
+  priority              Priority                   @default(NORMAL)
   submittedAt           DateTime?                  @map("submitted_at")
   reviewedAt            DateTime?                  @map("reviewed_at")
   approvedAt            DateTime?                  @map("approved_at")
@@ -146,7 +146,7 @@ model ApplicationWorkflow {
   id            String         @id @default(cuid())
   applicationId String         @map("application_id")
   stepName      String         @map("step_name")
-  status        WorkflowStatus @default("PENDING")
+  status        WorkflowStatus @default(PENDING)
   assignedTo    String?        @map("assigned_to")
   completedAt   DateTime?      @map("completed_at")
   notes         String?
@@ -194,7 +194,7 @@ model EmailNotification {
   subject          String
   message          String
   notificationType NotificationType @map("notification_type")
-  status           EmailStatus      @default("PENDING")
+  status           EmailStatus      @default(PENDING)
   errorMessage     String?          @map("error_message")
   createdAt        DateTime         @default(now()) @map("created_at")
   sentAt           DateTime?        @map("sent_at")
@@ -329,6 +329,23 @@ model LegalDocument {
   @@map("legal_documents")
 }
 
+model SOPDocument {
+  id             Int      @id @default(autoincrement())
+  title          String
+  category       String
+  description    String
+  imagePath      String?  @map("image_path")
+  features       Json?    // Array of features
+  downloadInfo   Json?    @map("download_info") // Download file info
+  color          String   @default("primary")
+  displayOrder   Int      @default(0) @map("display_order")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("sop_documents")
+}
+
 model Setting {
   id          Int      @id @default(autoincrement())
   key         String   @unique
@@ -383,7 +400,7 @@ model Cooperation {
   documentNumber       String?           @map("document_number")
   documentSize         Int?              @map("document_size")
   documentMimeType     String?           @map("document_mime_type")
-  status               CooperationStatus @default("ACTIVE")
+  status               CooperationStatus @default(ACTIVE)
   notes                String?
   createdAt            DateTime          @default(now()) @map("created_at")
   updatedAt            DateTime          @updatedAt @map("updated_at")

@@ -140,6 +140,8 @@ export async function POST(request: NextRequest) {
     let uploadPath: string;
     if (type === 'legal-document') {
       uploadPath = `uploads/legal-documents/${validation.sanitizedFilename!}`;
+    } else if (type === 'sop-document') {
+      uploadPath = `uploads/sop-documents/${validation.sanitizedFilename!}`;
     } else {
       uploadPath = createUploadPath(validation.sanitizedFilename!);
     }

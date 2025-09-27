@@ -1,6 +1,6 @@
 import HeroSection from "@/components/sections/HeroSection";
 import StatsSection from "@/components/sections/StatsSection";
-import TestimonialSection from "@/components/sections/TestimonialSection";
+import WelcomeSection from "@/components/sections/WelcomeSection";
 import KerjasamaSection from "@/components/sections/KerjasamaSection";
 import SOPSection from "@/components/sections/SOPSection";
 import DasarHukumSection from "@/components/sections/DasarHukumSection";
@@ -23,7 +23,7 @@ export default function Home() {
     <div className="min-h-screen">
       <HeroSection data={content.hero} />
       <StatsSection />
-      <TestimonialSection />
+      <WelcomeSection />
       <KerjasamaSection data={kerjasama} />
       <DasarHukumSection />
       <SOPSection />

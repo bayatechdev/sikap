@@ -3,24 +3,41 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useHeroSettings } from "@/hooks/use-settings";
+import HeroSlider from "@/components/ui/HeroSlider";
 import { HeroSection as HeroData } from "@/types";
+import { HeroImage } from "@/components/ui/HeroImageManager";
 
 interface HeroSectionProps {
-  data: HeroData;
+  data?: HeroData; // Made optional for backward compatibility
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function HeroSection({ data }: HeroSectionProps) {
-  // const containerVariants = {
-  //   hidden: { opacity: 0 },
-  //   visible: {
-  //     opacity: 1,
-  //     transition: {
-  //       staggerChildren: 0.3,
-  //       delayChildren: 0.2,
-  //     },
-  //   },
-  // };
+  const { loading, error, getSetting } = useHeroSettings();
+
+  // Fallback to data prop if available
+  const heroTitle = getSetting('hero_title', data?.title || 'Selamat datang di Website SIKAP');
+  const heroSubtitle = getSetting('hero_subtitle', data?.subtitle || 'Sistem kerjasama berbasis digital Kabupaten Tana Tidung yang akuntabel dan transparan');
+  const primaryButton = getSetting('hero_primary_button', data?.cta?.primary || 'Ajukan Kerjasama');
+  const secondaryButton = getSetting('hero_secondary_button', data?.cta?.secondary || 'Lihat Data');
+  // Parse hero_images JSON string safely
+  const parseHeroImages = (): HeroImage[] => {
+    try {
+      const heroImagesString = getSetting('hero_images', '[]');
+
+      if (!heroImagesString || typeof heroImagesString !== 'string') {
+        return [];
+      }
+
+      const parsed = JSON.parse(heroImagesString);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Error parsing hero images in HeroSection:', error);
+      return [];
+    }
+  };
+
+  const heroImages = parseHeroImages();
 
   const leftVariants = {
     hidden: { opacity: 0, x: -60 },
@@ -46,6 +63,27 @@ export default function HeroSection({ data }: HeroSectionProps) {
     },
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <header id="home" className="bg-section w-full pb-[70px] pt-[200px]">
+        <div className="relative flex justify-center">
+          <div className="flex flex-col gap-[30px] px-4 md:px-[75px] max-w-[1280px] w-full">
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // Error state
+  if (error) {
+    console.error('Hero settings error:', error);
+    // Fall back to default content on error
+  }
+
   return (
     <header id="home" className="bg-section w-full pb-[70px] pt-[200px]">
       <div className="relative flex justify-center">
@@ -61,26 +99,25 @@ export default function HeroSection({ data }: HeroSectionProps) {
               transition={{ duration: 0.8, ease: "easeInOut" }}
             >
               <h1 className="text-[32px] md:text-6xl font-extrabold leading-tight md:leading-[70px]">
-                Selamat datang di Website{" "}
+                {heroTitle.replace('SIKAP', '')}{" "}
                 <span className="bg-primary inline-flex -mx-1 items-center justify-center px-3 py-2 md:h-14 rounded">
                   SIKAP
                 </span>
               </h1>
               <p className="max-w-[484px] text-lg leading-8 font-medium text-gray-700">
-                Sistem kerjasama berbasis digital Kabupaten Tana Tidung yang
-                akuntabel dan transparan
+                {heroSubtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-3.5">
                 <button className="px-[30px] py-[20px] rounded-[100px] bg-primary text-[16px] font-bold leading-[19px] transition-all duration-300 hover:shadow-primary hover:-translate-y-1">
-                  Ajukan Kerjasama
+                  {primaryButton}
                 </button>
                 <button className="px-[30px] py-[20px] rounded-[100px] border border-foreground text-[16px] font-bold leading-[19px] transition-all duration-300 hover:ring-2 hover:ring-primary hover:bg-primary hover:border-primary hover:text-foreground">
-                  Lihat Data
+                  {secondaryButton}
                 </button>
               </div>
             </motion.div>
 
-            {/* Right Content - Images */}
+            {/* Right Content - Hero Slider */}
             <motion.div
               className="relative shrink-0 w-full lg:w-[550px] h-[400px] lg:h-[507px]"
               variants={rightVariants}
@@ -88,14 +125,12 @@ export default function HeroSection({ data }: HeroSectionProps) {
               animate="visible"
               transition={{ duration: 0.8, ease: "easeInOut" }}
             >
-              {/* Main UI Image with rounded corners - positioned in center */}
+              {/* Hero Image Slider with rounded corners */}
               <div className="absolute ml-4 mr-4 lg:ml-[52px] lg:mr-[51px] w-[calc(100%-32px)] lg:w-[447px] h-full lg:h-[506px] rounded-[26px] overflow-hidden">
-                <Image
-                  src="/assets/images/thumbnails/ui.png"
-                  alt="SIKAP Interface"
-                  fill
-                  className="object-cover"
-                  priority
+                <HeroSlider
+                  images={heroImages}
+                  autoPlayInterval={6000}
+                  className="w-full h-full"
                 />
               </div>
 

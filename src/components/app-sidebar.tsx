@@ -7,6 +7,7 @@ import {
   Settings,
   BarChart3,
   Building,
+  Building2,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 
@@ -76,6 +77,11 @@ const getSikapData = (session: { user?: { name?: string; email?: string } } | nu
           title: "SOP",
           url: "/dashboard/sop",
           icon: FileText,
+        },
+        {
+          title: "Partners",
+          url: "/dashboard/partners",
+          icon: Building2,
         },
         {
           title: "Users",

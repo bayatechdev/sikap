@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useHeroSettings } from "@/hooks/use-settings";
+import { useHeroSettings, usePartners } from "@/hooks/use-settings";
 import HeroSlider from "@/components/ui/HeroSlider";
 import { HeroSection as HeroData } from "@/types";
 import { HeroImage } from "@/components/ui/HeroImageManager";
@@ -14,6 +14,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ data }: HeroSectionProps) {
   const { loading, error, getSetting } = useHeroSettings();
+  const { partners } = usePartners();
 
   // Fallback to data prop if available
   const heroTitle = getSetting('hero_title', data?.title || 'Selamat datang di Website SIKAP');
@@ -159,29 +160,43 @@ export default function HeroSection({ data }: HeroSectionProps) {
           </div>
 
           {/* Partners Section */}
-          <motion.div
-            className="flex flex-col gap-[30px] items-center mt-16"
-            variants={scaleVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ duration: 0.8, ease: "easeInOut", delay: 0.6 }}
-          >
-            <h2 className="max-w-[370px] font-bold text-[24px] md:text-[32px] leading-[46px] text-center">
-              Partner Kami
-            </h2>
-            <div className="flex w-full justify-center gap-8 lg:gap-[70px] h-[42px]">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="relative flex-1">
-                  <Image
-                    src={`/assets/images/icons/logoipsum-${i}.svg`}
-                    alt={`Partner ${i}`}
-                    fill
-                    className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
-                  />
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          {partners.length > 0 && (
+            <motion.div
+              className="flex flex-col gap-[30px] items-center mt-16"
+              variants={scaleVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ duration: 0.8, ease: "easeInOut", delay: 0.6 }}
+            >
+              <h2 className="max-w-[370px] font-bold text-[24px] md:text-[32px] leading-[46px] text-center">
+                Partner Kami
+              </h2>
+              <div className="flex w-full justify-center gap-8 lg:gap-[70px] h-[42px]">
+                {partners.slice(0, 5).map((partner) => (
+                  <div key={partner.id} className="relative flex-1">
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={partner.logoUrl}
+                        alt={partner.name}
+                        fill
+                        className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
+                        title={partner.name}
+                      />
+                    </div>
+                    {partner.website && (
+                      <a
+                        href={partner.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute inset-0"
+                        aria-label={`Visit ${partner.name} website`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </header>

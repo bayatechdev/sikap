@@ -9,7 +9,8 @@ const ALLOWED_TYPES = [
   'image/jpg',
   'image/png',
   'image/webp',
-  'image/avif'
+  'image/avif',
+  'image/svg+xml'
 ];
 
 // Max file size: 5MB

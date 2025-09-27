@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { HeroImageManager, HeroImage } from '@/components/ui/HeroImageManager';
-import { Loader2, Save, RefreshCw, AlertCircle, CheckCircle, Globe, Phone, MessageSquare } from 'lucide-react';
+import { Partner } from '@/components/ui/PartnerManager';
+import { Loader2, Save, RefreshCw, AlertCircle, CheckCircle, Globe, Phone, MessageSquare, Users } from 'lucide-react';
 
 interface Setting {
   id: number;
@@ -25,6 +27,7 @@ interface Setting {
 
 export default function WebsiteSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -191,9 +194,29 @@ export default function WebsiteSettingsPage() {
     }
   };
 
+  // Fetch partners from API
+  const fetchPartners = useCallback(async () => {
+    try {
+      const response = await fetch('/api/partners');
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch partners: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPartners(data.partners);
+      }
+    } catch (err) {
+      console.error('Error fetching partners:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]);
+    fetchPartners();
+  }, [fetchSettings, fetchPartners]);
 
   if (loading) {
     return (
@@ -239,10 +262,11 @@ export default function WebsiteSettingsPage() {
 
       <Tabs defaultValue="hero" className="space-y-6 w-full">
         <div className="overflow-x-auto">
-          <TabsList className="grid w-full min-w-fit grid-cols-5">
+          <TabsList className="grid w-full min-w-fit grid-cols-6">
             <TabsTrigger value="hero" className="whitespace-nowrap">Hero Section</TabsTrigger>
             <TabsTrigger value="welcome" className="whitespace-nowrap">Welcome</TabsTrigger>
             <TabsTrigger value="contact" className="whitespace-nowrap">Contact</TabsTrigger>
+            <TabsTrigger value="partners" className="whitespace-nowrap">Partners</TabsTrigger>
             <TabsTrigger value="social" className="whitespace-nowrap">Social Media</TabsTrigger>
             <TabsTrigger value="site" className="whitespace-nowrap">Site Info</TabsTrigger>
           </TabsList>
@@ -579,6 +603,77 @@ export default function WebsiteSettingsPage() {
                     </>
                   )}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Partners Settings */}
+        <TabsContent value="partners">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Partners Preview
+              </CardTitle>
+              <CardDescription>
+                View how partners appear on your homepage. For full management, visit the Partners section.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">{partners.length}</div>
+                    <div className="text-sm text-muted-foreground">Total Partners</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">{partners.filter(p => p.isActive).length}</div>
+                    <div className="text-sm text-muted-foreground">Active</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-500">{partners.filter(p => !p.isActive).length}</div>
+                    <div className="text-sm text-muted-foreground">Inactive</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{partners.filter(p => p.website).length}</div>
+                    <div className="text-sm text-muted-foreground">With Links</div>
+                  </div>
+                </div>
+
+                {/* Partners Preview */}
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium mb-3">Homepage Display Preview</h4>
+                  <div className="flex justify-center gap-8 lg:gap-[70px] h-[42px]">
+                    {partners.filter(p => p.isActive).slice(0, 5).map((partner) => (
+                      <div key={partner.id} className="relative flex-1 max-w-[100px]">
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={partner.logoUrl}
+                            alt={partner.name}
+                            fill
+                            className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
+                            title={partner.name}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {partners.filter(p => p.isActive).length === 0 && (
+                      <div className="text-center text-muted-foreground py-4">
+                        No active partners to display
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <div className="flex justify-center pt-4">
+                  <Button onClick={() => window.location.href = '/dashboard/partners'}>
+                    <Users className="mr-2 h-4 w-4" />
+                    Manage Partners
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

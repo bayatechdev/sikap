@@ -30,7 +30,7 @@ interface UploadState {
   dragActive: boolean;
 }
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
 const DEFAULT_MAX_SIZE = 5; // MB
 
 export function ImageUpload({
@@ -64,7 +64,7 @@ export function ImageUpload({
 
     // Type validation
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'Invalid file type. Only JPG, PNG, WebP, and AVIF images are allowed.';
+      return 'Invalid file type. Only JPG, PNG, WebP, AVIF, and SVG images are allowed.';
     }
 
     return null;
@@ -244,7 +244,7 @@ export function ImageUpload({
                 {uploadState.dragActive ? 'Drop image here' : 'Click to upload or drag & drop'}
               </p>
               <p className="text-sm text-gray-500">
-                JPG, PNG, WebP, AVIF up to {maxSizeMB}MB
+                JPG, PNG, WebP, AVIF, SVG up to {maxSizeMB}MB
               </p>
             </div>
           </div>

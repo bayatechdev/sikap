@@ -1,5 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 
+interface Partner {
+  id: number;
+  name: string;
+  logoUrl: string;
+  website?: string | null;
+  description?: string | null;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Setting {
   id: number;
   key: string;
@@ -172,4 +184,46 @@ export function useSiteSettings() {
       'secondary_color'
     ]
   });
+}
+
+// Hook for partners
+export function usePartners() {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPartners = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/partners?active=true');
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch partners: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPartners(data.partners);
+      }
+    } catch (err) {
+      console.error('Error fetching partners:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch partners');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPartners();
+  }, [fetchPartners]);
+
+  return {
+    partners,
+    loading,
+    error,
+    refetch: fetchPartners,
+  };
 }

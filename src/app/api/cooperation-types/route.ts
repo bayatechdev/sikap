@@ -72,14 +72,28 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse JSON fields for easier frontend consumption
-    const processedTypes = cooperationTypes.map(type => ({
-      ...type,
-      features: type.features ? (type.features as string[]) : [],
-      examples: type.examples ? (type.examples as string[]) : [],
-      downloadInfo: type.downloadInfo ? (type.downloadInfo as Record<string, unknown>) : null,
-      requiredDocuments: type.requiredDocumentsJson ? JSON.parse(type.requiredDocumentsJson as string) : [],
-      workflowSteps: type.workflowStepsJson ? JSON.parse(type.workflowStepsJson as string) : [],
-    }));
+    const processedTypes = cooperationTypes.map(type => {
+      // Helper function to safely parse JSON or return object if already parsed
+      const safeParseJson = (field: unknown) => {
+        if (typeof field === 'string') {
+          try {
+            return JSON.parse(field);
+          } catch {
+            return [];
+          }
+        }
+        return field || [];
+      };
+
+      return {
+        ...type,
+        features: type.features ? (type.features as string[]) : [],
+        examples: type.examples ? (type.examples as string[]) : [],
+        downloadInfo: type.downloadInfo ? (type.downloadInfo as Record<string, unknown>) : null,
+        requiredDocuments: safeParseJson(type.requiredDocumentsJson),
+        workflowSteps: safeParseJson(type.workflowStepsJson),
+      };
+    });
 
     return NextResponse.json({ cooperationTypes: processedTypes });
   } catch (error) {

@@ -1,27 +1,9 @@
-export interface DownloadInfo {
-  fileName: string;
-  fileSize: string;
-  fileType: string;
-  docType: string;
-  color: string;
-  icon: string;
-}
+// Re-export all types from specialized files
+export * from './cooperation';
+export * from './application';
+export * from './api';
 
-export interface KerjasamaType {
-  title: string;
-  description: string;
-  features: string[];
-  examples: string[];
-  downloadInfo: DownloadInfo;
-}
-
-export interface KerjasamaData {
-  mou: KerjasamaType;
-  pks: KerjasamaType;
-  surat_kuasa: KerjasamaType;
-  nota_kesepakatan: KerjasamaType;
-}
-
+// Legacy frontend types (keeping for backward compatibility)
 export interface SOPDownloadInfo {
   fileName: string;
   fileSize: string;

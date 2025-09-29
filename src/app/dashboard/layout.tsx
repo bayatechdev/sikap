@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { DynamicBreadcrumb } from "@/components/dynamic-breadcrumb"
+import { CenterLoadingSkeleton } from '@/components/ui/skeleton-variants'
 
 export default function DashboardLayout({
   children,
@@ -17,11 +18,7 @@ export default function DashboardLayout({
   const router = useRouter()
 
   if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    )
+    return <CenterLoadingSkeleton />
   }
 
   if (!session) {

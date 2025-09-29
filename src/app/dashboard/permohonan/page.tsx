@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, Search, RefreshCw, FileText } from "lucide-react";
+import { DataTableSkeleton } from "@/components/ui/skeleton-variants";
 import Link from "next/link";
 
 interface Application {
@@ -215,10 +216,7 @@ export default function ApplicationManagementPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p>Loading applications...</p>
-            </div>
+            <DataTableSkeleton />
           ) : error ? (
             <div className="text-center py-8 text-red-600">
               <p>Error: {error}</p>

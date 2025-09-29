@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Search, RefreshCw, FileText, Plus, Edit, Trash2, Calendar, Building } from "lucide-react";
+import { DataTableSkeleton } from "@/components/ui/skeleton-variants";
 
 interface Cooperation {
   id: string;
@@ -295,11 +296,30 @@ export default function CooperationManagementPage() {
     }
   };
 
-  const getTypeColor = (type: string, color: string) => {
+  const getTypeColor = (type: string, color?: string) => {
+    // Jika color tidak ada, tentukan berdasarkan type untuk konsistensi
+    if (!color) {
+      switch (type) {
+        case 'MOU': return 'default';
+        case 'PKS': return 'secondary';
+        case 'NK': return 'outline';
+        case 'Nota Kesepakatan': return 'outline';
+        case 'Surat Kuasa': return 'secondary';
+        default: return 'default';
+      }
+    }
+
+    // Mapping warna yang konsisten untuk semua badge
     switch (color) {
       case 'primary': return 'default';
       case 'blue': return 'secondary';
       case 'green': return 'outline';
+      case 'red': return 'destructive';
+      case 'yellow': return 'default';
+      case 'orange': return 'secondary';
+      case 'purple': return 'outline';
+      case 'gray':
+      case 'grey': return 'secondary';
       default: return 'default';
     }
   };
@@ -413,10 +433,7 @@ export default function CooperationManagementPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p>Loading cooperations...</p>
-            </div>
+            <DataTableSkeleton />
           ) : error ? (
             <div className="text-center py-8 text-red-600">
               <p>Error: {error}</p>
@@ -984,10 +1001,7 @@ export default function CooperationManagementPage() {
 
             <div className="max-h-96 overflow-y-auto">
               {browseLoading ? (
-                <div className="text-center py-8">
-                  <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-                  <p>Loading applications...</p>
-                </div>
+                <DataTableSkeleton />
               ) : approvedApplications.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />

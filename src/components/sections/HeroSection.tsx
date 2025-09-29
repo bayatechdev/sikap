@@ -7,6 +7,7 @@ import { useHeroSettings, usePartners } from "@/hooks/use-settings";
 import HeroSlider from "@/components/ui/HeroSlider";
 import { HeroSection as HeroData } from "@/types";
 import { HeroImage } from "@/components/ui/HeroImageManager";
+import { HeroSkeleton } from "@/components/ui/skeleton-variants";
 
 interface HeroSectionProps {
   data?: HeroData; // Made optional for backward compatibility
@@ -66,17 +67,7 @@ export default function HeroSection({ data }: HeroSectionProps) {
 
   // Loading state
   if (loading) {
-    return (
-      <header id="home" className="bg-section w-full pb-[70px] pt-[200px]">
-        <div className="relative flex justify-center">
-          <div className="flex flex-col gap-[30px] px-4 md:px-[75px] max-w-[1280px] w-full">
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
-            </div>
-          </div>
-        </div>
-      </header>
-    );
+    return <HeroSkeleton />;
   }
 
   // Error state

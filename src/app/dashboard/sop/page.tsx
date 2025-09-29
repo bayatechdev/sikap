@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { DataTableSkeleton } from '@/components/ui/skeleton-variants';
 
 interface SOPDocument {
   id: number;
@@ -161,13 +162,7 @@ export default function SOPPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
+    return <DataTableSkeleton />;
   }
 
   return (

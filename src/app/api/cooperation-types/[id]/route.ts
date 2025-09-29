@@ -72,14 +72,26 @@ export async function GET(
       );
     }
 
+    // Helper function to safely parse JSON or return object if already parsed
+    const safeParseJson = (field: unknown) => {
+      if (typeof field === 'string') {
+        try {
+          return JSON.parse(field);
+        } catch {
+          return [];
+        }
+      }
+      return field || [];
+    };
+
     // Parse JSON fields for easier frontend consumption
     const processedType = {
       ...cooperationType,
       features: cooperationType.features ? (cooperationType.features as string[]) : [],
       examples: cooperationType.examples ? (cooperationType.examples as string[]) : [],
       downloadInfo: cooperationType.downloadInfo ? (cooperationType.downloadInfo as Record<string, unknown>) : null,
-      requiredDocuments: cooperationType.requiredDocumentsJson ? JSON.parse(cooperationType.requiredDocumentsJson as string) : [],
-      workflowSteps: cooperationType.workflowStepsJson ? JSON.parse(cooperationType.workflowStepsJson as string) : [],
+      requiredDocuments: safeParseJson(cooperationType.requiredDocumentsJson),
+      workflowSteps: safeParseJson(cooperationType.workflowStepsJson),
     };
 
     return NextResponse.json(processedType);

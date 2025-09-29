@@ -71,20 +71,20 @@ export async function GET(request: NextRequest) {
       orderBy: homepageOnly ? { displayOrder: 'asc' } : { name: 'asc' },
     });
 
+    // Helper function to safely parse JSON or return object if already parsed
+    const safeParseJson = (field: unknown) => {
+      if (typeof field === 'string') {
+        try {
+          return JSON.parse(field);
+        } catch {
+          return [];
+        }
+      }
+      return field || [];
+    };
+
     // Parse JSON fields for easier frontend consumption
     const processedTypes = cooperationTypes.map(type => {
-      // Helper function to safely parse JSON or return object if already parsed
-      const safeParseJson = (field: unknown) => {
-        if (typeof field === 'string') {
-          try {
-            return JSON.parse(field);
-          } catch {
-            return [];
-          }
-        }
-        return field || [];
-      };
-
       return {
         ...type,
         features: type.features ? (type.features as string[]) : [],

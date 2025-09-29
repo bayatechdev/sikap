@@ -5,10 +5,10 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const updateCooperationSchema = z.object({
-  applicationId: z.string().optional(),
+  applicationId: z.string().nullable().optional(),
   title: z.string().min(1, 'Title is required').optional(),
   cooperationType: z.enum(['MOU', 'PKS', 'NK']).optional(),
-  cooperationTypeColor: z.enum(['primary', 'blue', 'green']).optional(),
+  cooperationTypeColor: z.enum(['primary', 'blue', 'green', 'red', 'yellow', 'orange', 'purple', 'gray', 'default']).optional(),
   orgUnit: z.string().min(1, 'OPD is required').optional(),
   partnerInstitution: z.string().min(1, 'Partner institution is required').optional(),
   cooperationDate: z.string().transform((str) => new Date(str)).optional(),
@@ -96,10 +96,30 @@ export async function PUT(
       );
     }
 
+    // Prepare data for update, handling applicationId properly
+    const updateData = { ...validatedData };
+
+    // If applicationId is provided and not null/empty, validate it exists
+    if (validatedData.applicationId && validatedData.applicationId.trim() !== '') {
+      const applicationExists = await prisma.application.findUnique({
+        where: { id: validatedData.applicationId },
+      });
+
+      if (!applicationExists) {
+        return NextResponse.json(
+          { error: 'Application not found' },
+          { status: 400 }
+        );
+      }
+    } else if (validatedData.applicationId === null || validatedData.applicationId === '') {
+      // If applicationId is explicitly set to null or empty string, allow null
+      updateData.applicationId = null;
+    }
+
     // Update cooperation
     const cooperation = await prisma.cooperation.update({
       where: { id },
-      data: validatedData,
+      data: updateData,
       include: {
         application: {
           select: {

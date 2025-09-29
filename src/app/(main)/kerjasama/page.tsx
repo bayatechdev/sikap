@@ -61,14 +61,44 @@ export default function KerjasamaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const getBadgeClasses = (color: string) => {
+  const getBadgeClasses = (cooperationType: string, color?: string) => {
+    // Jika color tidak ada, tentukan berdasarkan cooperationType untuk konsistensi
+    if (!color) {
+      switch (cooperationType) {
+        case "MOU":
+          return "bg-primary text-primary-foreground";
+        case "PKS":
+          return "bg-blue-100 text-blue-800";
+        case "NK":
+          return "bg-green-100 text-green-800";
+        case "Nota Kesepakatan":
+          return "bg-purple-100 text-purple-800";
+        case "Surat Kuasa":
+          return "bg-orange-100 text-orange-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    }
+
+    // Mapping warna yang konsisten untuk semua badge
     switch (color) {
       case "primary":
-        return "bg-primary text-foreground";
+        return "bg-primary text-primary-foreground";
       case "blue":
         return "bg-blue-100 text-blue-800";
       case "green":
         return "bg-green-100 text-green-800";
+      case "red":
+        return "bg-red-100 text-red-800";
+      case "yellow":
+        return "bg-yellow-100 text-yellow-800";
+      case "orange":
+        return "bg-orange-100 text-orange-800";
+      case "purple":
+        return "bg-purple-100 text-purple-800";
+      case "gray":
+      case "grey":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -632,6 +662,7 @@ export default function KerjasamaPage() {
                           <td className="px-6 py-4">
                             <span
                               className={`inline-flex items-center px-3 py-1 rounded-full text-[12px] font-semibold ${getBadgeClasses(
+                                row.cooperationType,
                                 row.cooperationTypeColor
                               )}`}
                             >

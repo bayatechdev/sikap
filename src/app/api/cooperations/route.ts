@@ -9,7 +9,7 @@ const createCooperationSchema = z.object({
   applicationId: z.string().optional(),
   title: z.string().min(1, 'Title is required'),
   cooperationType: z.enum(['MOU', 'PKS', 'NK']),
-  cooperationTypeColor: z.enum(['primary', 'blue', 'green']),
+  cooperationTypeColor: z.enum(['primary', 'blue', 'green', 'red', 'yellow', 'orange', 'purple', 'gray', 'default']),
   orgUnit: z.string().min(1, 'OPD is required'),
   partnerInstitution: z.string().min(1, 'Partner institution is required'),
   cooperationDate: z.string().transform((str) => new Date(str)),

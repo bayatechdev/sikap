@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HeroImageManager, HeroImage } from '@/components/ui/HeroImageManager';
 import { Partner } from '@/components/ui/PartnerManager';
 import { Loader2, Save, RefreshCw, AlertCircle, CheckCircle, Globe, Phone, MessageSquare, Users } from 'lucide-react';
+import { CenterLoadingSkeleton } from '@/components/ui/skeleton-variants';
 
 interface Setting {
   id: number;
@@ -40,7 +41,7 @@ export default function WebsiteSettingsPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/settings');
+      const response = await fetch('/api/settings/bulk');
 
       if (!response.ok) {
         throw new Error(`Failed to fetch settings: ${response.statusText}`);
@@ -219,14 +220,7 @@ export default function WebsiteSettingsPage() {
   }, [fetchSettings, fetchPartners]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p>Loading website settings...</p>
-        </div>
-      </div>
-    );
+    return <CenterLoadingSkeleton />;
   }
 
   if (error) {

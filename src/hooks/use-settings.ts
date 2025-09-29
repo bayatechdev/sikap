@@ -73,7 +73,7 @@ export function useSettings(options: UseSettingsOptions = {}): UseSettingsReturn
         params.append('type', type);
       }
 
-      const response = await fetch(`/api/settings?${params.toString()}`);
+      const response = await fetch(`/api/settings/bulk?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch settings: ${response.statusText}`);

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Save, User, Mail, Shield, Trash2 } from "lucide-react"
+import { FormSkeleton } from "@/components/ui/skeleton-variants"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -196,51 +197,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
   };
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <div className="h-10 w-24 bg-muted rounded animate-pulse"></div>
-          <div>
-            <div className="h-8 w-64 bg-muted rounded animate-pulse mb-2"></div>
-            <div className="h-4 w-48 bg-muted rounded animate-pulse"></div>
-          </div>
-        </div>
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <div className="h-6 w-40 bg-muted rounded animate-pulse"></div>
-                <div className="h-4 w-64 bg-muted rounded animate-pulse"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[1,2,3].map(i => (
-                    <div key={i} className="space-y-2">
-                      <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
-                      <div className="h-10 w-full bg-muted rounded animate-pulse"></div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <Card>
-              <CardHeader>
-                <div className="h-6 w-32 bg-muted rounded animate-pulse"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[1,2].map(i => (
-                    <div key={i} className="h-16 w-full bg-muted rounded animate-pulse"></div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
+    return <FormSkeleton />;
   }
 
   if (!user) {

@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -277,6 +279,77 @@ async function main() {
     ],
   });
 
+  // Update cooperation types with detailed data
+  console.log('Enriching cooperation types...');
+  try {
+    const kerjasamaDataPath = path.join(process.cwd(), 'src', 'data', 'kerjasama.json');
+    const kerjasamaData = JSON.parse(fs.readFileSync(kerjasamaDataPath, 'utf8'));
+
+    const cooperationTypesUpdates = [
+      {
+        code: 'mou',
+        displayTitle: kerjasamaData.mou.title,
+        longDescription: kerjasamaData.mou.description,
+        features: JSON.stringify(kerjasamaData.mou.features),
+        examples: JSON.stringify(kerjasamaData.mou.examples),
+        downloadInfo: JSON.stringify(kerjasamaData.mou.downloadInfo),
+        color: kerjasamaData.mou.downloadInfo.color || 'primary',
+        icon: kerjasamaData.mou.downloadInfo.icon,
+        displayOrder: 1,
+        showOnHomepage: true,
+        active: true
+      },
+      {
+        code: 'pks',
+        displayTitle: kerjasamaData.pks.title,
+        longDescription: kerjasamaData.pks.description,
+        features: JSON.stringify(kerjasamaData.pks.features),
+        examples: JSON.stringify(kerjasamaData.pks.examples),
+        downloadInfo: JSON.stringify(kerjasamaData.pks.downloadInfo),
+        color: kerjasamaData.pks.downloadInfo.color || 'blue',
+        icon: kerjasamaData.pks.downloadInfo.icon,
+        displayOrder: 2,
+        showOnHomepage: true,
+        active: true
+      },
+      {
+        code: 'surat_kuasa',
+        displayTitle: kerjasamaData.surat_kuasa.title,
+        longDescription: kerjasamaData.surat_kuasa.description,
+        features: JSON.stringify(kerjasamaData.surat_kuasa.features),
+        examples: JSON.stringify(kerjasamaData.surat_kuasa.examples),
+        downloadInfo: JSON.stringify(kerjasamaData.surat_kuasa.downloadInfo),
+        color: kerjasamaData.surat_kuasa.downloadInfo.color || 'green',
+        icon: kerjasamaData.surat_kuasa.downloadInfo.icon,
+        displayOrder: 3,
+        showOnHomepage: true,
+        active: true
+      },
+      {
+        code: 'nota_kesepakatan',
+        displayTitle: kerjasamaData.nota_kesepakatan.title,
+        longDescription: kerjasamaData.nota_kesepakatan.description,
+        features: JSON.stringify(kerjasamaData.nota_kesepakatan.features),
+        examples: JSON.stringify(kerjasamaData.nota_kesepakatan.examples),
+        downloadInfo: JSON.stringify(kerjasamaData.nota_kesepakatan.downloadInfo),
+        color: kerjasamaData.nota_kesepakatan.downloadInfo.color || 'orange',
+        icon: kerjasamaData.nota_kesepakatan.downloadInfo.icon,
+        displayOrder: 4,
+        showOnHomepage: true,
+        active: true
+      }
+    ];
+
+    for (const updateData of cooperationTypesUpdates) {
+      await prisma.cooperationType.update({
+        where: { code: updateData.code },
+        data: updateData
+      });
+    }
+  } catch (error) {
+    console.log('⚠️ Kerjasama data file not found, skipping cooperation types enrichment');
+  }
+
   // Create settings
   console.log('Creating settings...');
   await prisma.setting.createMany({
@@ -383,6 +456,201 @@ async function main() {
     ],
   });
 
+  // Create SOP documents
+  console.log('Creating SOP documents...');
+  const sopDocuments = [
+    {
+      title: 'Standar Operasional Prosedur Kerjasama Dalam Negeri',
+      category: 'Kerjasama Dalam Negeri',
+      description: 'SOP untuk menjalin kerjasama dengan instansi/lembaga dalam negeri, termasuk antar daerah, BUMN, dan organisasi nasional lainnya.',
+      imagePath: '/assets/images/sop-dalam-negeri.png',
+      features: JSON.stringify([
+        'Identifikasi dan pemetaan calon mitra',
+        'Proses negosiasi dan penyusunan draft',
+        'Review legal dan teknis',
+        'Penandatanganan dan implementasi',
+        'Monitoring dan evaluasi'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Kerjasama-Dalam-Negeri.pdf',
+        fileSize: '2.1 MB',
+        fileType: 'PDF',
+        lastUpdated: '15 Januari 2025',
+        url: '#'
+      }),
+      color: 'blue',
+      displayOrder: 1,
+      active: true
+    },
+    {
+      title: 'Standar Operasional Prosedur Kerjasama Luar Negeri',
+      category: 'Kerjasama Luar Negeri',
+      description: 'SOP untuk kerjasama internasional dengan negara lain, organisasi internasional, dan sister city program sesuai regulasi diplomasi Indonesia.',
+      imagePath: '/assets/images/sop-luar-negeri.png',
+      features: JSON.stringify([
+        'Koordinasi dengan Kementerian Luar Negeri',
+        'Sister city dan diplomatic relations',
+        'International best practices',
+        'Cross-border collaboration protocols',
+        'Cultural exchange programs'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Kerjasama-Luar-Negeri.pdf',
+        fileSize: '2.4 MB',
+        fileType: 'PDF',
+        lastUpdated: '20 Januari 2025',
+        url: '#'
+      }),
+      color: 'indigo',
+      displayOrder: 2,
+      active: true
+    },
+    {
+      title: 'SOP Kerjasama Bidang Ekonomi dan Perdagangan',
+      category: 'Ekonomi & Perdagangan',
+      description: 'Prosedur khusus untuk kerjasama di bidang ekonomi, perdagangan, dan investasi. Mencakup pengembangan UMKM, promosi produk lokal, dan pembukaan pasar baru.',
+      imagePath: '/assets/images/sop-ekonomi.png',
+      features: JSON.stringify([
+        'Analisis ekonomi dan kelayakan',
+        'Kajian dampak terhadap UMKM lokal',
+        'Koordinasi dengan Dinas Perdagangan',
+        'Monitoring indikator ekonomi',
+        'Evaluasi benefit-cost ratio'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Ekonomi-Perdagangan.pdf',
+        fileSize: '2.8 MB',
+        fileType: 'PDF',
+        lastUpdated: '10 Januari 2025',
+        url: '#'
+      }),
+      color: 'green',
+      displayOrder: 3,
+      active: true
+    },
+    {
+      title: 'SOP Kerjasama Bidang Pendidikan dan Pelatihan',
+      category: 'Pendidikan & SDM',
+      description: 'Panduan untuk kerjasama dalam pengembangan sumber daya manusia, pendidikan, pelatihan, dan capacity building bagi aparatur dan masyarakat Tana Tidung.',
+      imagePath: '/assets/images/sop-pendidikan.png',
+      features: JSON.stringify([
+        'Program beasiswa dan pertukaran',
+        'Pelatihan teknis dan manajerial',
+        'Sertifikasi kompetensi',
+        'Pengembangan kurikulum lokal',
+        'Transfer knowledge dan teknologi'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Pendidikan-Pelatihan.pdf',
+        fileSize: '2.5 MB',
+        fileType: 'PDF',
+        lastUpdated: '5 Januari 2025',
+        url: '#'
+      }),
+      color: 'orange',
+      displayOrder: 4,
+      active: true
+    },
+    {
+      title: 'SOP Kerjasama Bidang Kesehatan dan Sosial',
+      category: 'Kesehatan & Sosial',
+      description: 'Prosedur untuk kerjasama dalam peningkatan pelayanan kesehatan masyarakat, program sosial, dan pemberdayaan komunitas khususnya di daerah terpencil.',
+      imagePath: '/assets/images/sop-kesehatan.png',
+      features: JSON.stringify([
+        'Program kesehatan masyarakat',
+        'Telemedicine dan rujukan medis',
+        'Bantuan sosial dan pemberdayaan',
+        'Pelatihan tenaga kesehatan',
+        'Monitoring indikator kesehatan'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Kesehatan-Sosial.pdf',
+        fileSize: '2.3 MB',
+        fileType: 'PDF',
+        lastUpdated: '12 Januari 2025',
+        url: '#'
+      }),
+      color: 'red',
+      displayOrder: 5,
+      active: true
+    },
+    {
+      title: 'SOP Kerjasama Bidang Infrastruktur dan Pembangunan',
+      category: 'Infrastruktur & Pembangunan',
+      description: 'Pedoman untuk kerjasama pembangunan infrastruktur, termasuk jalan, jembatan, fasilitas umum, dan infrastruktur digital di Kabupaten Tana Tidung.',
+      imagePath: '/assets/images/sop-infrastruktur.png',
+      features: JSON.stringify([
+        'Perencanaan dan desain infrastruktur',
+        'Koordinasi dengan PUPR',
+        'Environmental impact assessment',
+        'Quality control dan supervisi',
+        'Maintenance dan sustainability'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Infrastruktur-Pembangunan.pdf',
+        fileSize: '3.5 MB',
+        fileType: 'PDF',
+        lastUpdated: '18 Januari 2025',
+        url: '#'
+      }),
+      color: 'purple',
+      displayOrder: 6,
+      active: true
+    },
+    {
+      title: 'SOP Kerjasama Bidang Lingkungan dan Konservasi',
+      category: 'Lingkungan & Konservasi',
+      description: 'Prosedur untuk kerjasama dalam pelestarian lingkungan, konservasi alam, pengelolaan sampah, dan program sustainability di Tana Tidung.',
+      imagePath: '/assets/images/sop-lingkungan.png',
+      features: JSON.stringify([
+        'Program konservasi dan reboisasi',
+        'Pengelolaan limbah dan sampah',
+        'Monitoring kualitas lingkungan',
+        'Edukasi lingkungan masyarakat',
+        'Sertifikasi green initiatives'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Lingkungan-Konservasi.pdf',
+        fileSize: '2.7 MB',
+        fileType: 'PDF',
+        lastUpdated: '22 Januari 2025',
+        url: '#'
+      }),
+      color: 'teal',
+      displayOrder: 7,
+      active: true
+    },
+    {
+      title: 'SOP Kerjasama Bidang Pariwisata dan Kebudayaan',
+      category: 'Pariwisata & Budaya',
+      description: 'Panduan kerjasama untuk pengembangan sektor pariwisata, promosi budaya lokal, dan pelestarian warisan budaya Kabupaten Tana Tidung.',
+      imagePath: '/assets/images/sop-pariwisata.png',
+      features: JSON.stringify([
+        'Pengembangan destinasi wisata',
+        'Promosi budaya dan festival',
+        'Pelatihan guide dan operator',
+        'Marketing digital tourism',
+        'Preservasi heritage sites'
+      ]),
+      downloadInfo: JSON.stringify({
+        fileName: 'SOP-Pariwisata-Kebudayaan.pdf',
+        fileSize: '2.9 MB',
+        fileType: 'PDF',
+        lastUpdated: '8 Januari 2025',
+        url: '#'
+      }),
+      color: 'pink',
+      displayOrder: 8,
+      active: true
+    }
+  ];
+
+  for (const docData of sopDocuments) {
+    await prisma.sOPDocument.create({
+      data: docData
+    });
+  }
+
   // Create dashboard stats
   console.log('Creating dashboard stats...');
   await prisma.dashboardStat.createMany({
@@ -402,12 +670,13 @@ async function main() {
   console.log(`
 📊 Created:
 - 5 roles (admin, reviewer, staff, applicant, manager)
-- 5 users with hashed passwords (password: password123)
+- 6 users with hashed passwords (password: password123)
 - 8 cooperation categories
 - 6 institutions
 - 4 application types (MOU, PKS, Surat Kuasa, Nota Kesepakatan)
 - 8 system settings
 - 10 legal documents
+- 8 SOP documents
 - 8 dashboard statistics
   `);
 }

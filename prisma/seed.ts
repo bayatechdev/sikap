@@ -346,7 +346,7 @@ async function main() {
         data: updateData
       });
     }
-  } catch (error) {
+  } catch {
     console.log('⚠️ Kerjasama data file not found, skipping cooperation types enrichment');
   }
 
@@ -375,7 +375,7 @@ async function main() {
         documentNumber: "UU-06-2014",
         year: "2014",
         category: "Undang-Undang",
-        relativePath: "/uploads/legal-documents/uu-06-2014-desa.pdf",
+        relativePath: "legal-documents/uu-06-2014-desa.pdf",
         description: "Undang-undang yang mengatur tentang desa dan pemerintahan desa",
       },
       {
@@ -383,7 +383,7 @@ async function main() {
         documentNumber: "UU-23-2014",
         year: "2014",
         category: "Undang-Undang",
-        relativePath: "/uploads/legal-documents/uu-23-2014-pemda.pdf",
+        relativePath: "legal-documents/uu-23-2014-pemda.pdf",
         description: "Undang-undang yang mengatur tentang pemerintahan daerah",
       },
       {
@@ -391,7 +391,7 @@ async function main() {
         documentNumber: "UU-05-2014",
         year: "2014",
         category: "Undang-Undang",
-        relativePath: "/uploads/legal-documents/uu-05-2014-asn.pdf",
+        relativePath: "legal-documents/uu-05-2014-asn.pdf",
         description: "Undang-undang yang mengatur tentang aparatur sipil negara",
       },
       // Peraturan Pemerintah
@@ -400,7 +400,7 @@ async function main() {
         documentNumber: "PP-28-2018",
         year: "2018",
         category: "Peraturan Pemerintah",
-        relativePath: "/uploads/legal-documents/pp-28-2018-kerjasama-daerah.pdf",
+        relativePath: "legal-documents/pp-28-2018-kerjasama-daerah.pdf",
         description: "Peraturan pemerintah yang mengatur tentang kerjasama daerah",
       },
       {
@@ -408,7 +408,7 @@ async function main() {
         documentNumber: "PP-12-2019",
         year: "2019",
         category: "Peraturan Pemerintah",
-        relativePath: "/uploads/legal-documents/pp-12-2019-keuangan-daerah.pdf",
+        relativePath: "legal-documents/pp-12-2019-keuangan-daerah.pdf",
         description: "Peraturan pemerintah yang mengatur tentang pengelolaan keuangan daerah",
       },
       {
@@ -416,7 +416,7 @@ async function main() {
         documentNumber: "PP-16-2018",
         year: "2018",
         category: "Peraturan Pemerintah",
-        relativePath: "/uploads/legal-documents/pp-16-2018-pengadaan.pdf",
+        relativePath: "legal-documents/pp-16-2018-pengadaan.pdf",
         description: "Peraturan pemerintah yang mengatur tentang pengadaan barang dan jasa pemerintah",
       },
       // Peraturan Menteri
@@ -425,7 +425,7 @@ async function main() {
         documentNumber: "PERMENDAGRI-07-2019",
         year: "2019",
         category: "Peraturan Menteri",
-        relativePath: "/uploads/legal-documents/permendagri-07-2019-kerjasama.pdf",
+        relativePath: "legal-documents/permendagri-07-2019-kerjasama.pdf",
         description: "Peraturan menteri dalam negeri tentang kerjasama daerah",
       },
       {
@@ -433,7 +433,7 @@ async function main() {
         documentNumber: "PERMENKEU-213-2013",
         year: "2013",
         category: "Peraturan Menteri",
-        relativePath: "/uploads/legal-documents/permenkeu-213-2013-akuntansi.pdf",
+        relativePath: "legal-documents/permenkeu-213-2013-akuntansi.pdf",
         description: "Peraturan menteri keuangan tentang sistem akuntansi pemerintahan",
       },
       // Peraturan Daerah
@@ -442,7 +442,7 @@ async function main() {
         documentNumber: "PERDA-TANATIDUNG-03-2020",
         year: "2020",
         category: "Peraturan Daerah",
-        relativePath: "/uploads/legal-documents/perda-tanatidung-03-2020-kerjasama.pdf",
+        relativePath: "legal-documents/perda-tanatidung-03-2020-kerjasama.pdf",
         description: "Peraturan daerah Kabupaten Tana Tidung tentang kerjasama daerah",
       },
       {
@@ -450,7 +450,7 @@ async function main() {
         documentNumber: "PERDA-TANATIDUNG-05-2021",
         year: "2021",
         category: "Peraturan Daerah",
-        relativePath: "/uploads/legal-documents/perda-tanatidung-05-2021-rpjmd.pdf",
+        relativePath: "legal-documents/perda-tanatidung-05-2021-rpjmd.pdf",
         description: "Peraturan daerah Kabupaten Tana Tidung tentang Rencana Pembangunan Jangka Menengah Daerah 2021-2026",
       },
     ],

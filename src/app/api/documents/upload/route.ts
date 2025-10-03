@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import path from 'path';
 import { prisma } from '@/lib/prisma';
 import {
   validateFile,
   performVirusScan,
   calculateFileHash,
-  createUploadPath,
   MAX_FILE_SIZE,
 } from '@/lib/file-security';
-import { getUploadDir, getRelativePath } from '@/lib/file-paths';
+import { getUploadDir, getRelativePath, createUploadPath, ensureUploadDir } from '@/lib/file-paths';
 
 export async function POST(request: NextRequest) {
   try {
@@ -138,19 +136,21 @@ export async function POST(request: NextRequest) {
 
     // Create upload directory structure based on type
     let uploadPath: string;
-    if (type === 'legal-document') {
-      uploadPath = `uploads/legal-documents/${validation.sanitizedFilename!}`;
-    } else if (type === 'sop-document') {
-      uploadPath = `uploads/sop-documents/${validation.sanitizedFilename!}`;
-    } else {
-      uploadPath = createUploadPath(validation.sanitizedFilename!);
-    }
-    const fullUploadPath = path.join(getUploadDir(), uploadPath);
-    const uploadDir = path.dirname(fullUploadPath);
+    let fileType: 'image' | 'document' | 'legal' | 'sop' = 'document';
 
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    if (type === 'legal-document') {
+      fileType = 'legal';
+      uploadPath = createUploadPath(validation.sanitizedFilename!, fileType);
+    } else if (type === 'sop-document') {
+      fileType = 'sop';
+      uploadPath = createUploadPath(validation.sanitizedFilename!, fileType);
+    } else {
+      uploadPath = createUploadPath(validation.sanitizedFilename!, fileType);
     }
+
+    // Ensure upload directory exists
+    await ensureUploadDir(uploadPath);
+    const fullUploadPath = path.join(getUploadDir(), uploadPath);
 
     // Save file to disk
     await writeFile(fullUploadPath, buffer);

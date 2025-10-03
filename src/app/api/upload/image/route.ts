@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { getPublicUploadDir, getPublicFileUrl, ensureUploadDir } from '@/lib/file-paths';
 
 // Supported image types
 const ALLOWED_TYPES = [
@@ -52,12 +53,15 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save file to public/uploads/hero directory
-    const filepath = path.join(process.cwd(), 'public', 'uploads', 'hero', filename);
+    // Ensure upload directory exists
+    await ensureUploadDir('hero', true);
+
+    // Save file to public uploads directory
+    const filepath = path.join(getPublicUploadDir(), 'hero', filename);
     await writeFile(filepath, buffer);
 
     // Return the public URL
-    const publicUrl = `/uploads/hero/${filename}`;
+    const publicUrl = getPublicFileUrl(filename, 'hero');
 
     return NextResponse.json({
       success: true,
@@ -90,7 +94,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete file from filesystem
-    const filepath = path.join(process.cwd(), 'public', 'uploads', 'hero', filename);
+    const filepath = path.join(getPublicUploadDir(), 'hero', filename);
 
     try {
       const fs = await import('fs').then(m => m.promises);

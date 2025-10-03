@@ -42,6 +42,8 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# uploads
-/uploads
+# uploads - ignore all upload directories
+/uploads/
 uploads/
+public/uploads/
+**/uploads/

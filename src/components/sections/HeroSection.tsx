@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useHeroSettings, usePartners } from "@/hooks/use-settings";
 import HeroSlider from "@/components/ui/HeroSlider";
+import HeroFullSlider from "@/components/ui/HeroFullSlider";
 import { HeroSection as HeroData } from "@/types";
 import { HeroImage } from "@/components/ui/HeroImageManager";
 import { HeroSkeleton } from "@/components/ui/skeleton-variants";
@@ -18,14 +19,17 @@ export default function HeroSection({ data }: HeroSectionProps) {
   const { partners } = usePartners();
 
   // Fallback to data prop if available
+  const heroVersion = getSetting('hero_version', 'split'); // 'split' or 'fullslider'
   const heroTitle = getSetting('hero_title', data?.title || 'Selamat datang di Website SIKAP');
   const heroSubtitle = getSetting('hero_subtitle', data?.subtitle || 'Sistem kerjasama berbasis digital Kabupaten Tana Tidung yang akuntabel dan transparan');
   const primaryButton = getSetting('hero_primary_button', data?.cta?.primary || 'Ajukan Kerjasama');
   const secondaryButton = getSetting('hero_secondary_button', data?.cta?.secondary || 'Lihat Data');
-  // Parse hero_images JSON string safely
+  // Parse hero_images JSON string safely based on version
   const parseHeroImages = (): HeroImage[] => {
     try {
-      const heroImagesString = getSetting('hero_images', '[]');
+      // Use different image source based on hero version
+      const imageKey = heroVersion === 'fullslider' ? 'hero_images_fullslider' : 'hero_images_split';
+      const heroImagesString = getSetting(imageKey, '[]');
 
       if (!heroImagesString || typeof heroImagesString !== 'string') {
         return [];
@@ -76,6 +80,66 @@ export default function HeroSection({ data }: HeroSectionProps) {
     // Fall back to default content on error
   }
 
+  // Render Full Slider Version
+  if (heroVersion === 'fullslider') {
+    return (
+      <>
+        <HeroFullSlider
+          images={heroImages}
+          autoPlayInterval={6000}
+          title={heroTitle}
+          subtitle={heroSubtitle}
+          primaryButton={primaryButton}
+          secondaryButton={secondaryButton}
+        />
+        {/* Partners Section */}
+        {partners.length > 0 && (
+          <section className="bg-section w-full py-16">
+            <div className="relative flex justify-center">
+              <div className="flex flex-col gap-[30px] px-4 md:px-[75px] max-w-[1280px] w-full">
+                <motion.div
+                  className="flex flex-col gap-[30px] items-center"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8, ease: "easeInOut", delay: 0.6 }}
+                >
+                  <h2 className="max-w-[370px] font-bold text-[24px] md:text-[32px] leading-[46px] text-center">
+                    Partner Kami
+                  </h2>
+                  <div className="flex w-full justify-center gap-8 lg:gap-[70px] h-[42px]">
+                    {partners.slice(0, 5).map((partner) => (
+                      <div key={partner.id} className="relative flex-1">
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={partner.logoUrl}
+                            alt={partner.name}
+                            fill
+                            className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300"
+                            title={partner.name}
+                          />
+                        </div>
+                        {partner.website && (
+                          <a
+                            href={partner.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0"
+                            aria-label={`Visit ${partner.name} website`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </section>
+        )}
+      </>
+    );
+  }
+
+  // Render Split Layout Version (Default)
   return (
     <header id="home" className="bg-section w-full pb-[70px] pt-[200px]">
       <div className="relative flex justify-center">

@@ -49,6 +49,12 @@ const websiteSettings = [
     type: 'text',
   },
   {
+    key: 'hero_version',
+    value: 'split',
+    description: 'Hero section layout version: split or fullslider',
+    type: 'select',
+  },
+  {
     key: 'hero_images',
     value: JSON.stringify([
       {
@@ -67,7 +73,36 @@ const websiteSettings = [
         title: 'Kerjasama Daerah'
       }
     ]),
-    description: 'Array of hero images for slider',
+    description: 'Array of hero images for slider (legacy)',
+    type: 'json',
+  },
+  {
+    key: 'hero_images_split',
+    value: JSON.stringify([
+      {
+        url: '/assets/images/thumbnails/ui.png',
+        alt: 'SIKAP Interface - Tampilan Utama',
+        title: 'Dashboard SIKAP'
+      },
+      {
+        url: '/assets/images/hero/kantor-bupati.jpg',
+        alt: 'Kantor Bupati Tana Tidung',
+        title: 'Kantor Bupati'
+      }
+    ]),
+    description: 'Hero images for split layout version',
+    type: 'json',
+  },
+  {
+    key: 'hero_images_fullslider',
+    value: JSON.stringify([
+      {
+        url: '/assets/images/hero/kegiatan-kerjasama.jpg',
+        alt: 'Kegiatan Kerjasama Daerah',
+        title: 'Kerjasama Daerah'
+      }
+    ]),
+    description: 'Hero images for fullslider version',
     type: 'json',
   },
 

@@ -132,11 +132,14 @@ export function useSettings(options: UseSettingsOptions = {}): UseSettingsReturn
 export function useHeroSettings() {
   return useSettings({
     keys: [
+      'hero_version',
       'hero_title',
       'hero_subtitle',
       'hero_primary_button',
       'hero_secondary_button',
-      'hero_images'
+      'hero_images',
+      'hero_images_split',
+      'hero_images_fullslider'
     ]
   });
 }

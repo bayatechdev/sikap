@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { HeroImageManager, HeroImage } from '@/components/ui/HeroImageManager';
+import { HeroVersionSelector } from '@/components/ui/HeroVersionSelector';
 import { Partner } from '@/components/ui/PartnerManager';
 import { Loader2, Save, RefreshCw, AlertCircle, CheckCircle, Globe, Phone, MessageSquare, Users } from 'lucide-react';
 import { CenterLoadingSkeleton } from '@/components/ui/skeleton-variants';
@@ -148,17 +149,14 @@ export default function WebsiteSettingsPage() {
   };
 
   // Helper functions for hero images
-  const getHeroImages = (): HeroImage[] => {
+  const parseHeroImages = (key: string): HeroImage[] => {
     try {
       // Don't try to parse if settings aren't loaded yet
       if (loading || !settings || Object.keys(settings).length === 0) {
         return [];
       }
 
-      const heroImagesString = settings.hero_images;
-
-      // Debug logging
-      console.log('heroImagesString:', heroImagesString, 'type:', typeof heroImagesString);
+      const heroImagesString = settings[key];
 
       if (!heroImagesString ||
           heroImagesString === '' ||
@@ -176,17 +174,39 @@ export default function WebsiteSettingsPage() {
 
       return JSON.parse(trimmed);
     } catch (error) {
-      console.error('Error parsing hero images:', error, 'Value was:', settings.hero_images);
+      console.error(`Error parsing ${key}:`, error, 'Value was:', settings[key]);
       return [];
     }
   };
 
-  const saveHeroImages = async (images: HeroImage[]) => {
+  const getHeroImagesSplit = (): HeroImage[] => {
+    return parseHeroImages('hero_images_split');
+  };
+
+  const getHeroImagesFullslider = (): HeroImage[] => {
+    return parseHeroImages('hero_images_fullslider');
+  };
+
+  const saveHeroImagesSplit = async (images: HeroImage[]) => {
     try {
       const heroImagesString = JSON.stringify(images);
-      await saveSetting('hero_images', heroImagesString);
+      await saveSetting('hero_images_split', heroImagesString);
     } catch (error) {
-      console.error('Error saving hero images:', error);
+      console.error('Error saving hero images split:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save hero images',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const saveHeroImagesFullslider = async (images: HeroImage[]) => {
+    try {
+      const heroImagesString = JSON.stringify(images);
+      await saveSetting('hero_images_fullslider', heroImagesString);
+    } catch (error) {
+      console.error('Error saving hero images fullslider:', error);
       toast({
         title: 'Error',
         description: 'Failed to save hero images',
@@ -269,6 +289,28 @@ export default function WebsiteSettingsPage() {
         {/* Hero Section Settings */}
         <TabsContent value="hero">
           <div className="space-y-6">
+            {/* Hero Version Selector */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Hero Layout Version
+                </CardTitle>
+                <CardDescription>
+                  Pilih versi tampilan hero section dan kelola gambar sesuai dengan versi yang dipilih
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <HeroVersionSelector
+                  value={settings.hero_version || 'split'}
+                  onChange={(value) => {
+                    setSettings(prev => ({ ...prev, hero_version: value }));
+                    saveSetting('hero_version', value);
+                  }}
+                />
+              </CardContent>
+            </Card>
+
             {/* Hero Text Content */}
             <Card>
               <CardHeader>
@@ -349,21 +391,46 @@ export default function WebsiteSettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Hero Images Management */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Hero Background Images
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <HeroImageManager
-                  images={getHeroImages()}
-                  onImagesChange={saveHeroImages}
-                />
-              </CardContent>
-            </Card>
+            {/* Hero Images Management - Conditional based on version */}
+            {settings.hero_version === 'split' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Hero Images - Split Layout
+                  </CardTitle>
+                  <CardDescription>
+                    Kelola gambar untuk hero section versi split layout (gambar di kanan)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <HeroImageManager
+                    images={getHeroImagesSplit()}
+                    onImagesChange={saveHeroImagesSplit}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {settings.hero_version === 'fullslider' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Hero Images - Full Slider
+                  </CardTitle>
+                  <CardDescription>
+                    Kelola gambar untuk hero section versi full slider (background full-width)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <HeroImageManager
+                    images={getHeroImagesFullslider()}
+                    onImagesChange={saveHeroImagesFullslider}
+                  />
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 

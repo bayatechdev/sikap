@@ -11,8 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { HeroImageManager, HeroImage } from '@/components/ui/HeroImageManager';
-import { HeroVersionSelector } from '@/components/ui/HeroVersionSelector';
+import { HeroSlideManager, HeroSlide } from '@/components/ui/HeroSlideManager';
 import { Partner } from '@/components/ui/PartnerManager';
 import { Loader2, Save, RefreshCw, AlertCircle, CheckCircle, Globe, Phone, MessageSquare, Users } from 'lucide-react';
 import { CenterLoadingSkeleton } from '@/components/ui/skeleton-variants';
@@ -30,6 +29,7 @@ interface Setting {
 export default function WebsiteSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -148,72 +148,6 @@ export default function WebsiteSettingsPage() {
     }
   };
 
-  // Helper functions for hero images
-  const parseHeroImages = (key: string): HeroImage[] => {
-    try {
-      // Don't try to parse if settings aren't loaded yet
-      if (loading || !settings || Object.keys(settings).length === 0) {
-        return [];
-      }
-
-      const heroImagesString = settings[key];
-
-      if (!heroImagesString ||
-          heroImagesString === '' ||
-          heroImagesString === 'undefined' ||
-          heroImagesString === 'null' ||
-          typeof heroImagesString !== 'string') {
-        return [];
-      }
-
-      // Trim whitespace and check if it's valid JSON
-      const trimmed = heroImagesString.trim();
-      if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined') {
-        return [];
-      }
-
-      return JSON.parse(trimmed);
-    } catch (error) {
-      console.error(`Error parsing ${key}:`, error, 'Value was:', settings[key]);
-      return [];
-    }
-  };
-
-  const getHeroImagesSplit = (): HeroImage[] => {
-    return parseHeroImages('hero_images_split');
-  };
-
-  const getHeroImagesFullslider = (): HeroImage[] => {
-    return parseHeroImages('hero_images_fullslider');
-  };
-
-  const saveHeroImagesSplit = async (images: HeroImage[]) => {
-    try {
-      const heroImagesString = JSON.stringify(images);
-      await saveSetting('hero_images_split', heroImagesString);
-    } catch (error) {
-      console.error('Error saving hero images split:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save hero images',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const saveHeroImagesFullslider = async (images: HeroImage[]) => {
-    try {
-      const heroImagesString = JSON.stringify(images);
-      await saveSetting('hero_images_fullslider', heroImagesString);
-    } catch (error) {
-      console.error('Error saving hero images fullslider:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to save hero images',
-        variant: 'destructive',
-      });
-    }
-  };
 
   // Fetch partners from API
   const fetchPartners = useCallback(async () => {
@@ -234,10 +168,30 @@ export default function WebsiteSettingsPage() {
     }
   }, []);
 
+  // Fetch hero slides from API
+  const fetchHeroSlides = useCallback(async () => {
+    try {
+      const response = await fetch('/api/hero-slides');
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch hero slides: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setHeroSlides(data.heroSlides);
+      }
+    } catch (err) {
+      console.error('Error fetching hero slides:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchSettings();
     fetchPartners();
-  }, [fetchSettings, fetchPartners]);
+    fetchHeroSlides();
+  }, [fetchSettings, fetchPartners, fetchHeroSlides]);
 
   if (loading) {
     return <CenterLoadingSkeleton />;
@@ -289,35 +243,16 @@ export default function WebsiteSettingsPage() {
         {/* Hero Section Settings */}
         <TabsContent value="hero">
           <div className="space-y-6">
-            {/* Hero Version Selector */}
+            {/* Hero Text Content (Global Fallback) */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
-                  Hero Layout Version
+                  Global Hero Text (Fallback)
                 </CardTitle>
                 <CardDescription>
-                  Pilih versi tampilan hero section dan kelola gambar sesuai dengan versi yang dipilih
+                  These texts will be used as fallback when slides don't have custom title/subtitle
                 </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <HeroVersionSelector
-                  value={settings.hero_version || 'split'}
-                  onChange={(value) => {
-                    setSettings(prev => ({ ...prev, hero_version: value }));
-                    saveSetting('hero_version', value);
-                  }}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Hero Text Content */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Hero Text Content
-                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4">
@@ -383,7 +318,7 @@ export default function WebsiteSettingsPage() {
                     ) : (
                       <>
                         <Save className="mr-2 h-4 w-4" />
-                        Save Hero Text
+                        Save Global Text
                       </>
                     )}
                   </Button>
@@ -391,46 +326,24 @@ export default function WebsiteSettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Hero Images Management - Conditional based on version */}
-            {settings.hero_version === 'split' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Hero Images - Split Layout
-                  </CardTitle>
-                  <CardDescription>
-                    Kelola gambar untuk hero section versi split layout (gambar di kanan)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <HeroImageManager
-                    images={getHeroImagesSplit()}
-                    onImagesChange={saveHeroImagesSplit}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {settings.hero_version === 'fullslider' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Hero Images - Full Slider
-                  </CardTitle>
-                  <CardDescription>
-                    Kelola gambar untuk hero section versi full slider (background full-width)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <HeroImageManager
-                    images={getHeroImagesFullslider()}
-                    onImagesChange={saveHeroImagesFullslider}
-                  />
-                </CardContent>
-              </Card>
-            )}
+            {/* Hero Slides Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Hero Slides Management
+                </CardTitle>
+                <CardDescription>
+                  Manage your hero carousel slides. You can create unlimited slides with split or full layout.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HeroSlideManager
+                  slides={heroSlides}
+                  onSlidesChange={setHeroSlides}
+                />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 

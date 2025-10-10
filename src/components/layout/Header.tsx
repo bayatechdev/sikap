@@ -107,30 +107,30 @@ export default function Header({ navigation }: HeaderProps) {
           >
             Beranda
           </Link>
-          <a
-            href="#about"
+          <Link
+            href="/#dasar-hukum"
             className="hover:text-primary hover:underline text-white text-[16px] font-semibold transition-all duration-300"
           >
             Dasar Hukum
-          </a>
-          <a
+          </Link>
+          <Link
             href="/permohonan"
             className="hover:text-primary hover:underline text-white text-[16px] font-semibold transition-all duration-300"
           >
             Permohonan
-          </a>
-          <a
+          </Link>
+          <Link
             href="/kerjasama"
             className="hover:text-primary hover:underline text-white text-[16px] font-semibold transition-all duration-300"
           >
             Data
-          </a>
-          <a
-            href="#download"
+          </Link>
+          <Link
+            href="/#jenis-kerjasama"
             className="hover:text-primary hover:underline text-white text-[16px] font-semibold transition-all duration-300"
           >
             Download
-          </a>
+          </Link>
         </div>
 
         {/* CTA Button */}

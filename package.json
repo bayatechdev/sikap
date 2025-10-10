@@ -10,7 +10,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "deploy": "npm run build && pm2 restart ktt-sikap"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

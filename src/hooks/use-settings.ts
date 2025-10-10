@@ -230,3 +230,62 @@ export function usePartners() {
     refetch: fetchPartners,
   };
 }
+
+// Hero slide interface
+export interface HeroSlide {
+  id: number;
+  version: 'split' | 'full';
+  order: number;
+  isActive: boolean;
+  title: string | null;
+  subtitle: string | null;
+  imagesJson: Array<{
+    url: string;
+    alt?: string;
+    title?: string;
+  }> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Hook for hero slides
+export function useHeroSlides() {
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchHeroSlides = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/hero-slides?active=true');
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch hero slides: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setHeroSlides(data.heroSlides);
+      }
+    } catch (err) {
+      console.error('Error fetching hero slides:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch hero slides');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHeroSlides();
+  }, [fetchHeroSlides]);
+
+  return {
+    heroSlides,
+    loading,
+    error,
+    refetch: fetchHeroSlides,
+  };
+}

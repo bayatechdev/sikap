@@ -358,6 +358,20 @@ model Setting {
   @@map("settings")
 }
 
+model HeroSlide {
+  id         Int      @id @default(autoincrement())
+  version    String   // 'split' or 'full'
+  order      Int      // urutan render
+  isActive   Boolean  @default(true) @map("is_active")
+  title      String?  // override global hero_title
+  subtitle   String?  // override global hero_subtitle
+  imagesJson Json?    @map("images_json") // array images spesifik slide ini
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("hero_slides")
+}
+
 model DashboardStat {
   id        String   @id @default(cuid())
   statKey   String   @map("stat_key")

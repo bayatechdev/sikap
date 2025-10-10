@@ -12,13 +12,7 @@ const heroSlides = [
     imagesJson: [
       {
         url: '/assets/images/thumbnails/ui.png',
-        alt: 'SIKAP Interface - Tampilan Utama',
-        title: 'Dashboard SIKAP'
-      },
-      {
-        url: '/assets/images/hero/kantor-bupati.jpg',
-        alt: 'Kantor Bupati Tana Tidung',
-        title: 'Kantor Bupati'
+        alt: 'SIKAP Interface - Tampilan Utama'
       }
     ]
   },
@@ -31,13 +25,7 @@ const heroSlides = [
     imagesJson: [
       {
         url: '/assets/images/hero/kegiatan-kerjasama.jpg',
-        alt: 'Kegiatan Kerjasama Daerah',
-        title: 'Kerjasama Daerah'
-      },
-      {
-        url: '/assets/images/hero/kantor-bupati.jpg',
-        alt: 'Kantor Bupati Tana Tidung',
-        title: 'Kantor Bupati'
+        alt: 'Kegiatan Kerjasama Daerah'
       }
     ]
   },
@@ -49,9 +37,8 @@ const heroSlides = [
     subtitle: 'Menghubungkan pemerintah dengan mitra strategis untuk pembangunan daerah',
     imagesJson: [
       {
-        url: '/assets/images/thumbnails/ui.png',
-        alt: 'SIKAP Interface',
-        title: 'Platform SIKAP'
+        url: '/assets/images/hero/kantor-bupati.jpg',
+        alt: 'Kantor Bupati Tana Tidung'
       }
     ]
   }

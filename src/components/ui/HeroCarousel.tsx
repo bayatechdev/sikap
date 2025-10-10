@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import HeroSlider from "@/components/ui/HeroSlider";
 import { HeroSlide } from "@/hooks/use-settings";
 
 interface HeroCarouselProps {
@@ -15,16 +14,17 @@ interface HeroCarouselProps {
   autoPlayInterval?: number;
 }
 
-// Split Layout Slide Content
+// Split Layout Slide Content - 1 Image Only
 interface SplitSlideContentProps {
   title: string;
   subtitle: string;
   primaryButton: string;
   secondaryButton: string;
-  images: Array<{ url: string; alt: string; title?: string }>;
+  imageUrl: string;
+  imageAlt: string;
 }
 
-function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, images }: SplitSlideContentProps) {
+function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, imageUrl, imageAlt }: SplitSlideContentProps) {
   const leftVariants = {
     hidden: { opacity: 0, x: -60 },
     visible: { opacity: 1, x: 0 },
@@ -66,7 +66,7 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
             </div>
           </motion.div>
 
-          {/* Right Content - Hero Slider */}
+          {/* Right Content - Single Static Image */}
           <motion.div
             className="relative shrink-0 w-full lg:w-[550px] h-[400px] lg:h-[507px]"
             variants={rightVariants}
@@ -74,11 +74,14 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
             animate="visible"
             transition={{ duration: 0.8, ease: "easeInOut" }}
           >
+            {/* Main Image with rounded corners */}
             <div className="absolute ml-4 mr-4 lg:ml-[52px] lg:mr-[51px] w-[calc(100%-32px)] lg:w-[447px] h-full lg:h-[506px] rounded-[26px] overflow-hidden">
-              <HeroSlider
-                images={images}
-                autoPlayInterval={6000}
-                className="w-full h-full"
+              <Image
+                src={imageUrl}
+                alt={imageAlt}
+                fill
+                className="object-cover"
+                priority
               />
             </div>
 
@@ -110,7 +113,7 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
   );
 }
 
-// Full Slider Layout Slide Content
+// Full Slider Layout Slide Content - 1 Image Only
 interface FullSlideContentProps {
   title: string;
   subtitle: string;
@@ -253,11 +256,14 @@ export default function HeroCarousel({
   const currentSlide = slides[currentIndex];
   const slideTitle = currentSlide.title || globalTitle;
   const slideSubtitle = currentSlide.subtitle || globalSubtitle;
-  const slideImages = (currentSlide.imagesJson || []).map(img => ({
-    url: img.url,
-    alt: img.alt || slideTitle,
-    title: img.title
-  }));
+
+  // Get first image from imagesJson array (now only 1 image per slide)
+  const slideImage = currentSlide.imagesJson && currentSlide.imagesJson[0]
+    ? {
+        url: currentSlide.imagesJson[0].url,
+        alt: currentSlide.imagesJson[0].alt || slideTitle
+      }
+    : null;
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -273,6 +279,15 @@ export default function HeroCarousel({
       opacity: 0
     })
   };
+
+  // If no image found, show error state
+  if (!slideImage || !slideImage.url) {
+    return (
+      <header className="bg-section w-full h-screen flex items-center justify-center">
+        <p className="text-gray-500">No image available for current slide</p>
+      </header>
+    );
+  }
 
   return (
     <header
@@ -303,7 +318,8 @@ export default function HeroCarousel({
                 subtitle={slideSubtitle}
                 primaryButton={primaryButton}
                 secondaryButton={secondaryButton}
-                images={slideImages}
+                imageUrl={slideImage.url}
+                imageAlt={slideImage.alt}
               />
             ) : (
               <FullSlideContent
@@ -311,8 +327,8 @@ export default function HeroCarousel({
                 subtitle={slideSubtitle}
                 primaryButton={primaryButton}
                 secondaryButton={secondaryButton}
-                imageUrl={slideImages[0]?.url || ''}
-                imageAlt={slideImages[0]?.alt || slideTitle}
+                imageUrl={slideImage.url}
+                imageAlt={slideImage.alt}
               />
             )}
           </motion.div>

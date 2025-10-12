@@ -24,7 +24,7 @@ const heroSlides = [
     subtitle: null, // Use global setting
     imagesJson: [
       {
-        url: '/assets/images/hero/kegiatan-kerjasama.jpg',
+        url: '/assets/images/thumbnails/featured-image.png',
         alt: 'Kegiatan Kerjasama Daerah'
       }
     ]
@@ -37,8 +37,8 @@ const heroSlides = [
     subtitle: 'Menghubungkan pemerintah dengan mitra strategis untuk pembangunan daerah',
     imagesJson: [
       {
-        url: '/assets/images/hero/kantor-bupati.jpg',
-        alt: 'Kantor Bupati Tana Tidung'
+        url: '/assets/images/thumbnails/sass-cover.png',
+        alt: 'SIKAP - Sistem Informasi Kerjasama Pemerintah'
       }
     ]
   }

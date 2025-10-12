@@ -22,10 +22,11 @@ const heroSlideUpdateSchema = z.object({
 // GET /api/hero-slides/[id] - Get single hero slide
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -61,7 +62,7 @@ export async function GET(
 // PUT /api/hero-slides/[id] - Update hero slide
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -73,7 +74,8 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(params.id);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -84,8 +86,12 @@ export async function PUT(
 
     const body = await request.json();
 
+    console.log('🔧 UPDATE API called with:', body);
+
     // Validate input
     const validatedData = heroSlideUpdateSchema.parse(body);
+
+    console.log('✅ Validated data:', validatedData);
 
     // Check if slide exists
     const existingSlide = await prisma.heroSlide.findUnique({
@@ -153,7 +159,7 @@ export async function PUT(
 // DELETE /api/hero-slides/[id] - Delete hero slide
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -165,7 +171,8 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(params.id);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
 
     if (isNaN(id)) {
       return NextResponse.json(

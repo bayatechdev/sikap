@@ -70,40 +70,7 @@ export default function WebsiteSettingsPage() {
     }
   }, [toast]);
 
-  // Save individual setting
-  const saveSetting = async (key: string, value: string) => {
-    try {
-      setSaving(true);
-      const response = await fetch(`/api/settings/${key}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ value }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to save setting: ${response.statusText}`);
-      }
-
-      setSettings(prev => ({ ...prev, [key]: value }));
-
-      toast({
-        title: 'Success',
-        description: 'Setting saved successfully',
-      });
-    } catch (err) {
-      console.error('Error saving setting:', err);
-      toast({
-        title: 'Error',
-        description: 'Failed to save setting',
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
+  
   // Save all settings in a section
   const saveSection = async (sectionSettings: Record<string, string>) => {
     try {
@@ -251,7 +218,7 @@ export default function WebsiteSettingsPage() {
                   Global Hero Text (Fallback)
                 </CardTitle>
                 <CardDescription>
-                  These texts will be used as fallback when slides don't have custom title/subtitle
+                  These texts will be used as fallback when slides don&apos;t have custom title/subtitle
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

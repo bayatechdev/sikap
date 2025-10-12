@@ -19,15 +19,24 @@ const MAX_SIZE = 5 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🚀 Image upload API called');
+
     const formData = await request.formData();
     const file = formData.get('image') as File;
 
     if (!file) {
+      console.error('❌ No file provided in form data');
       return NextResponse.json(
         { error: 'No image file provided' },
         { status: 400 }
       );
     }
+
+    console.log('📁 File received:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -63,6 +72,12 @@ export async function POST(request: NextRequest) {
     // Return the public URL
     const publicUrl = getPublicFileUrl(filename, 'hero');
 
+    console.log('✅ Upload successful:', {
+      filename,
+      publicUrl,
+      size: file.size
+    });
+
     return NextResponse.json({
       success: true,
       url: publicUrl,
@@ -73,7 +88,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Image upload error:', error);
+    console.error('❌ Image upload error:', error);
     return NextResponse.json(
       { error: 'Failed to upload image' },
       { status: 500 }

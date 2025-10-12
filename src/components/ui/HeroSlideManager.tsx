@@ -37,7 +37,7 @@ export function HeroSlideManager({
     try {
       const updatedSlides = await HeroSlideAPI.getAllSlides();
       onSlidesChange(updatedSlides);
-    } catch (error) {
+    } catch {
       // Error refreshing slides handled by toast
     }
   }, [onSlidesChange]);
@@ -103,7 +103,7 @@ export function HeroSlideManager({
 
       await refreshSlides();
       setDeleteSlideId(null);
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to delete slide',
@@ -125,7 +125,7 @@ export function HeroSlideManager({
       });
 
       await refreshSlides();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to toggle slide status',

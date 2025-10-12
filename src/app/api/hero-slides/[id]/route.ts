@@ -48,7 +48,7 @@ export async function GET(
       success: true,
       heroSlide
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch hero slide' },
       { status: 500 }
@@ -197,7 +197,7 @@ export async function DELETE(
       success: true,
       message: 'Hero slide deleted successfully',
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to delete hero slide' },
       { status: 500 }

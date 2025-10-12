@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       heroSlides,
       count: heroSlides.length
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch hero slides' },
       { status: 500 }
@@ -153,7 +153,7 @@ export async function PUT(request: NextRequest) {
       success: true,
       message: 'Hero slide orders updated successfully',
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to update hero slide orders' },
       { status: 500 }

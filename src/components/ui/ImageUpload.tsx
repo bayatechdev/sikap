@@ -139,29 +139,17 @@ export function ImageUpload({
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      console.log('🚀 Starting image upload...');
-      console.log('📁 File details:', {
-        name: selectedFile.name,
-        size: selectedFile.size,
-        type: selectedFile.type
-      });
-
       const response = await fetch('/api/upload/image', {
         method: 'POST',
         body: formData
       });
 
-      console.log('📡 Upload response status:', response.status);
-      console.log('📡 Upload response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Upload failed:', errorData);
         throw new Error(errorData.error || 'Upload failed');
       }
 
       const result = await response.json();
-      console.log('✅ Upload successful:', result);
 
       // Call success callback with image data including metadata
       onUploadSuccess({
@@ -177,7 +165,6 @@ export function ImageUpload({
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
-      console.error('❌ Upload error:', error);
       setUploadState(prev => ({ ...prev, error: errorMessage }));
       if (onUploadError) onUploadError(errorMessage);
     } finally {

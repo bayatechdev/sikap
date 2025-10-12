@@ -6,9 +6,7 @@ import { z } from 'zod';
 
 // Validation schema for hero slide creation/update
 const heroSlideSchema = z.object({
-  version: z.enum(['split', 'full'], {
-    errorMap: () => ({ message: "Version must be either 'split' or 'full'" })
-  }),
+  version: z.enum(['split', 'full']),
   order: z.number().int().min(1, 'Order must be at least 1'),
   isActive: z.boolean().optional(),
   title: z.string().max(255).nullable().optional(),
@@ -42,7 +40,6 @@ export async function GET(request: NextRequest) {
       count: heroSlides.length
     });
   } catch (error) {
-    console.error('Error fetching hero slides:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch hero slides' },
       { status: 500 }
@@ -79,15 +76,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const createData: any = {
+      version: validatedData.version,
+      order: validatedData.order,
+      isActive: validatedData.isActive ?? true,
+      title: validatedData.title ?? null,
+      subtitle: validatedData.subtitle ?? null,
+    };
+
+    if (validatedData.imagesJson !== undefined) {
+      createData.imagesJson = validatedData.imagesJson;
+    }
+
     const heroSlide = await prisma.heroSlide.create({
-      data: {
-        version: validatedData.version,
-        order: validatedData.order,
-        isActive: validatedData.isActive ?? true,
-        title: validatedData.title ?? null,
-        subtitle: validatedData.subtitle ?? null,
-        imagesJson: validatedData.imagesJson ?? null,
-      },
+      data: createData,
     });
 
     return NextResponse.json({
@@ -96,8 +99,6 @@ export async function POST(request: NextRequest) {
       message: 'Hero slide created successfully',
     });
   } catch (error) {
-    console.error('Error creating hero slide:', error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -153,7 +154,6 @@ export async function PUT(request: NextRequest) {
       message: 'Hero slide orders updated successfully',
     });
   } catch (error) {
-    console.error('Error updating hero slide orders:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update hero slide orders' },
       { status: 500 }

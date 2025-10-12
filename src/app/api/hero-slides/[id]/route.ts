@@ -6,9 +6,7 @@ import { z } from 'zod';
 
 // Validation schema for hero slide update
 const heroSlideUpdateSchema = z.object({
-  version: z.enum(['split', 'full'], {
-    errorMap: () => ({ message: "Version must be either 'split' or 'full'" })
-  }).optional(),
+  version: z.enum(['split', 'full']).optional(),
   order: z.number().int().min(1, 'Order must be at least 1').optional(),
   isActive: z.boolean().optional(),
   title: z.string().max(255).nullable().optional(),
@@ -51,7 +49,6 @@ export async function GET(
       heroSlide
     });
   } catch (error) {
-    console.error('Error fetching hero slide:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch hero slide' },
       { status: 500 }
@@ -86,12 +83,8 @@ export async function PUT(
 
     const body = await request.json();
 
-    console.log('🔧 UPDATE API called with:', body);
-
     // Validate input
     const validatedData = heroSlideUpdateSchema.parse(body);
-
-    console.log('✅ Validated data:', validatedData);
 
     // Check if slide exists
     const existingSlide = await prisma.heroSlide.findUnique({
@@ -123,11 +116,15 @@ export async function PUT(
     }
 
     // Update slide
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateData: any = { ...validatedData };
+    if (validatedData.imagesJson !== undefined) {
+      updateData.imagesJson = validatedData.imagesJson;
+    }
+
     const updatedSlide = await prisma.heroSlide.update({
       where: { id },
-      data: {
-        ...validatedData,
-      },
+      data: updateData,
     });
 
     return NextResponse.json({
@@ -136,8 +133,6 @@ export async function PUT(
       message: 'Hero slide updated successfully',
     });
   } catch (error) {
-    console.error('Error updating hero slide:', error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -203,7 +198,6 @@ export async function DELETE(
       message: 'Hero slide deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting hero slide:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete hero slide' },
       { status: 500 }

@@ -38,7 +38,6 @@ export class HeroSlideAPI {
 
       return data.heroSlides;
     } catch (error) {
-      console.error('Error fetching slides:', error);
       throw error;
     }
   }
@@ -74,7 +73,6 @@ export class HeroSlideAPI {
 
       return result.heroSlide;
     } catch (error) {
-      console.error('Error creating slide:', error);
       throw error;
     }
   }
@@ -114,7 +112,6 @@ export class HeroSlideAPI {
 
       return result.heroSlide;
     } catch (error) {
-      console.error('Error updating slide:', error);
       throw error;
     }
   }
@@ -130,7 +127,6 @@ export class HeroSlideAPI {
         throw new Error('Failed to delete slide');
       }
     } catch (error) {
-      console.error('Error deleting slide:', error);
       throw error;
     }
   }
@@ -154,7 +150,6 @@ export class HeroSlideAPI {
 
       return result.heroSlide;
     } catch (error) {
-      console.error('Error toggling slide:', error);
       throw error;
     }
   }
@@ -162,8 +157,6 @@ export class HeroSlideAPI {
   // Reorder slides (swap positions) - Use temporary order to avoid conflicts
   static async reorderSlides(slide1: { id: number; order: number }, slide2: { id: number; order: number }): Promise<HeroSlide[]> {
     try {
-      console.log('🔄 Reordering slides:', { slide1, slide2 });
-
       // Use a temporary order number to avoid conflicts
       const tempOrder = Math.max(slide1.order, slide2.order) + 1000;
 
@@ -177,7 +170,6 @@ export class HeroSlideAPI {
       ];
 
       await Promise.all(updates);
-      console.log('✅ Step 1: Moved slide1 to temporary order:', tempOrder);
 
       // Step 2: Move slide2 to slide1's original order
       await fetch(`/api/hero-slides/${slide2.id}`, {
@@ -185,7 +177,6 @@ export class HeroSlideAPI {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order: slide1.order }),
       });
-      console.log('✅ Step 2: Moved slide2 to slide1\'s original order:', slide1.order);
 
       // Step 3: Move slide1 to slide2's original order
       await fetch(`/api/hero-slides/${slide1.id}`, {
@@ -193,17 +184,12 @@ export class HeroSlideAPI {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order: slide2.order }),
       });
-      console.log('✅ Step 3: Moved slide1 to slide2\'s original order:', slide2.order);
-
-      console.log('✅ Reorder successful, fetching updated slides...');
 
       // Return updated slides to ensure UI is in sync
       const updatedSlides = await this.getAllSlides();
-      console.log('✅ Updated slides fetched:', updatedSlides.map(s => ({ id: s.id, order: s.order })));
 
       return updatedSlides;
     } catch (error) {
-      console.error('❌ Error reordering slide:', error);
       throw error;
     }
   }

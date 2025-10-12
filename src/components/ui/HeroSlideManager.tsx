@@ -38,7 +38,7 @@ export function HeroSlideManager({
       const updatedSlides = await HeroSlideAPI.getAllSlides();
       onSlidesChange(updatedSlides);
     } catch (error) {
-      console.error('Error refreshing slides:', error);
+      // Error refreshing slides handled by toast
     }
   }, [onSlidesChange]);
 
@@ -56,7 +56,6 @@ export function HeroSlideManager({
       await refreshSlides();
       setShowAddDialog(false);
     } catch (error) {
-      console.error('Error creating slide:', error);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to create slide',
@@ -81,7 +80,6 @@ export function HeroSlideManager({
       await refreshSlides();
       setEditingSlide(null);
     } catch (error) {
-      console.error('Error updating slide:', error);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to update slide',
@@ -106,7 +104,6 @@ export function HeroSlideManager({
       await refreshSlides();
       setDeleteSlideId(null);
     } catch (error) {
-      console.error('Error deleting slide:', error);
       toast({
         title: 'Error',
         description: 'Failed to delete slide',
@@ -129,7 +126,6 @@ export function HeroSlideManager({
 
       await refreshSlides();
     } catch (error) {
-      console.error('Error toggling slide:', error);
       toast({
         title: 'Error',
         description: 'Failed to toggle slide status',
@@ -151,7 +147,6 @@ export function HeroSlideManager({
 
     try {
       setReorderingSlideId(slide.id);
-      console.log(`🔄 Starting reorder: ${slide.title || 'Slide ' + slide.id} ${direction}`);
 
       const updatedSlides = await HeroSlideAPI.reorderSlides(
         { id: slide.id, order: slide.order },
@@ -165,10 +160,7 @@ export function HeroSlideManager({
         title: 'Success',
         description: `Slide moved ${direction}`,
       });
-
-      console.log(`✅ Reorder completed: ${slide.title || 'Slide ' + slide.id}`);
     } catch (error) {
-      console.error('❌ Error reordering slide:', error);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to reorder slide',

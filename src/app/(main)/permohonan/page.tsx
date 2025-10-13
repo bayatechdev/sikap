@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AutocompleteInput } from "@/components/ui/autocomplete-input";
 import { CategorySelector } from "@/components/ui/category-selector";
 import { FilePicker } from "@/components/ui/file-picker";
@@ -43,14 +44,6 @@ interface FormErrors {
   [key: string]: string;
 }
 
-interface SubmissionResult {
-  success: boolean;
-  trackingNumber: string;
-  publicToken: string;
-  applicationId: string;
-  message: string;
-}
-
 const tabsConfig = {
   mou: {
     label: "MOU",
@@ -73,7 +66,7 @@ const tabsConfig = {
       { key: "draftPks", label: "Draft PKS", required: true },
     ],
   },
-  suratKuasa: {
+  surat_kuasa: {
     label: "Surat Kuasa",
     title: "Surat Kuasa",
     description: "Pengajuan permohonan surat kuasa untuk representasi legal",
@@ -82,7 +75,7 @@ const tabsConfig = {
       { key: "draftPks", label: "Draft PKS", required: true },
     ],
   },
-  notaKesepakatan: {
+  nota_kesepakatan: {
     label: "Nota Kesepakatan",
     title: "Nota Kesepakatan",
     description: "Pengajuan permohonan nota kesepakatan untuk kerjasama strategis",
@@ -94,6 +87,7 @@ const tabsConfig = {
 };
 
 export default function PermohonanPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<keyof typeof tabsConfig>("mou");
   const [formData, setFormData] = useState<FormData>({
     nama: "",
@@ -106,7 +100,6 @@ export default function PermohonanPage() {
   });
   const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -215,6 +208,7 @@ export default function PermohonanPage() {
     try {
       const formData = new FormData();
       formData.append('file', selectedFile.file);
+      formData.append('type', 'application');
       formData.append('applicationId', applicationId);
       formData.append('documentType', selectedFile.documentType);
 
@@ -292,32 +286,15 @@ export default function PermohonanPage() {
       try {
         await Promise.all(uploadPromises);
 
-        // All files uploaded successfully
-        setSubmissionResult(result);
-
-        // Reset form on success
-        setFormData({
-          nama: "",
-          email: "",
-          contactPerson: "",
-          instansi: "",
-          keperluan: "",
-          tentang: "",
-          catatan: "",
-        });
-        setSelectedInstitution(null);
-        setSelectedFiles([]);
-        setErrors({});
+        // All files uploaded successfully - redirect to success page
+        router.push(`/permohonan/success/${result.trackingNumber}`);
 
       } catch (uploadError) {
-        // Some files failed to upload, but application was created
+        // Some files failed to upload, but application was created - still redirect
         console.error('File upload error:', uploadError);
-        setErrors({
-          files: 'Beberapa dokumen gagal diupload. Anda dapat mengupload ulang dokumen setelah aplikasi dibuat.'
-        });
 
-        // Still show success for application creation
-        setSubmissionResult(result);
+        // Still redirect to success page even if some files failed
+        router.push(`/permohonan/success/${result.trackingNumber}`);
       }
 
     } catch (error) {
@@ -403,9 +380,8 @@ export default function PermohonanPage() {
                         key={key}
                         onClick={() => {
                           setActiveTab(key as keyof typeof tabsConfig);
-                          // Clear errors and submission status when changing tabs
+                          // Clear errors when changing tabs
                           setErrors({});
-                          setSubmissionResult(null);
                         }}
                         className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                           activeTab === key
@@ -430,69 +406,6 @@ export default function PermohonanPage() {
                     {currentTab.description}
                   </p>
                 </div>
-
-                {/* Submission Result */}
-                {submissionResult && (
-                  <div className="p-6 rounded-lg border bg-green-50 border-green-200 text-green-800">
-                    <div className="flex items-start gap-3">
-                      <Image
-                        src="/assets/images/icons/ic_check.svg"
-                        alt="Success"
-                        width={24}
-                        height={24}
-                        className="text-green-600 mt-0.5"
-                      />
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-green-900 mb-2">
-                          Permohonan Berhasil Dikirim!
-                        </h3>
-                        <div className="space-y-2 text-sm">
-                          <p>
-                            <strong>Nomor Tracking:</strong>
-                            <span className="ml-2 px-2 py-1 bg-green-100 rounded font-mono">
-                              {submissionResult.trackingNumber}
-                            </span>
-                          </p>
-                          {/* File upload status summary */}
-                          {selectedFiles.length > 0 && (
-                            <div className="mt-3">
-                              <p className="font-medium">Status Upload Dokumen:</p>
-                              <div className="mt-1 space-y-1">
-                                {selectedFiles.map(file => (
-                                  <div key={file.documentType} className="flex items-center justify-between text-xs">
-                                    <span>{currentTab.files.find(f => f.key === file.documentType)?.label}</span>
-                                    <span className={file.uploaded ? 'text-green-600' : file.error ? 'text-red-600' : 'text-orange-600'}>
-                                      {file.uploaded ? '✓ Berhasil' : file.error ? '✗ Gagal' : '⌛ Menunggu'}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          <p>Simpan nomor tracking di atas untuk melacak status permohonan Anda.</p>
-                          <p>Tim kami akan meninjau permohonan dan memberikan update melalui email.</p>
-                          <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                            <a
-                              href={`/track/${submissionResult.trackingNumber}`}
-                              className="flex-1 px-4 py-3 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors text-center"
-                            >
-                              🔍 Lacak Status Permohonan
-                            </a>
-                            <button
-                              onClick={() => {
-                                setSubmissionResult(null);
-                                setErrors({});
-                              }}
-                              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-300 transition-colors"
-                            >
-                              📝 Buat Permohonan Baru
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Error Status */}
                 {(createApplicationMutation.isError || errors.submit) && (

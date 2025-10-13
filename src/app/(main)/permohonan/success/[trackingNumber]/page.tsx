@@ -144,7 +144,7 @@ export default function PermohonanSuccessPage() {
 
           {/* Main Success Card */}
           <div className="bg-white rounded-[20px] shadow-xl overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-primary to-primary/80 p-6 text-white">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
               <h2 className="text-xl font-semibold mb-2">Nomor Tracking Anda</h2>
               <p className="text-white/80 text-sm mb-4">
                 Simpan nomor ini untuk melacak status permohonan Anda
@@ -158,7 +158,7 @@ export default function PermohonanSuccessPage() {
                 </div>
                 <button
                   onClick={copyToClipboard}
-                  className="ml-4 px-4 py-2 bg-white text-primary rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 font-medium"
+                  className="ml-4 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 font-medium"
                 >
                   <svg
                     className={`w-5 h-5 ${copied ? 'text-green-600' : ''}`}

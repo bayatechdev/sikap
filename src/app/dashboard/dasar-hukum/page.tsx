@@ -1,9 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Edit2, Trash2, Download, Filter } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Download, FileText, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface LegalDocument {
   id: number;
@@ -38,18 +48,13 @@ export default function DasarHukumPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [totalCount, setTotalCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (searchTerm) params.append("search", searchTerm);
-      if (selectedCategory) params.append("category", selectedCategory);
-
-      const response = await fetch(`/api/legal-documents?${params}`);
+      const response = await fetch('/api/legal-documents');
       if (!response.ok) {
         throw new Error("Failed to fetch documents");
       }
@@ -57,7 +62,6 @@ export default function DasarHukumPage() {
       const data: ApiResponse = await response.json();
       setDocuments(data.documents);
       setCategories(data.categories);
-      setTotalCount(data.totalCount);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -67,10 +71,19 @@ export default function DasarHukumPage() {
 
   useEffect(() => {
     fetchDocuments();
-  }, [searchTerm, selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Client-side filtering
+  const filteredDocuments = documents.filter(document =>
+    (selectedCategory === '' || document.category === selectedCategory) &&
+    (searchTerm === '' ||
+     document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     document.documentNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     (document.description && document.description.toLowerCase().includes(searchTerm.toLowerCase())))
+  );
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this document?")) {
+    if (!confirm("Apakah Anda yakin ingin menghapus dokumen ini?")) {
       return;
     }
 
@@ -86,30 +99,54 @@ export default function DasarHukumPage() {
       // Refresh the list
       fetchDocuments();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete document");
+      alert(err instanceof Error ? err.message : "Gagal menghapus dokumen");
     }
   };
 
-  const getCategoryBadgeColor = (category: string) => {
+  const getCategoryBadgeVariant = (category: string) => {
     switch (category) {
       case "Undang-Undang":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "destructive";
       case "Peraturan Pemerintah":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "default";
       case "Peraturan Menteri":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "secondary";
       case "Peraturan Daerah":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "outline";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "outline";
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading...</div>
+      <div className="@container/main space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dasar Hukum</h1>
+            <p className="text-muted-foreground">Kelola dokumen hukum dan peraturan yang tersedia</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1,2,3,4].map(i => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="space-y-0 pb-2">
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -117,142 +154,191 @@ export default function DasarHukumPage() {
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-red-500">Error: {error}</div>
+      <div className="@container/main space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dasar Hukum</h1>
+            <p className="text-muted-foreground">Kelola dokumen hukum dan peraturan yang tersedia</p>
+          </div>
         </div>
+        <Card>
+          <CardContent className="flex items-center justify-center h-64">
+            <div className="text-destructive text-center">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Error: {error}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="@container/main space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dasar Hukum</h1>
-          <p className="text-gray-600 mt-1">
-            Manage legal documents and regulations ({totalCount} documents)
+          <h1 className="text-3xl font-bold tracking-tight">Dasar Hukum</h1>
+          <p className="text-muted-foreground">
+            Kelola dokumen hukum dan peraturan yang tersedia di sistem ({documents.length} dokumen)
           </p>
         </div>
         <Link href="/dashboard/dasar-hukum/create">
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Add Document
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Dokumen
           </Button>
         </Link>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search documents..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[200px]"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category.name} value={category.name}>
-                  {category.name} ({category.count})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Documents List */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Legal Documents</h2>
-        </div>
-
-        {documents.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No documents found. {searchTerm || selectedCategory ? "Try adjusting your filters." : ""}
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {documents.map((document) => (
-              <div key={document.id} className="p-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
-                        {document.title}
-                      </h3>
-                      <span
-                        className={`px-2 py-1 text-xs font-medium border rounded-full ${getCategoryBadgeColor(
-                          document.category
-                        )}`}
-                      >
-                        {document.category}
-                      </span>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-600">
-                      <span className="font-medium">{document.documentNumber}</span>
-                      <span className="hidden sm:inline">•</span>
-                      <span>Tahun {document.year}</span>
-                      {document.description && (
-                        <>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="truncate">{document.description}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <button
-                      onClick={() => window.open(`/api/legal-documents/${document.id}/download`, '_blank')}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                      title="Download"
-                    >
-                      <Download className="h-4 w-4" />
-                    </button>
-                    <Link
-                      href={`/dashboard/dasar-hukum/${document.id}`}
-                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                      title="Edit"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(document.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {categories.map((category) => (
-          <div key={category.name} className="bg-white p-4 rounded-lg border border-gray-200">
-            <div className="text-2xl font-bold text-gray-900">{category.count}</div>
-            <div className="text-sm text-gray-600">{category.name}</div>
-          </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Dasar Hukum
+            </CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{documents.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Dokumen terdaftar
+            </p>
+          </CardContent>
+        </Card>
+        {categories.slice(0, 3).map((category) => (
+          <Card key={category.name}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {category.name}
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{category.count}</div>
+              <p className="text-xs text-muted-foreground">
+                Dokumen {category.name.toLowerCase()}
+              </p>
+            </CardContent>
+          </Card>
         ))}
       </div>
+
+      {/* Search and Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar Dasar Hukum</CardTitle>
+          <CardDescription>
+            Cari dan kelola semua dokumen hukum dan peraturan
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari berdasarkan judul, nomor, atau deskripsi..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Button
+              variant={selectedCategory === "" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory("")}
+            >
+              Semua Kategori
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.name}
+                variant={selectedCategory === category.name ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category.name)}
+              >
+                {category.name} ({category.count})
+              </Button>
+            ))}
+          </div>
+
+          {/* Documents List */}
+          <div className="py-4">
+            {filteredDocuments.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {searchTerm || selectedCategory ? 'Tidak ada dokumen yang cocok dengan pencarian.' : 'Belum ada dokumen hukum.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredDocuments.map((document) => (
+                  <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium leading-none truncate">
+                          {document.title}
+                        </p>
+                        <Badge variant={getCategoryBadgeVariant(document.category)}>
+                          {document.category}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {document.documentNumber} • Tahun {document.year}
+                        {document.description && ` • ${document.description}`}
+                      </p>
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                        <span>Kategori: {document.category}</span>
+                        <span>Dibuat: {formatDate(document.createdAt)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/api/legal-documents/${document.id}/download`, '_blank')}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Unduh
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/dasar-hukum/${document.id}`}>
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(document.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Hapus
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

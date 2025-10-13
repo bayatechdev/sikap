@@ -5,6 +5,10 @@ import { ArrowLeft, Upload, FileText, Download } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface LegalDocument {
   id: number;
@@ -180,9 +184,25 @@ export default function EditLegalDocumentPage({
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-gray-500">Loading...</div>
+      <div className="@container/main space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Edit Dasar Hukum</h1>
+            <p className="text-muted-foreground">Perbarui informasi dokumen hukum</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {[1,2].map(i => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="space-y-0 pb-2">
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -190,201 +210,201 @@ export default function EditLegalDocumentPage({
 
   if (error && !document) {
     return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-red-500">Error: {error}</div>
+      <div className="@container/main space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Edit Dasar Hukum</h1>
+            <p className="text-muted-foreground">Perbarui informasi dokumen hukum</p>
+          </div>
         </div>
+        <Card>
+          <CardContent className="flex items-center justify-center h-64">
+            <div className="text-destructive text-center">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Error: {error}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="@container/main space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link
-          href="/dashboard/dasar-hukum"
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Edit Legal Document</h1>
-          <p className="text-gray-600 mt-1">Update legal document information</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Link href="/dashboard/dasar-hukum">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Kembali
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Edit Dasar Hukum</h1>
+            <p className="text-muted-foreground">
+              Perbarui informasi dokumen hukum yang ada
+            </p>
+          </div>
         </div>
         {document && (
           <Button
             variant="outline"
             onClick={() => window.open(`/api/legal-documents/${document.id}/download`, '_blank')}
-            className="flex items-center gap-2"
           >
-            <Download className="h-4 w-4" />
-            Download Current File
+            <Download className="h-4 w-4 mr-2" />
+            Unduh File Saat Ini
           </Button>
         )}
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Document Information</h2>
-
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Title *
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., UU No. 6 Tahun 2014 tentang Desa"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="documentNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                Document Number *
-              </label>
-              <input
-                type="text"
-                id="documentNumber"
-                name="documentNumber"
-                value={formData.documentNumber}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., UU-06-2014"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-2">
-                Year *
-              </label>
-              <input
-                type="text"
-                id="year"
-                name="year"
-                value={formData.year}
-                onChange={handleInputChange}
-                required
-                pattern="[0-9]{4}"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="2024"
-              />
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Brief description of the legal document..."
-            />
-          </div>
-        </div>
-
-        {/* File Upload */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Update Document File</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Leave empty to keep the current file, or upload a new PDF to replace it.
-          </p>
-
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">
-                Upload New PDF File (Optional)
-              </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="file"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file"
-                        name="file"
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleFileChange}
-                        className="sr-only"
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PDF files only, up to 10MB</p>
-                </div>
-              </div>
-            </div>
-
-            {formData.file && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <FileText className="h-5 w-5 text-blue-600" />
-                <span className="text-sm text-blue-900">{formData.file.name}</span>
-                <span className="text-xs text-blue-600 ml-auto">
-                  {(formData.file.size / 1024 / 1024).toFixed(2)} MB
-                </span>
+        {/* Basic Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Informasi Dokumen</CardTitle>
+            <CardDescription>
+              Perbarui informasi dasar dokumen hukum
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-destructive text-sm">{error}</p>
               </div>
             )}
-          </div>
-        </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Judul *</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Contoh: UU No. 6 Tahun 2014 tentang Desa"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="documentNumber">Nomor Dokumen *</Label>
+                <Input
+                  id="documentNumber"
+                  name="documentNumber"
+                  value={formData.documentNumber}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Contoh: UU-06-2014"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Kategori *</Label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <option value="">Pilih Kategori</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="year">Tahun *</Label>
+                <Input
+                  id="year"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleInputChange}
+                  required
+                  pattern="[0-9]{4}"
+                  placeholder="2024"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Deskripsi</Label>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={3}
+                placeholder="Deskripsi singkat dokumen hukum..."
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+            {/* File Upload */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Perbarui File Dokumen</CardTitle>
+            <CardDescription>
+              Kosongkan untuk menggunakan file saat ini, atau unggah PDF baru untuk menggantinya
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="file">Unggah File PDF Baru (Opsional)</Label>
+                <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-muted-foreground/25 rounded-md hover:border-muted-foreground/50 transition-colors">
+                  <div className="space-y-1 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <div className="flex text-sm text-muted-foreground">
+                      <label
+                        htmlFor="file"
+                        className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/90 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                      >
+                        <span>Unggah file</span>
+                        <input
+                          id="file"
+                          name="file"
+                          type="file"
+                          accept=".pdf"
+                          onChange={handleFileChange}
+                          className="sr-only"
+                        />
+                      </label>
+                      <p className="pl-1">atau drag and drop</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">File PDF saja, maksimal 10MB</p>
+                  </div>
+                </div>
+              </div>
+
+              {formData.file && (
+                <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-md">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <span className="text-sm text-primary">{formData.file.name}</span>
+                  <span className="text-xs text-primary ml-auto">
+                    {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                  </span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:justify-end">
+        <div className="flex justify-end space-x-4">
           <Link href="/dashboard/dasar-hukum">
-            <Button variant="outline" type="button" className="w-full sm:w-auto">
-              Cancel
+            <Button type="button" variant="outline">
+              Batal
             </Button>
           </Link>
-          <Button
-            type="submit"
-            disabled={saving}
-            className="w-full sm:w-auto"
-          >
-            {saving ? "Updating..." : "Update Document"}
+          <Button type="submit" disabled={saving}>
+            {saving ? "Memperbarui..." : "Perbarui Dokumen"}
           </Button>
         </div>
       </form>

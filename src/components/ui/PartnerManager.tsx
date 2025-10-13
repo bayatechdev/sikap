@@ -260,7 +260,7 @@ export function PartnerManager({
       </div>
 
       {/* Partners Grid */}
-      <div className="space-y-4">
+      <div className="md:grid md:grid-cols-4 gap-4">
         {partners.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
@@ -274,61 +274,64 @@ export function PartnerManager({
           partners.map((partner, index) => (
             <Card key={partner.id} className="overflow-hidden">
               <CardContent className="p-4">
-                <div className="flex gap-4">
-                  {/* Partner Logo */}
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                    <Image
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      fill
-                      className="object-contain p-2"
-                      sizes="64px"
-                    />
-                  </div>
+                <div className='flex flex-col gap-4'>
+                  <div className="flex gap-4">
+                    {/* Partner Logo */}
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      <Image
+                        src={partner.logoUrl}
+                        alt={partner.name}
+                        fill
+                        className="object-contain p-2"
+                        sizes="64px"
+                      />
+                    </div>
 
-                  {/* Partner Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium truncate">
-                            {partner.name}
-                          </h4>
-                          {partner.website && (
-                            <a
-                              href={partner.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
+                    {/* Partner Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium truncate">
+                              {partner.name}
+                            </h4>
+                            {partner.website && (
+                              <a
+                                href={partner.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            )}
+                          </div>
+                          {partner.description && (
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                              {partner.description}
+                            </p>
                           )}
-                        </div>
-                        {partner.description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                            {partner.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="outline" className="text-xs">
-                            #{index + 1}
-                          </Badge>
-                          <Switch
-                            checked={partner.isActive}
-                            onCheckedChange={(checked) => handleToggleActive(partner.id, checked)}
-                            className="scale-75"
-                          />
-                          <span className="text-xs text-gray-500">
-                            {partner.isActive ? 'Active' : 'Inactive'}
-                          </span>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline" className="text-xs">
+                              #{index + 1}
+                            </Badge>
+                            <Switch
+                              checked={partner.isActive}
+                              onCheckedChange={(checked) => handleToggleActive(partner.id, checked)}
+                              className="scale-75"
+                            />
+                            <span className="text-xs text-gray-500">
+                              {partner.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
+
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col gap-1 flex-shrink-0">
+                  <div className="flex flex-row gap-3 flex-shrink-0">
                     {/* Move buttons */}
                     <div className="flex gap-1">
                       <Button

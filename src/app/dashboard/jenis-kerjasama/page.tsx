@@ -48,6 +48,8 @@ export default function JenisKerjasamaPage() {
   const [cooperationTypes, setCooperationTypes] = useState<CooperationType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedHomepage, setSelectedHomepage] = useState('');
 
   const fetchCooperationTypes = async () => {
     try {
@@ -70,9 +72,16 @@ export default function JenisKerjasamaPage() {
   }, []);
 
   const filteredTypes = cooperationTypes.filter(type =>
-    type.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    type.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    type.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    (searchTerm === '' ||
+     type.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     type.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     type.description?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (selectedStatus === '' ||
+     (selectedStatus === 'active' && type.active) ||
+     (selectedStatus === 'inactive' && !type.active)) &&
+    (selectedHomepage === '' ||
+     (selectedHomepage === 'show' && type.showOnHomepage) ||
+     (selectedHomepage === 'hide' && !type.showOnHomepage))
   );
 
   const getStatusColor = (active: boolean) => {
@@ -222,6 +231,58 @@ export default function JenisKerjasamaPage() {
             </div>
           </div>
 
+          {/* Status Filter */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <div className="w-full text-sm font-medium text-muted-foreground mb-2">Filter Status:</div>
+            <Button
+              variant={selectedStatus === "" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedStatus("")}
+            >
+              Semua Status
+            </Button>
+            <Button
+              variant={selectedStatus === "active" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedStatus("active")}
+            >
+              Aktif ({cooperationTypes.filter(t => t.active).length})
+            </Button>
+            <Button
+              variant={selectedStatus === "inactive" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedStatus("inactive")}
+            >
+              Non-Aktif ({cooperationTypes.filter(t => !t.active).length})
+            </Button>
+          </div>
+
+          {/* Homepage Filter */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <div className="w-full text-sm font-medium text-muted-foreground mb-2">Filter Homepage:</div>
+            <Button
+              variant={selectedHomepage === "" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedHomepage("")}
+            >
+              Semua Tampilan
+            </Button>
+            <Button
+              variant={selectedHomepage === "show" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedHomepage("show")}
+            >
+              Tampil di Homepage ({cooperationTypes.filter(t => t.showOnHomepage).length})
+            </Button>
+            <Button
+              variant={selectedHomepage === "hide" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedHomepage("hide")}
+            >
+              Tidak Tampil ({cooperationTypes.filter(t => !t.showOnHomepage).length})
+            </Button>
+          </div>
+
           {/* Cooperation Types Table */}
           <div className="space-y-4">
             {filteredTypes.length > 0 ? filteredTypes.map((type) => (
@@ -269,7 +330,7 @@ export default function JenisKerjasamaPage() {
               <div className="text-center py-8">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {searchTerm ? 'Tidak ada jenis kerjasama yang cocok dengan pencarian.' : 'Belum ada jenis kerjasama.'}
+                  {searchTerm || selectedStatus || selectedHomepage ? 'Tidak ada jenis kerjasama yang cocok dengan filter.' : 'Belum ada jenis kerjasama.'}
                 </p>
               </div>
             )}

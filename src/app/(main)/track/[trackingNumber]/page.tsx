@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, AlertCircle, FileText, ChevronRight, X } from "lucide-react";
 
 
 
@@ -95,17 +94,54 @@ export default function TrackingDetailPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      'SUBMITTED': 'bg-blue-100 text-blue-800',
-      'UNDER_REVIEW': 'bg-yellow-100 text-yellow-800',
-      'ADDITIONAL_INFO_REQUIRED': 'bg-orange-100 text-orange-800',
-      'APPROVED': 'bg-green-100 text-green-800',
-      'REJECTED': 'bg-red-100 text-red-800'
+  // const getStatusColor = (status: string) => {
+  //   const colors: Record<string, string> = {
+  //     'SUBMITTED': 'bg-blue-100 text-blue-800',
+  //     'UNDER_REVIEW': 'bg-yellow-100 text-yellow-800',
+  //     'ADDITIONAL_INFO_REQUIRED': 'bg-orange-100 text-orange-800',
+  //     'APPROVED': 'bg-green-100 text-green-800',
+  //     'REJECTED': 'bg-red-100 text-red-800'
+  //   };
+  //   return colors[status] || 'bg-gray-100 text-gray-800';
+  // };
+
+  const getStatusInfo = (status: string) => {
+    const statusInfo: Record<string, { icon: React.ReactNode; color: string; description: string; nextStep?: string }> = {
+      'SUBMITTED': {
+        icon: <CheckCircle2 className="w-6 h-6" />,
+        color: '#3b82f6',
+        description: 'Permohonan Anda telah diterima dan akan segera diproses.',
+        nextStep: 'Menunggu review oleh tim kami'
+      },
+      'UNDER_REVIEW': {
+        icon: <Clock className="w-6 h-6" />,
+        color: '#f59e0b',
+        description: 'Permohonan Anda sedang dalam tahap review.',
+        nextStep: 'Tim kami sedang memeriksa kelengkapan dokumen'
+      },
+      'ADDITIONAL_INFO_REQUIRED': {
+        icon: <AlertCircle className="w-6 h-6" />,
+        color: '#ea580c',
+        description: 'Informasi tambahan diperlukan untuk melanjutkan proses.',
+        nextStep: 'Silakan upload dokumen tambahan yang diminta'
+      },
+      'APPROVED': {
+        icon: <CheckCircle2 className="w-6 h-6" />,
+        color: '#10b981',
+        description: 'Permohonan Anda telah disetujui.',
+        nextStep: 'Proses kerjasama dapat dilanjutkan'
+      },
+      'REJECTED': {
+        icon: <AlertCircle className="w-6 h-6" />,
+        color: '#ef4444',
+        description: 'Permohonan Anda tidak dapat disetujui.',
+        nextStep: 'Periksa kembali persyaratan dan ajukan kembali'
+      }
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return statusInfo[status] || statusInfo['SUBMITTED'];
   };
 
+  
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -143,26 +179,40 @@ export default function TrackingDetailPage() {
             <div className="bg-white rounded-[20px] shadow-lg overflow-hidden p-8">
               <div className="text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Image
-                    src="/assets/images/icons/ic_close.svg"
-                    alt="Error"
-                    width={24}
-                    height={24}
-                    className="text-red-500"
-                  />
+                  <X className="w-8 h-8 text-red-500" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Permohonan Tidak Ditemukan</h2>
                 <p className="text-gray-600 mb-6">{error}</p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
                     onClick={() => router.push('/track')}
-                    className="px-6 py-3 bg-primary text-foreground rounded-lg hover:shadow-lg transition-all"
+                    className="px-6 py-3 rounded-lg hover:shadow-lg transition-all font-medium"
+                    style={{
+                      backgroundColor: '#b7eb38',
+                      color: '#0b251c'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#89a534';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#b7eb38';
+                    }}
                   >
                     Coba Lagi
                   </button>
                   <button
                     onClick={() => router.push('/permohonan')}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all"
+                    className="px-6 py-3 rounded-lg hover:shadow-lg transition-all font-medium"
+                    style={{
+                      backgroundColor: '#f3f4f6',
+                      color: '#6b7280'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#e5e7eb';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6';
+                    }}
                   >
                     Buat Permohonan Baru
                   </button>
@@ -203,170 +253,275 @@ export default function TrackingDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Status Overview */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Status Permohonan</h2>
-                <div className="flex items-center justify-between mb-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(application.status)}`}>
-                    {application.timeline.find(t => t.isCurrent)?.label || application.status}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    Terakhir diupdate: {formatDate(application.updatedAt)}
-                  </span>
+              {/* New Status Overview Card */}
+              <div
+                className="rounded-[20px] shadow-xl overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${getStatusInfo(application.status).color}15, ${getStatusInfo(application.status).color}08)`,
+                  border: `1px solid ${getStatusInfo(application.status).color}20`
+                }}
+              >
+                {/* Main Status Header */}
+                <div
+                  className="p-6 text-white"
+                  style={{
+                    background: `linear-gradient(135deg, ${getStatusInfo(application.status).color}, ${getStatusInfo(application.status).color}dd)`,
+                  }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                    >
+                      {getStatusInfo(application.status).icon}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold">
+                        {application.timeline.find(t => t.isCurrent)?.label || application.status}
+                      </h2>
+                      <p className="text-white/80 text-sm">
+                        Terakhir diupdate: {formatDate(application.updatedAt)}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Timeline */}
-                <div className="space-y-4">
-                  {application.timeline.map((item) => (
-                    <div key={item.status} className="flex items-start gap-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        item.completed ? 'bg-green-500' : item.isCurrent ? 'bg-blue-500' : 'bg-gray-300'
-                      }`}>
-                        {item.completed ? (
-                          <Image
-                            src="/assets/images/icons/ic_check.svg"
-                            alt="Completed"
-                            width={16}
-                            height={16}
-                            className="brightness-0 invert"
-                          />
-                        ) : (
-                          <span className={`w-2 h-2 rounded-full ${
-                            item.isCurrent ? 'bg-white' : 'bg-gray-500'
-                          }`} />
-                        )}
+                {/* Status Details */}
+                <div className="p-6">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Status Detail</h3>
+                    <p className="text-gray-600">
+                      {getStatusInfo(application.status).description}
+                    </p>
+                    {getStatusInfo(application.status).nextStep && (
+                      <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                        <ChevronRight className="w-4 h-4" style={{ color: getStatusInfo(application.status).color }} />
+                        <span>
+                          <strong>Next Step:</strong> {getStatusInfo(application.status).nextStep}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <h3 className={`font-medium ${
-                          item.completed || item.isCurrent ? 'text-gray-900' : 'text-gray-500'
-                        }`}>
-                          {item.label}
-                        </h3>
-                        {item.date && (
-                          <p className="text-sm text-gray-500">{formatDate(item.date)}</p>
-                        )}
-                        {item.notes && (
-                          <p className="text-sm text-gray-600 mt-1">{item.notes}</p>
-                        )}
-                      </div>
+                    )}
+                  </div>
+
+                  {/* Complete Timeline - All Status History */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Timeline Status</h3>
+                    <div className="space-y-4">
+                      {application.statusHistory.map((history, index) => (
+                        <div key={index} className="flex items-start gap-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                            history.status === application.status ? 'text-white' : 'bg-gray-300'
+                          }`}
+                          style={{
+                            backgroundColor: history.status === application.status ? getStatusInfo(application.status).color :
+                                           application.statusHistory.indexOf(history) < application.statusHistory.findIndex(h => h.status === application.status) ? '#10b981' : '#d1d5db'
+                          }}>
+                            {application.statusHistory.indexOf(history) < application.statusHistory.findIndex(h => h.status === application.status) ? (
+                              <CheckCircle2 className="w-4 h-4 text-white" />
+                            ) : history.status === application.status ? (
+                              <Clock className="w-4 h-4 text-white" />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-gray-500" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <h4 className={`font-medium ${
+                                history.status === application.status || application.statusHistory.indexOf(history) < application.statusHistory.findIndex(h => h.status === application.status) ? 'text-gray-900' : 'text-gray-500'
+                              }`}>
+                                {application.timeline.find(t => t.status === history.status)?.label || history.status}
+                              </h4>
+                              <span className="text-sm text-gray-500 whitespace-nowrap">
+                                {formatDate(history.changedAt)}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600">Oleh: {history.changedBy}</p>
+                            {history.notes && (
+                              <p className="text-sm text-gray-700 mt-1">{history.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Documents */}
+              {/* Enhanced Documents Section - SIKAP Theme */}
               {application.documents.length > 0 && (
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Dokumen</h2>
-                  <div className="space-y-3">
-                    {application.documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Image
-                              src="/assets/images/icons/ic_document.svg"
-                              alt="Document"
-                              width={20}
-                              height={20}
-                            />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">{doc.filename}</h4>
-                            <p className="text-sm text-gray-500">
-                              {doc.type} • {formatFileSize(doc.size)} • {formatDate(doc.uploadedAt)}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
-                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                <div className="bg-white rounded-[20px] shadow-xl overflow-hidden">
+                  <div
+                    className="px-6 py-4"
+                    style={{
+                      background: 'linear-gradient(135deg, #b7eb3815, #b7eb3808)',
+                      borderBottom: `1px solid #b7eb3830`
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: '#b7eb3820' }}
+                      >
+                        <FileText className="w-4 h-4" style={{ color: '#b7eb38' }} />
+                      </div>
+                      <h2 className="text-lg font-semibold" style={{ color: '#0b251c' }}>
+                        Dokumen Terkait
+                      </h2>
+                      <span
+                        className="text-xs px-2 py-1 rounded-full font-medium"
+                        style={{
+                          backgroundColor: '#b7eb3820',
+                          color: '#0b251c'
+                        }}
+                      >
+                        {application.documents.length} file
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      {application.documents.map((doc) => (
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-4 border rounded-xl transition-all hover:shadow-md"
+                          style={{
+                            borderColor: '#e5e7eb',
+                            backgroundColor: '#ffffff'
+                          }}
                         >
-                          Download
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Status History */}
-              {application.statusHistory.length > 0 && (
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">Riwayat Status</h2>
-                  <div className="space-y-4">
-                    {application.statusHistory.map((history, index) => (
-                      <div key={index} className="border-l-4 border-blue-200 pl-4">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-gray-900">
-                            {application.timeline.find(t => t.status === history.status)?.label || history.status}
-                          </h4>
-                          <span className="text-sm text-gray-500">{formatDate(history.changedAt)}</span>
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div
+                              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                              style={{ backgroundColor: '#b7eb3810' }}
+                            >
+                              <FileText className="w-5 h-5" style={{ color: '#b7eb38' }} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h4
+                                className="font-medium truncate"
+                                style={{ color: '#0b251c' }}
+                              >
+                                {doc.filename}
+                              </h4>
+                              <p className="text-xs" style={{ color: '#6b7280' }}>
+                                {doc.type} • {formatFileSize(doc.size)} • {formatDate(doc.uploadedAt)}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                            className="px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-2 flex-shrink-0 font-medium"
+                            style={{
+                              backgroundColor: '#b7eb38',
+                              color: '#0b251c'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#89a534';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#b7eb38';
+                            }}
+                          >
+                            <FileText className="w-4 h-4" />
+                            Download
+                          </button>
                         </div>
-                        <p className="text-sm text-gray-600">Oleh: {history.changedBy}</p>
-                        {history.notes && (
-                          <p className="text-sm text-gray-700 mt-1">{history.notes}</p>
-                        )}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Sidebar */}
+              </div>
+
+            {/* Sidebar - SIKAP Theme */}
             <div className="space-y-6">
               {/* Application Info */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Informasi Permohonan</h2>
-                <div className="space-y-3">
+              <div className="bg-white rounded-[20px] shadow-xl overflow-hidden">
+                <div
+                  className="px-6 py-4 border-b"
+                  style={{
+                    background: 'linear-gradient(135deg, #b7eb3815, #b7eb3808)',
+                    borderBottom: `1px solid #b7eb3830`
+                  }}
+                >
+                  <h2 className="text-lg font-semibold" style={{ color: '#0b251c' }}>
+                    Informasi Permohonan
+                  </h2>
+                </div>
+                <div className="p-6 space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Judul</label>
-                    <p className="text-gray-900">{application.title}</p>
+                    <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Judul</label>
+                    <p style={{ color: '#0b251c' }} className="font-medium">{application.title}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Jenis</label>
-                    <p className="text-gray-900">{application.cooperationType.name}</p>
+                    <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Jenis</label>
+                    <p style={{ color: '#0b251c' }} className="font-medium">{application.cooperationType.name}</p>
                   </div>
                   {application.institution && (
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Instansi</label>
-                      <p className="text-gray-900">{application.institution.name}</p>
-                      <p className="text-sm text-gray-600">{application.institution.type}</p>
+                      <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Instansi</label>
+                      <p style={{ color: '#0b251c' }} className="font-medium">{application.institution.name}</p>
+                      <p className="text-sm" style={{ color: '#6b7280' }}>{application.institution.type}</p>
                     </div>
                   )}
                   {application.cooperationCategory && (
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Kategori</label>
-                      <p className="text-gray-900">{application.cooperationCategory.name}</p>
+                      <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Kategori</label>
+                      <p style={{ color: '#0b251c' }} className="font-medium">{application.cooperationCategory.name}</p>
                     </div>
                   )}
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Tanggal Pengajuan</label>
-                    <p className="text-gray-900">{formatDate(application.submittedAt)}</p>
+                    <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Tanggal Pengajuan</label>
+                    <p style={{ color: '#0b251c' }} className="font-medium">{formatDate(application.submittedAt)}</p>
                   </div>
                 </div>
               </div>
 
               {/* Contact Info */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Kontak</h2>
-                <div className="space-y-2">
+              <div className="bg-white rounded-[20px] shadow-xl overflow-hidden">
+                <div
+                  className="px-6 py-4 border-b"
+                  style={{
+                    background: 'linear-gradient(135deg, #b7eb3815, #b7eb3808)',
+                    borderBottom: `1px solid #b7eb3830`
+                  }}
+                >
+                  <h2 className="text-lg font-semibold" style={{ color: '#0b251c' }}>
+                    Kontak
+                  </h2>
+                </div>
+                <div className="p-6 space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Nama</label>
-                    <p className="text-gray-900">{application.contact.person}</p>
+                    <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Nama</label>
+                    <p style={{ color: '#0b251c' }} className="font-medium">{application.contact.person}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Email</label>
-                    <p className="text-gray-900">{application.contact.email}</p>
+                    <label className="text-sm font-medium" style={{ color: '#6b7280' }}>Email</label>
+                    <p style={{ color: '#0b251c' }} className="font-medium">{application.contact.email}</p>
                   </div>
                 </div>
               </div>
 
-              {/* Refresh Button */}
+              {/* Refresh Button - SIKAP Theme */}
               <button
                 onClick={fetchApplicationData}
                 disabled={loading}
-                className="w-full px-4 py-3 bg-primary text-foreground rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                className="w-full px-4 py-3 rounded-xl transition-all disabled:opacity-50 font-medium shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: '#b7eb38',
+                  color: '#0b251c'
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = '#89a534';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = '#b7eb38';
+                  }
+                }}
               >
                 {loading ? 'Memuat...' : 'Refresh Status'}
               </button>

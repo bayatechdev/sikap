@@ -48,7 +48,7 @@ export default function KerjasamaSection({ data: staticData }: KerjasamaSectionP
         className="py-[60px] md:py-[100px] bg-section"
         animationType="fadeUp"
       >
-        <div id="cooperation"></div>
+        <div id="jenis-kerjasama"></div>
         <div className="mx-auto px-4 md:px-[75px] max-w-[1280px]">
           <div className="flex flex-col gap-[30px] md:gap-[50px]">
             {/* Section Header */}
@@ -81,7 +81,7 @@ export default function KerjasamaSection({ data: staticData }: KerjasamaSectionP
         className="py-[60px] md:py-[100px] bg-section"
         animationType="fadeUp"
       >
-        <div id="cooperation"></div>
+        <div id="jenis-kerjasama"></div>
         <div className="mx-auto px-4 md:px-[75px] max-w-[1280px]">
           <div className="flex flex-col gap-[30px] md:gap-[50px]">
             {/* Section Header */}

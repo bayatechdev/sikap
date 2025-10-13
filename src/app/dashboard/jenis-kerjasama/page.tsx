@@ -231,56 +231,58 @@ export default function JenisKerjasamaPage() {
             </div>
           </div>
 
+          <div className="flex felx-row pb-4">
           {/* Status Filter */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <div className="w-full text-sm font-medium text-muted-foreground mb-2">Filter Status:</div>
-            <Button
-              variant={selectedStatus === "" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedStatus("")}
-            >
-              Semua Status
-            </Button>
-            <Button
-              variant={selectedStatus === "active" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedStatus("active")}
-            >
-              Aktif ({cooperationTypes.filter(t => t.active).length})
-            </Button>
-            <Button
-              variant={selectedStatus === "inactive" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedStatus("inactive")}
-            >
-              Non-Aktif ({cooperationTypes.filter(t => !t.active).length})
-            </Button>
-          </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="w-full text-sm font-medium text-muted-foreground">Filter Status:</div>
+              <Button
+                variant={selectedStatus === "" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus("")}
+              >
+                Semua Status
+              </Button>
+              <Button
+                variant={selectedStatus === "active" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus("active")}
+              >
+                Aktif ({cooperationTypes.filter(t => t.active).length})
+              </Button>
+              <Button
+                variant={selectedStatus === "inactive" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus("inactive")}
+              >
+                Non-Aktif ({cooperationTypes.filter(t => !t.active).length})
+              </Button>
+            </div>
 
-          {/* Homepage Filter */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <div className="w-full text-sm font-medium text-muted-foreground mb-2">Filter Homepage:</div>
-            <Button
-              variant={selectedHomepage === "" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedHomepage("")}
-            >
-              Semua Tampilan
-            </Button>
-            <Button
-              variant={selectedHomepage === "show" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedHomepage("show")}
-            >
-              Tampil di Homepage ({cooperationTypes.filter(t => t.showOnHomepage).length})
-            </Button>
-            <Button
-              variant={selectedHomepage === "hide" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedHomepage("hide")}
-            >
-              Tidak Tampil ({cooperationTypes.filter(t => !t.showOnHomepage).length})
-            </Button>
+            {/* Homepage Filter */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="w-full text-sm font-medium text-muted-foreground">Filter Homepage:</div>
+              <Button
+                variant={selectedHomepage === "" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedHomepage("")}
+              >
+                Semua Tampilan
+              </Button>
+              <Button
+                variant={selectedHomepage === "show" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedHomepage("show")}
+              >
+                Tampil di Homepage ({cooperationTypes.filter(t => t.showOnHomepage).length})
+              </Button>
+              <Button
+                variant={selectedHomepage === "hide" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedHomepage("hide")}
+              >
+                Tidak Tampil ({cooperationTypes.filter(t => !t.showOnHomepage).length})
+              </Button>
+            </div>
           </div>
 
           {/* Cooperation Types Table */}

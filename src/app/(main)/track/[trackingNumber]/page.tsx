@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+
+
 
 interface StatusHistory {
   status: string;
@@ -186,12 +189,7 @@ export default function TrackingDetailPage() {
               onClick={() => router.push('/track')}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
             >
-              <Image
-                src="/assets/images/icons/ic_arrow_left.svg"
-                alt="Back"
-                width={16}
-                height={16}
-              />
+              <ArrowLeft />
               Kembali ke Pencarian
             </button>
             <h1 className="text-3xl font-bold text-foreground mb-2">

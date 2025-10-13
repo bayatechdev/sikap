@@ -148,10 +148,10 @@ const getSikapData = (session: { user?: { name?: string; email?: string } } | nu
           url: "#",
           icon: Settings,
           items: [
-            {
-              title: "General Settings",
-              url: "/dashboard/settings",
-            },
+            // {
+            //   title: "General Settings",
+            //   url: "/dashboard/settings",
+            // },
             {
               title: "Website Settings",
               url: "/dashboard/settings/website",

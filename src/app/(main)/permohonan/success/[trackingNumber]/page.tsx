@@ -120,7 +120,7 @@ export default function PermohonanSuccessPage() {
       <div className="py-[100px]">
         <div className="mx-auto px-4 md:px-[75px] w-full max-w-[800px]">
           {/* Success Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 pb-6">
             <div className="mb-6">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                 <Image
@@ -145,17 +145,19 @@ export default function PermohonanSuccessPage() {
           {/* Main Success Card */}
           <div className="bg-white rounded-[20px] shadow-xl overflow-hidden mb-8">
             <div
-              className="p-6 text-white"
+              className="p-6"
               style={{
-                background: 'linear-gradient(to right, #2563eb, #1e3a8a)',
-              }}
+              background: 'linear-gradient(to right, #2b452c, #4a6d62)',
+              color: 'white',
+              boxShadow: '0 4px 15px rgba(11, 37, 28, 0.3)'
+            }}
             >
               <h2 className="text-xl font-semibold mb-2">Nomor Tracking Anda</h2>
-              <p className="text-blue-100 text-sm mb-4" style={{ color: 'rgba(219, 234, 254, 0.8)' }}>
+              <p className="text-white/80 text-sm mb-4" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                 Simpan nomor ini untuk melacak status permohonan Anda
               </p>
 
-              <div className="rounded-lg p-4 flex items-center justify-between" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(8px)' }}>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-2xl md:text-3xl font-mono font-bold tracking-wider">
                     {applicationData.trackingNumber}
@@ -163,7 +165,7 @@ export default function PermohonanSuccessPage() {
                 </div>
                 <button
                   onClick={copyToClipboard}
-                  className="ml-4 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 font-medium"
+                  className="ml-4 px-4 py-2 bg-white text-foreground rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2 font-medium"
                 >
                   <svg
                     className={`w-5 h-5 ${copied ? 'text-green-600' : ''}`}
@@ -261,13 +263,6 @@ export default function PermohonanSuccessPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Buat Permohonan Baru
-            </Link>
-
-            <Link
-              href="/"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center px-8 py-4 border border-gray-300 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-center"
-            >
-              Kembali ke Beranda
             </Link>
           </div>
 

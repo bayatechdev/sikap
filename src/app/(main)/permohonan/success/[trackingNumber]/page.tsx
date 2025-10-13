@@ -144,13 +144,18 @@ export default function PermohonanSuccessPage() {
 
           {/* Main Success Card */}
           <div className="bg-white rounded-[20px] shadow-xl overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
+            <div
+              className="p-6 text-white"
+              style={{
+                background: 'linear-gradient(to right, #2563eb, #1e3a8a)',
+              }}
+            >
               <h2 className="text-xl font-semibold mb-2">Nomor Tracking Anda</h2>
-              <p className="text-white/80 text-sm mb-4">
+              <p className="text-blue-100 text-sm mb-4" style={{ color: 'rgba(219, 234, 254, 0.8)' }}>
                 Simpan nomor ini untuk melacak status permohonan Anda
               </p>
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-between">
+              <div className="rounded-lg p-4 flex items-center justify-between" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(8px)' }}>
                 <div className="flex-1">
                   <p className="text-2xl md:text-3xl font-mono font-bold tracking-wider">
                     {applicationData.trackingNumber}

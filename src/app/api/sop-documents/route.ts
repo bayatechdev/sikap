@@ -25,7 +25,11 @@ const createSOPDocumentSchema = z.object({
 const querySchema = z.object({
   search: z.string().optional(),
   category: z.string().optional(),
-  active: z.string().optional().transform(val => val === 'true'),
+  active: z.string().optional().transform(val => {
+    if (val === 'true') return true;
+    if (val === 'false') return false;
+    return undefined;
+  }),
   limit: z.string().optional().transform(val => val ? parseInt(val) : 50),
   offset: z.string().optional().transform(val => val ? parseInt(val) : 0),
 });

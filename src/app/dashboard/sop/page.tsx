@@ -1,24 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Edit2, Trash2, Download, FileText, MoreHorizontal, ToggleLeft, ToggleRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,9 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { DataTableSkeleton } from '@/components/ui/skeleton-variants';
 
 interface SOPDocument {
   id: number;
@@ -50,37 +43,25 @@ interface SOPDocument {
 
 interface APIResponse {
   documents: SOPDocument[];
-  totalCount: number;
   categories: { name: string; count: number }[];
-  pagination: {
-    limit: number;
-    offset: number;
-    hasMore: boolean;
-  };
 }
 
 export default function SOPPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<SOPDocument[]>([]);
+  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<SOPDocument | null>(null);
 
   const fetchDocuments = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams();
-
-      if (searchTerm) params.append('search', searchTerm);
-      if (selectedCategory) params.append('category', selectedCategory);
-      // For admin dashboard, we still want to see all documents, but let's include active ones by default
-      params.append('active', 'true');
-
-      const response = await fetch(`/api/sop-documents?${params.toString()}`);
+      const response = await fetch('/api/sop-documents');
 
       if (!response.ok) {
         throw new Error('Failed to fetch SOP documents');
@@ -89,13 +70,8 @@ export default function SOPPage() {
       const data: APIResponse = await response.json();
       setDocuments(data.documents);
       setCategories(data.categories);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch SOP documents',
-        variant: 'destructive',
-      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -103,8 +79,19 @@ export default function SOPPage() {
 
   useEffect(() => {
     fetchDocuments();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTerm, selectedCategory]);
+  }, []);
+
+  // Client-side filtering
+  const filteredDocuments = documents.filter(document =>
+    (selectedCategory === '' || document.category === selectedCategory) &&
+    (selectedStatus === '' ||
+     (selectedStatus === 'active' && document.active) ||
+     (selectedStatus === 'inactive' && !document.active)) &&
+    (searchTerm === '' ||
+     document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     document.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     document.category.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const handleDelete = async () => {
     if (!documentToDelete) return;
@@ -124,11 +111,10 @@ export default function SOPPage() {
       });
 
       fetchDocuments();
-    } catch (error) {
-      console.error('Error deleting document:', error);
+    } catch (err) {
       toast({
         title: 'Error',
-        description: 'Failed to delete SOP document',
+        description: err instanceof Error ? err.message : 'Failed to delete SOP document',
         variant: 'destructive',
       });
     } finally {
@@ -141,12 +127,15 @@ export default function SOPPage() {
     window.open(`/api/sop-documents/${doc.id}/download`, '_blank');
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  const getCategoryBadgeVariant = (category: string) => {
+    // Dynamic variant assignment based on category name
+    const categoryHash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const variants = ['default', 'secondary', 'outline', 'destructive'];
+    return variants[categoryHash % variants.length] as 'default' | 'secondary' | 'outline' | 'destructive';
+  };
+
+  const getStatusColor = (active: boolean) => {
+    return active ? 'default' : 'secondary';
   };
 
   const getColorBadge = (color: string) => {
@@ -161,146 +150,281 @@ export default function SOPPage() {
     return colorMap[color] || colorMap.primary;
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   if (loading) {
-    return <DataTableSkeleton />;
+    return (
+      <div className="@container/main space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">SOP Management</h1>
+            <p className="text-muted-foreground">Kelola dokumen Standard Operating Procedures</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1,2,3,4].map(i => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader className="space-y-0 pb-2">
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 bg-muted rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-2/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="@container/main space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">SOP Management</h1>
+            <p className="text-muted-foreground">Kelola dokumen Standard Operating Procedures</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="flex items-center justify-center h-64">
+            <div className="text-destructive text-center">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Error: {error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <div className="@container/main space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">SOP Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">SOP Management</h1>
           <p className="text-muted-foreground">
-            Manage Standard Operating Procedures documents
+            Kelola dokumen Standard Operating Procedures yang tersedia di sistem ({filteredDocuments.length} dokumen)
           </p>
         </div>
-        <Button onClick={() => router.push('/dashboard/sop/create')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add New SOP
-        </Button>
+        <Link href="/dashboard/sop/create">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah SOP
+          </Button>
+        </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search SOP documents..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-3 py-2 border border-input bg-background rounded-md text-sm"
-        >
-          <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category.name} value={category.name}>
-              {category.name} ({category.count})
-            </option>
-          ))}
-        </select>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total SOP
+            </CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{filteredDocuments.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Dokumen SOP terdaftar
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Aktif
+            </CardTitle>
+            <ToggleRight className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {filteredDocuments.filter(d => d.active).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Saat ini aktif
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Non-Aktif
+            </CardTitle>
+            <ToggleLeft className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {filteredDocuments.filter(d => !d.active).length}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Sementara dinonaktifkan
+            </p>
+          </CardContent>
+        </Card>
+        {categories.slice(0, 1).map((category) => (
+          <Card key={category.name}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Kategori Terbanyak
+              </CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{category.count}</div>
+              <p className="text-xs text-muted-foreground">
+                {category.name}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[300px]">Title</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Color</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {documents.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  No SOP documents found
-                </TableCell>
-              </TableRow>
+      {/* Search and Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar SOP</CardTitle>
+          <CardDescription>
+            Cari dan kelola semua dokumen Standard Operating Procedures
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari berdasarkan judul, kategori, atau deskripsi..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+            >
+              <option value="">Semua Kategori</option>
+              {categories.map((category) => (
+                <option key={category.name} value={category.name}>
+                  {category.name} ({category.count})
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+            >
+              <option value="">Semua Status</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Non-Aktif</option>
+            </select>
+          </div>
+
+          {/* Documents List */}
+          <div className="py-4">
+            {filteredDocuments.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {searchTerm || selectedCategory || selectedStatus ? 'Tidak ada SOP yang cocok dengan filter.' : 'Belum ada dokumen SOP.'}
+                </p>
+              </div>
             ) : (
-              documents.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell className="max-w-[300px]">
-                    <div>
-                      <div className="font-medium line-clamp-2 leading-tight break-words">{doc.title}</div>
-                      <div className="text-sm text-muted-foreground line-clamp-1 mt-1 break-words">
-                        {doc.description}
+              <div className="space-y-4">
+                {filteredDocuments.map((document) => (
+                  <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-sm font-medium leading-none truncate">
+                          {document.title}
+                        </p>
+                        <Badge variant={getCategoryBadgeVariant(document.category)}>
+                          {document.category}
+                        </Badge>
+                        <Badge variant={getStatusColor(document.active)}>
+                          {document.active ? 'Aktif' : 'Non-Aktif'}
+                        </Badge>
+                        <Badge className={getColorBadge(document.color)}>
+                          {document.color}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {document.description}
+                      </p>
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                        <span>Order: {document.displayOrder}</span>
+                        <span>Dibuat: {formatDate(document.createdAt)}</span>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>{doc.category}</TableCell>
-                  <TableCell>
-                    <Badge className={getColorBadge(doc.color)}>
-                      {doc.color}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={doc.active ? 'default' : 'secondary'}>
-                      {doc.active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{formatDate(doc.createdAt)}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dashboard/sop/${doc.id}`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDownload(doc)}>
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setDocumentToDelete(doc);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownload(document)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Unduh
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/sop/${document.id}`}>
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setDocumentToDelete(document);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Hapus
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus SOP?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the SOP document
-              &quot;{documentToDelete?.title}&quot; and remove it from the database.
+              Tindakan ini tidak dapat dibatalkan. Ini akan menghapus dokumen SOP &quot;{documentToDelete?.title}&quot; secara permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Hapus
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

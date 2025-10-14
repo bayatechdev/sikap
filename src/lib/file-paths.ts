@@ -133,9 +133,14 @@ export async function ensureUploadDir(relativePath?: string, isPublic = false): 
  * Create upload path for a file based on its type
  * @param filename - The sanitized filename
  * @param fileType - Type of file: 'image', 'document', 'legal', 'sop'
+ * @param subPath - Optional subpath for additional organization
  * @returns Upload path structure
  */
-export function createUploadPath(filename: string, fileType: 'image' | 'document' | 'legal' | 'sop' = 'document'): string {
+export function createUploadPath(
+  filename: string,
+  fileType: 'image' | 'document' | 'legal' | 'sop' = 'document',
+  subPath?: string
+): string {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -143,13 +148,20 @@ export function createUploadPath(filename: string, fileType: 'image' | 'document
 
   switch (fileType) {
     case 'image':
-      return `images/${year}/${month}/${day}/${filename}`;
+      return subPath
+        ? `images/${subPath}/${filename}`
+        : `images/${year}/${month}/${day}/${filename}`;
     case 'legal':
       return `legal-documents/${filename}`;
     case 'sop':
       return `sop-documents/${filename}`;
     case 'document':
+      return subPath
+        ? `documents/${subPath}/${filename}`
+        : `documents/${year}/${month}/${day}/${filename}`;
     default:
-      return `documents/${year}/${month}/${day}/${filename}`;
+      return subPath
+        ? `${fileType}/${subPath}/${filename}`
+        : `${fileType}/${year}/${month}/${day}/${filename}`;
   }
 }

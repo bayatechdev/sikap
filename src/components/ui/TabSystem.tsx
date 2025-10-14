@@ -52,6 +52,16 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
 
   const colors = getColorClasses(data?.downloadInfo?.color || "primary");
 
+  const handleDownload = () => {
+    // If there's a real document with relativePath, download it
+    if (data?.downloadInfo?.relativePath) {
+      window.open(`/api/files/${encodeURIComponent(data.downloadInfo.relativePath)}`, '_blank');
+    } else {
+      // Fallback - could show a message or handle differently
+      console.log('No document available for download');
+    }
+  };
+
   return (
     <div className="bg-white rounded-[20px] p-6 md:p-8 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300">
       <div className="flex items-start gap-4 mb-6">
@@ -72,17 +82,21 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
             {data?.downloadInfo?.docType || "Document"}
           </div>
           <h3 className="text-lg font-bold text-foreground mb-1">
-            {data?.downloadInfo?.fileName || "Loading..."}
+            {data?.downloadInfo?.fileName || "Template Dokumen"}
           </h3>
           <p className="text-[14px] text-gray-500">
-            {data?.downloadInfo?.fileType || "PDF"} • {data?.downloadInfo?.fileSize || "Loading..."}
+            {data?.downloadInfo?.fileType || "PDF"} • {data?.downloadInfo?.fileSize || "Template"}
           </p>
         </div>
       </div>
 
       <div className="mb-6">
         <button
-          className={`inline-flex items-center justify-center gap-3 px-6 py-3 font-semibold rounded-[100px] transition-all duration-300 hover:-translate-y-1 ${colors.button}`}
+          onClick={handleDownload}
+          className={`inline-flex items-center justify-center gap-3 px-6 py-3 font-semibold rounded-[100px] transition-all duration-300 hover:-translate-y-1 ${colors.button} ${
+            !data?.downloadInfo?.relativePath ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          disabled={!data?.downloadInfo?.relativePath}
         >
           <Image
             src="/assets/images/icons/ic_download.svg"
@@ -90,8 +104,12 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
             width={20}
             height={20}
           />
-          <span className="hidden md:inline">Download File</span>
-          <span className="md:hidden">Download</span>
+          <span className="hidden md:inline">
+            {data?.downloadInfo?.relativePath ? 'Download File' : 'Template Tersedia'}
+          </span>
+          <span className="md:hidden">
+            {data?.downloadInfo?.relativePath ? 'Download' : 'N/A'}
+          </span>
           <div className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center">
             <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">
               <path d="M0 0v2h2v-2h-2zm0 3v2h2v-2h-2zm3-3v2h2v-2h-2zm0 3v2h2v-2h-2zm3-3v6h2v-6h-2z" />

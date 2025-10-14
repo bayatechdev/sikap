@@ -21,7 +21,9 @@ const updateCooperationTypeSchema = z.object({
     fileType: z.string().optional(),
     docType: z.string().optional(),
     color: z.string().optional(),
-    icon: z.string().optional()
+    icon: z.string().optional(),
+    relativePath: z.string().optional(),
+    originalName: z.string().optional()
   }).optional(),
   color: z.string().optional(),
   icon: z.string().optional(),

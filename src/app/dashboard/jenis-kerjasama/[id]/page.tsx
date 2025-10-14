@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react"
+import { ArrowLeft, Plus, Trash2, Save, FileText } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter, useParams } from "next/navigation"
+import { DocumentUpload } from "@/components/ui/DocumentUpload"
 
 interface RequiredDocument {
   name: string;
@@ -41,6 +42,8 @@ interface CooperationType {
     docType: string;
     color: string;
     icon: string;
+    relativePath?: string;
+    originalName?: string;
   };
   color: string;
   icon: string;
@@ -80,6 +83,15 @@ export default function EditJenisKerjasamaPage() {
   const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([
     { step: 1, name: '', description: '' }
   ]);
+
+  // Document upload state
+  const [currentDocument, setCurrentDocument] = useState<{
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchCooperationType = async () => {
@@ -123,6 +135,17 @@ export default function EditJenisKerjasamaPage() {
           ? data.workflowSteps
           : [{ step: 1, name: '', description: '' }]
         );
+
+        // Set current document if available
+        if (data.downloadInfo && data.downloadInfo.relativePath) {
+          setCurrentDocument({
+            fileName: data.downloadInfo.fileName,
+            fileSize: data.downloadInfo.fileSize,
+            fileType: data.downloadInfo.fileType,
+            relativePath: data.downloadInfo.relativePath,
+            originalName: data.downloadInfo.originalName || data.downloadInfo.fileName
+          });
+        }
       } catch (error) {
         console.error('Error fetching cooperation type:', error);
         alert('Gagal memuat data jenis kerjasama');
@@ -197,12 +220,41 @@ export default function EditJenisKerjasamaPage() {
     setWorkflowSteps(newSteps);
   };
 
+  // Document upload handlers
+  const handleDocumentUploadSuccess = (documentData: {
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  }) => {
+    setCurrentDocument(documentData);
+  };
+
+  const handleDocumentUploadError = (error: string) => {
+    console.error('Document upload error:', error);
+    alert(`Gagal mengupload dokumen: ${error}`);
+  };
+
+  const handleDocumentRemove = () => {
+    setCurrentDocument(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const downloadInfo = {
+      const downloadInfo = currentDocument ? {
+        fileName: currentDocument.fileName,
+        fileSize: currentDocument.fileSize,
+        fileType: currentDocument.fileType,
+        docType: name,
+        color: color,
+        icon: icon || '📄',
+        relativePath: currentDocument.relativePath,
+        originalName: currentDocument.originalName
+      } : {
         fileName: `Template_${code.toUpperCase()}`,
         fileSize: '150KB',
         fileType: 'PDF',
@@ -502,6 +554,29 @@ export default function EditJenisKerjasamaPage() {
               <Plus className="h-4 w-4 mr-2" />
               Tambah Contoh
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Document Upload */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Dokumen Template
+            </CardTitle>
+            <CardDescription>
+              Upload dokumen template yang dapat diunduh oleh pengguna untuk jenis kerjasama ini
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentUpload
+              onUploadSuccess={handleDocumentUploadSuccess}
+              onUploadError={handleDocumentUploadError}
+              onRemoveDocument={handleDocumentRemove}
+              cooperationTypeId={parseInt(params.id as string)}
+              existingDocument={currentDocument || undefined}
+              maxSizeMB={10}
+            />
           </CardContent>
         </Card>
 

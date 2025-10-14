@@ -73,9 +73,9 @@ export interface FooterSection {
 export interface FooterData {
   copyright: string;
   sections: {
-    product: FooterSection;
-    company: FooterSection;
-    developer: FooterSection;
+    informasi: FooterSection;
+    layanan: FooterSection;
+    kebijakan: FooterSection;
   };
 }
 

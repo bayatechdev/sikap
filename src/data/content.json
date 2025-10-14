@@ -59,33 +59,33 @@
     }
   },
   "footer": {
-    "copyright": "© 2025 - SIKAP - Tana Tidung",
+    "copyright": "© 2025 - SIKAP - Sistem Kerjasama Pemerintah Kabupaten Tana Tidung",
     "sections": {
-      "product": {
-        "title": "Kerjasama Terbaru",
+      "informasi": {
+        "title": "Informasi Publik",
         "links": [
-          "SaaS Web Builder",
-          "Copywriting Templates",
-          "Automation Tools",
-          "Users Tracking Behavior"
+          "Website Resmi",
+          "Layanan Masyarakat",
+          "Berita Terkini",
+          "Pengumuman Resmi"
         ]
       },
-      "company": {
-        "title": "Jenis Kerjasana",
+      "layanan": {
+        "title": "Layanan Kerjasama",
         "links": [
-          "Privacy Policy",
-          "Help Center",
-          "Terms Conditions",
-          "About Us"
+          "Ajukan Permohonan",
+          "Tracking Status",
+          "Download Dokumen",
+          "Standar Operasional"
         ]
       },
-      "developer": {
-        "title": "Link Terkait",
+      "kebijakan": {
+        "title": "Kebijakan & Informasi",
         "links": [
-          "API Documentations",
-          "Product Knowledges",
-          "Ticketing Support",
-          "Pricing"
+          "Kebijakan Privasi",
+          "Syarat & Ketentuan",
+          "FAQ",
+          "Hubungi Kami"
         ]
       }
     }

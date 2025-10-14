@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FooterData } from '@/types';
 
 interface FooterProps {
@@ -34,60 +35,130 @@ export default function Footer({ footerData }: FooterProps) {
 
           {/* Footer Links */}
           <div className="flex flex-col md:flex-row gap-8 md:gap-[70px]">
-            {/* Product Section */}
+            {/* Informasi Publik Section */}
             <nav className="flex flex-col gap-5">
               <h3 className="font-poppins text-[16px] leading-[24px] font-bold text-foreground">
-                {footerData.sections.product.title}
+                {footerData.sections.informasi.title}
               </h3>
               <ul className="flex flex-col gap-2.5">
-                {footerData.sections.product.links.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href="#"
-                      className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <a
+                    href="https://tanatidungkab.go.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Website Resmi
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://layanan.tanatidungkab.go.id"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Layanan Masyarakat
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Berita Terkini
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Pengumuman Resmi
+                  </a>
+                </li>
               </ul>
             </nav>
 
-            {/* Company Section */}
+            {/* Layanan Kerjasama Section */}
             <nav className="flex flex-col gap-5">
               <h3 className="font-poppins text-[16px] leading-[24px] font-bold text-foreground">
-                {footerData.sections.company.title}
+                {footerData.sections.layanan.title}
               </h3>
               <ul className="flex flex-col gap-2.5">
-                {footerData.sections.company.links.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href="#"
-                      className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <Link
+                    href="/permohonan"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Ajukan Permohonan
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/track"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Tracking Status
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#jenis-kerjasama"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Download Dokumen
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#sop"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Standar Operasional
+                  </Link>
+                </li>
               </ul>
             </nav>
 
-            {/* Developer Section */}
+            {/* Kebijakan & Informasi Section */}
             <nav className="flex flex-col gap-5">
               <h3 className="font-poppins text-[16px] leading-[24px] font-bold text-foreground">
-                {footerData.sections.developer.title}
+                {footerData.sections.kebijakan.title}
               </h3>
               <ul className="flex flex-col gap-2.5">
-                {footerData.sections.developer.links.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href="#"
-                      className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <a
+                    href="/privacy-policy"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Kebijakan Privasi
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/terms-conditions"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Syarat & Ketentuan
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/faq"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    FAQ
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="/#contact"
+                    className="text-[16px] leading-7 font-medium text-gray-600 hover:text-primary transition-colors duration-300"
+                  >
+                    Hubungi Kami
+                  </Link>
+                </li>
               </ul>
             </nav>
           </div>

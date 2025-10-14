@@ -75,18 +75,20 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
             transition={{ duration: 0.8, ease: "easeInOut" }}
           >
             {/* Main Image with rounded corners */}
-            <div className="absolute ml-4 mr-4 lg:ml-[52px] lg:mr-[51px] w-[calc(100%-32px)] lg:w-[447px] h-full lg:h-[506px] rounded-[26px] overflow-hidden">
-              <Image
-                src={imageUrl}
-                alt={imageAlt}
-                fill
-                className="object-cover"
-                priority
-              />
+            <div className="absolute bg-primary h-full w-[calc(100%-32px)] lg:w-[487px] pt-6 rounded-[26px] overflow-x-hidden">
+              <div className="absolute ml-4 mr-4 lg:ml-[32px] lg:mr-[51px] w-[calc(100%-32px)] lg:w-[467px] h-full lg:h-[506px] rounded-tl-[26px] overflow-hidden">
+                <Image
+                  src={imageUrl}
+                  alt={imageAlt}
+                  fill
+                  className="object-cover"
+                  priority
+                  />
+              </div>
             </div>
 
             {/* Review Card */}
-            <div className="absolute bottom-[20px] lg:bottom-[68px] left-0 w-[200px] lg:w-[316px] h-auto z-10">
+            {/* <div className="absolute bottom-[20px] lg:bottom-[68px] left-0 w-[200px] lg:w-[316px] h-auto z-10">
               <Image
                 src="/assets/images/thumbnails/review.png"
                 alt="Review"
@@ -94,12 +96,12 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
                 height={150}
                 className="drop-shadow-custom w-auto h-auto"
               />
-            </div>
+            </div> */}
 
             {/* Badge Card */}
             <div className="absolute top-[20px] lg:top-[77px] right-0 w-[80px] lg:w-[136px] h-auto z-10">
               <Image
-                src="/assets/images/thumbnails/badge.png"
+                src="/assets/images/thumbnails/hero_logo.png"
                 alt="Badge"
                 width={136}
                 height={120}

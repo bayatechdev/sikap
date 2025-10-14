@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 // Validation schema
 const createCooperationSchema = z.object({
-  applicationId: z.string().optional(),
+  applicationId: z.string().optional().transform(val => val === '' ? undefined : val),
   title: z.string().min(1, 'Title is required'),
   cooperationType: z.enum(['MOU', 'PKS', 'NK']),
   cooperationTypeColor: z.enum(['primary', 'blue', 'green', 'red', 'yellow', 'orange', 'purple', 'gray', 'default']),

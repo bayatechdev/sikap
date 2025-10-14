@@ -564,201 +564,240 @@ export default function CooperationManagementPage() {
 
       {/* Create Cooperation Modal */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Cooperation</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="border-b pb-4">
+            <DialogTitle className="text-xl font-semibold">Create New Cooperation</DialogTitle>
+            <DialogDescription className="text-base">
               Add a new cooperation agreement. You can import data from approved applications or enter manually.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {/* Import from Application Button */}
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsBrowseModalOpen(true)}
-              >
-                <Building className="h-4 w-4 mr-2" />
-                Browse Applications
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Enter cooperation title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cooperationType">Type *</Label>
-                <Select
-                  value={formData.cooperationType}
-                  onValueChange={(value) => setFormData({ ...formData, cooperationType: value as 'MOU' | 'PKS' | 'NK' })}
+          <div className="py-6 space-y-6">
+            {/* Import from Application Section */}
+            <div className="bg-muted/30 rounded-lg p-4 border border-muted">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Quick Import</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Import data from approved applications</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsBrowseModalOpen(true)}
+                  className="shrink-0"
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MOU">MOU</SelectItem>
-                    <SelectItem value="PKS">PKS</SelectItem>
-                    <SelectItem value="NK">Nota Kesepakatan</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cooperationTypeColor">Type Color</Label>
-                <Select
-                  value={formData.cooperationTypeColor}
-                  onValueChange={(value) => setFormData({ ...formData, cooperationTypeColor: value as 'primary' | 'blue' | 'green' })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="primary">Primary</SelectItem>
-                    <SelectItem value="blue">Blue</SelectItem>
-                    <SelectItem value="green">Green</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orgUnit">OPD *</Label>
-                <Input
-                  id="orgUnit"
-                  value={formData.orgUnit}
-                  onChange={(e) => setFormData({ ...formData, orgUnit: e.target.value })}
-                  placeholder="Enter organizational unit"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="partnerInstitution">Partner Institution *</Label>
-                <Input
-                  id="partnerInstitution"
-                  value={formData.partnerInstitution}
-                  onChange={(e) => setFormData({ ...formData, partnerInstitution: e.target.value })}
-                  placeholder="Enter partner institution"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="location">Location *</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Enter location"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cooperationDate">Cooperation Date *</Label>
-                <Input
-                  id="cooperationDate"
-                  type="date"
-                  value={formData.cooperationDate}
-                  onChange={(e) => setFormData({ ...formData, cooperationDate: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => setFormData({ ...formData, status: value as 'ACTIVE' | 'EXPIRED' | 'TERMINATED' | 'DRAFT' })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="EXPIRED">Expired</SelectItem>
-                    <SelectItem value="TERMINATED">Terminated</SelectItem>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Building className="h-4 w-4 mr-2" />
+                  Browse Applications
+                </Button>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Enter cooperation description"
-                rows={3}
-              />
+            {/* Basic Information Section */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-primary pl-4">
+                <h3 className="text-lg font-semibold">Basic Information</h3>
+                <p className="text-sm text-muted-foreground">Essential details about the cooperation</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="title" className="text-sm font-medium">Title *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Enter cooperation title"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="partnerInstitution" className="text-sm font-medium">Partner Institution *</Label>
+                  <Input
+                    id="partnerInstitution"
+                    value={formData.partnerInstitution}
+                    onChange={(e) => setFormData({ ...formData, partnerInstitution: e.target.value })}
+                    placeholder="Enter partner institution"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="cooperationType" className="text-sm font-medium">Cooperation Type *</Label>
+                  <Select
+                    value={formData.cooperationType}
+                    onValueChange={(value) => setFormData({ ...formData, cooperationType: value as 'MOU' | 'PKS' | 'NK' })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MOU">MOU</SelectItem>
+                      <SelectItem value="PKS">PKS</SelectItem>
+                      <SelectItem value="NK">Nota Kesepakatan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="cooperationTypeColor" className="text-sm font-medium">Type Color</Label>
+                  <Select
+                    value={formData.cooperationTypeColor}
+                    onValueChange={(value) => setFormData({ ...formData, cooperationTypeColor: value as 'primary' | 'blue' | 'green' })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="primary">Primary</SelectItem>
+                      <SelectItem value="blue">Blue</SelectItem>
+                      <SelectItem value="green">Green</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="orgUnit" className="text-sm font-medium">OPD *</Label>
+                  <Input
+                    id="orgUnit"
+                    value={formData.orgUnit}
+                    onChange={(e) => setFormData({ ...formData, orgUnit: e.target.value })}
+                    placeholder="Enter organizational unit"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="location" className="text-sm font-medium">Location *</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="Enter location"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="cooperationDate" className="text-sm font-medium">Cooperation Date *</Label>
+                  <Input
+                    id="cooperationDate"
+                    type="date"
+                    value={formData.cooperationDate}
+                    onChange={(e) => setFormData({ ...formData, cooperationDate: e.target.value })}
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="status" className="text-sm font-medium">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => setFormData({ ...formData, status: value as 'ACTIVE' | 'EXPIRED' | 'TERMINATED' | 'DRAFT' })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="EXPIRED">Expired</SelectItem>
+                      <SelectItem value="TERMINATED">Terminated</SelectItem>
+                      <SelectItem value="DRAFT">Draft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Dates Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div className="space-y-3">
+                  <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="endDate" className="text-sm font-medium">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="h-11"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="objectives">Objectives</Label>
-              <Textarea
-                id="objectives"
-                value={formData.objectives}
-                onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
-                placeholder="Enter cooperation objectives"
-                rows={3}
-              />
-            </div>
+            {/* Additional Information Section */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-primary pl-4">
+                <h3 className="text-lg font-semibold">Additional Information</h3>
+                <p className="text-sm text-muted-foreground">Detailed description and objectives</p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="scope">Scope</Label>
-              <Textarea
-                id="scope"
-                value={formData.scope}
-                onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-                placeholder="Enter cooperation scope"
-                rows={3}
-              />
-            </div>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Enter cooperation description"
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Enter additional notes"
-                rows={2}
-              />
+                <div className="space-y-3">
+                  <Label htmlFor="objectives" className="text-sm font-medium">Objectives</Label>
+                  <Textarea
+                    id="objectives"
+                    value={formData.objectives}
+                    onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
+                    placeholder="Enter cooperation objectives"
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="scope" className="text-sm font-medium">Scope</Label>
+                  <Textarea
+                    id="scope"
+                    value={formData.scope}
+                    onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
+                    placeholder="Enter cooperation scope"
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="notes" className="text-sm font-medium">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="Enter additional notes"
+                    rows={3}
+                    className="resize-none"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+          <DialogFooter className="border-t pt-4">
+            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} className="px-6">
               Cancel
             </Button>
-            <Button type="button" onClick={handleCreateCooperation}>
+            <Button type="button" onClick={handleCreateCooperation} className="px-6">
               Create Cooperation
             </Button>
           </DialogFooter>
@@ -767,189 +806,221 @@ export default function CooperationManagementPage() {
 
       {/* Edit Cooperation Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Cooperation</DialogTitle>
-            <DialogDescription>
-              Update cooperation agreement details.
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="border-b pb-4">
+            <DialogTitle className="text-xl font-semibold">Edit Cooperation</DialogTitle>
+            <DialogDescription className="text-base">
+              Update cooperation agreement details and information.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-title">Title *</Label>
-                <Input
-                  id="edit-title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Enter cooperation title"
-                />
+          <div className="py-6 space-y-6">
+            {/* Basic Information Section */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-primary pl-4">
+                <h3 className="text-lg font-semibold">Basic Information</h3>
+                <p className="text-sm text-muted-foreground">Essential details about the cooperation</p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-cooperationType">Type *</Label>
-                <Select
-                  value={formData.cooperationType}
-                  onValueChange={(value) => setFormData({ ...formData, cooperationType: value as 'MOU' | 'PKS' | 'NK' })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MOU">MOU</SelectItem>
-                    <SelectItem value="PKS">PKS</SelectItem>
-                    <SelectItem value="NK">Nota Kesepakatan</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label htmlFor="edit-title" className="text-sm font-medium">Title *</Label>
+                  <Input
+                    id="edit-title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Enter cooperation title"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-partnerInstitution" className="text-sm font-medium">Partner Institution *</Label>
+                  <Input
+                    id="edit-partnerInstitution"
+                    value={formData.partnerInstitution}
+                    onChange={(e) => setFormData({ ...formData, partnerInstitution: e.target.value })}
+                    placeholder="Enter partner institution"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-cooperationType" className="text-sm font-medium">Cooperation Type *</Label>
+                  <Select
+                    value={formData.cooperationType}
+                    onValueChange={(value) => setFormData({ ...formData, cooperationType: value as 'MOU' | 'PKS' | 'NK' })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MOU">MOU</SelectItem>
+                      <SelectItem value="PKS">PKS</SelectItem>
+                      <SelectItem value="NK">Nota Kesepakatan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-cooperationTypeColor" className="text-sm font-medium">Type Color</Label>
+                  <Select
+                    value={formData.cooperationTypeColor}
+                    onValueChange={(value) => setFormData({ ...formData, cooperationTypeColor: value as 'primary' | 'blue' | 'green' })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="primary">Primary</SelectItem>
+                      <SelectItem value="blue">Blue</SelectItem>
+                      <SelectItem value="green">Green</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-orgUnit" className="text-sm font-medium">OPD *</Label>
+                  <Input
+                    id="edit-orgUnit"
+                    value={formData.orgUnit}
+                    onChange={(e) => setFormData({ ...formData, orgUnit: e.target.value })}
+                    placeholder="Enter organizational unit"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-location" className="text-sm font-medium">Location *</Label>
+                  <Input
+                    id="edit-location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="Enter location"
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-cooperationDate" className="text-sm font-medium">Cooperation Date *</Label>
+                  <Input
+                    id="edit-cooperationDate"
+                    type="date"
+                    value={formData.cooperationDate}
+                    onChange={(e) => setFormData({ ...formData, cooperationDate: e.target.value })}
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-status" className="text-sm font-medium">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) => setFormData({ ...formData, status: value as 'ACTIVE' | 'EXPIRED' | 'TERMINATED' | 'DRAFT' })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Active</SelectItem>
+                      <SelectItem value="EXPIRED">Expired</SelectItem>
+                      <SelectItem value="TERMINATED">Terminated</SelectItem>
+                      <SelectItem value="DRAFT">Draft</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-cooperationTypeColor">Type Color</Label>
-                <Select
-                  value={formData.cooperationTypeColor}
-                  onValueChange={(value) => setFormData({ ...formData, cooperationTypeColor: value as 'primary' | 'blue' | 'green' })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="primary">Primary</SelectItem>
-                    <SelectItem value="blue">Blue</SelectItem>
-                    <SelectItem value="green">Green</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Dates Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div className="space-y-3">
+                  <Label htmlFor="edit-startDate" className="text-sm font-medium">Start Date</Label>
+                  <Input
+                    id="edit-startDate"
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="h-11"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-orgUnit">OPD *</Label>
-                <Input
-                  id="edit-orgUnit"
-                  value={formData.orgUnit}
-                  onChange={(e) => setFormData({ ...formData, orgUnit: e.target.value })}
-                  placeholder="Enter organizational unit"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-partnerInstitution">Partner Institution *</Label>
-                <Input
-                  id="edit-partnerInstitution"
-                  value={formData.partnerInstitution}
-                  onChange={(e) => setFormData({ ...formData, partnerInstitution: e.target.value })}
-                  placeholder="Enter partner institution"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-location">Location *</Label>
-                <Input
-                  id="edit-location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Enter location"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-cooperationDate">Cooperation Date *</Label>
-                <Input
-                  id="edit-cooperationDate"
-                  type="date"
-                  value={formData.cooperationDate}
-                  onChange={(e) => setFormData({ ...formData, cooperationDate: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-startDate">Start Date</Label>
-                <Input
-                  id="edit-startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-endDate">End Date</Label>
-                <Input
-                  id="edit-endDate"
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => setFormData({ ...formData, status: value as 'ACTIVE' | 'EXPIRED' | 'TERMINATED' | 'DRAFT' })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="EXPIRED">Expired</SelectItem>
-                    <SelectItem value="TERMINATED">Terminated</SelectItem>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-3">
+                  <Label htmlFor="edit-endDate" className="text-sm font-medium">End Date</Label>
+                  <Input
+                    id="edit-endDate"
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="h-11"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Enter cooperation description"
-                rows={3}
-              />
-            </div>
+            {/* Additional Information Section */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-primary pl-4">
+                <h3 className="text-lg font-semibold">Additional Information</h3>
+                <p className="text-sm text-muted-foreground">Detailed description and objectives</p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-objectives">Objectives</Label>
-              <Textarea
-                id="edit-objectives"
-                value={formData.objectives}
-                onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
-                placeholder="Enter cooperation objectives"
-                rows={3}
-              />
-            </div>
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="edit-description" className="text-sm font-medium">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Enter cooperation description"
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-scope">Scope</Label>
-              <Textarea
-                id="edit-scope"
-                value={formData.scope}
-                onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-                placeholder="Enter cooperation scope"
-                rows={3}
-              />
-            </div>
+                <div className="space-y-3">
+                  <Label htmlFor="edit-objectives" className="text-sm font-medium">Objectives</Label>
+                  <Textarea
+                    id="edit-objectives"
+                    value={formData.objectives}
+                    onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
+                    placeholder="Enter cooperation objectives"
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-notes">Notes</Label>
-              <Textarea
-                id="edit-notes"
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Enter additional notes"
-                rows={2}
-              />
+                <div className="space-y-3">
+                  <Label htmlFor="edit-scope" className="text-sm font-medium">Scope</Label>
+                  <Textarea
+                    id="edit-scope"
+                    value={formData.scope}
+                    onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
+                    placeholder="Enter cooperation scope"
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="edit-notes" className="text-sm font-medium">Notes</Label>
+                  <Textarea
+                    id="edit-notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    placeholder="Enter additional notes"
+                    rows={3}
+                    className="resize-none"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
+          <DialogFooter className="border-t pt-4">
+            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} className="px-6">
               Cancel
             </Button>
-            <Button type="button" onClick={handleEditCooperation}>
+            <Button type="button" onClick={handleEditCooperation} className="px-6">
               Update Cooperation
             </Button>
           </DialogFooter>

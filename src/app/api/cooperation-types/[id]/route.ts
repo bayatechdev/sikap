@@ -145,7 +145,7 @@ export async function PUT(
     };
 
     // Remove the array fields that are now in JSON format
-    const { features, examples, downloadInfo, ...updateData } = dbData;
+    const { features, examples, downloadInfo, requiredDocuments, workflowSteps, ...updateData } = dbData;
 
     // Update cooperation type
     const cooperationType = await prisma.cooperationType.update({

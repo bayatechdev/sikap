@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { getUploadDir, getPublicUploadDir } from '@/lib/file-paths';
 
 export async function GET(
   request: NextRequest,
@@ -17,18 +18,24 @@ export async function GET(
       );
     }
 
-    // Construct file path - check both public/uploads and uploads directories
+    // Construct file path - check both public uploads and private uploads directories
     const relativePath = filePath.join('/');
-    const publicFilePath = path.join(process.cwd(), 'public', 'uploads', relativePath);
-    const uploadsFilePath = path.join(process.cwd(), 'uploads', relativePath);
+    const publicUploadDir = getPublicUploadDir();
+    const privateUploadDir = getUploadDir();
+
+    const publicFilePath = path.join(publicUploadDir, relativePath);
+    const privateFilePath = path.join(privateUploadDir, relativePath);
 
     let fullPath: string;
+    let isPublicFile = false;
 
-    // Check which path exists
+    // Check which path exists (prioritize public files for direct access)
     if (existsSync(publicFilePath)) {
       fullPath = publicFilePath;
-    } else if (existsSync(uploadsFilePath)) {
-      fullPath = uploadsFilePath;
+      isPublicFile = true;
+    } else if (existsSync(privateFilePath)) {
+      fullPath = privateFilePath;
+      isPublicFile = false;
     } else {
       return NextResponse.json(
         { error: 'File not found' },
@@ -36,12 +43,12 @@ export async function GET(
       );
     }
 
-    // Security check - ensure path is within upload directories
+    // Security check - ensure path is within allowed upload directories
     const normalizedPath = path.normalize(fullPath);
-    const publicUploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    const uploadsDir = path.join(process.cwd(), 'uploads');
+    const normalizedPublicDir = path.normalize(publicUploadDir);
+    const normalizedPrivateDir = path.normalize(privateUploadDir);
 
-    if (!normalizedPath.startsWith(publicUploadsDir) && !normalizedPath.startsWith(uploadsDir)) {
+    if (!normalizedPath.startsWith(normalizedPublicDir) && !normalizedPath.startsWith(normalizedPrivateDir)) {
       return NextResponse.json(
         { error: 'Unauthorized file access' },
         { status: 403 }
@@ -87,13 +94,22 @@ export async function GET(
     }
 
     // Return file with appropriate headers
+    const headers: Record<string, string> = {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Content-Disposition': isPublicFile ? 'inline' : 'attachment',
+    };
+
+    // Add security headers for private files
+    if (!isPublicFile) {
+      headers['X-Content-Type-Options'] = 'nosniff';
+    }
+
+    console.log(`📁 Serving file: ${relativePath} (${isPublicFile ? 'public' : 'private'})`);
+
     return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
-        'Content-Disposition': 'inline',
-      },
+      headers,
     });
 
   } catch (error) {

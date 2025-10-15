@@ -75,7 +75,7 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
             transition={{ duration: 0.8, ease: "easeInOut" }}
           >
             {/* Main Image with rounded corners */}
-            <div className="absolute bg-primary h-full w-[calc(100%-32px)] lg:w-[487px] pt-6 rounded-[26px] overflow-x-hidden">
+            <div className="absolute bg-primary h-full w-[calc(100%-32px)] lg:w-[487px] pt-6 rounded-[26px] overflow-hidden">
               <div className="absolute ml-4 mr-4 lg:ml-[32px] lg:mr-[51px] w-[calc(100%-32px)] lg:w-[467px] h-full lg:h-[506px] rounded-tl-[26px] overflow-hidden">
                 <Image
                   src={imageUrl}

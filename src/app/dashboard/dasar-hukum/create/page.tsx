@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, Upload, FileText } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { DocumentUpload } from "@/components/ui/DocumentUpload";
 
 interface FormData {
   title: string;
@@ -16,7 +17,6 @@ interface FormData {
   year: string;
   category: string;
   description: string;
-  file: File | null;
 }
 
 const categories = [
@@ -36,8 +36,15 @@ export default function CreateLegalDocumentPage() {
     year: new Date().getFullYear().toString(),
     category: "",
     description: "",
-    file: null,
   });
+
+  const [currentDocument, setCurrentDocument] = useState<{
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  } | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -47,38 +54,32 @@ export default function CreateLegalDocumentPage() {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData(prev => ({
-      ...prev,
-      file
-    }));
+  // Document upload handlers
+  const handleDocumentUploadSuccess = (documentData: {
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  }) => {
+    setCurrentDocument(documentData);
+    console.log('Document uploaded successfully:', documentData);
   };
 
-  const uploadFile = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', 'legal-document');
+  const handleDocumentUploadError = (error: string) => {
+    console.error('Document upload error:', error);
+    setError(`Gagal mengupload dokumen: ${error}`);
+  };
 
-    const response = await fetch('/api/documents/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to upload file');
-    }
-
-    const data = await response.json();
-    return data.relativePath;
+  const handleDocumentRemove = () => {
+    setCurrentDocument(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.file) {
-      setError("Please select a file to upload");
+    if (!currentDocument) {
+      setError("Please upload a document");
       return;
     }
 
@@ -86,9 +87,6 @@ export default function CreateLegalDocumentPage() {
     setError(null);
 
     try {
-      // Upload file first
-      const relativePath = await uploadFile(formData.file);
-
       // Create legal document record
       const response = await fetch('/api/legal-documents', {
         method: 'POST',
@@ -101,7 +99,11 @@ export default function CreateLegalDocumentPage() {
           year: formData.year,
           category: formData.category,
           description: formData.description,
-          relativePath: relativePath,
+          relativePath: currentDocument.relativePath,
+          fileName: currentDocument.fileName,
+          fileSize: currentDocument.fileSize,
+          fileType: currentDocument.fileType,
+          originalName: currentDocument.originalName,
         }),
       });
 
@@ -232,49 +234,19 @@ export default function CreateLegalDocumentPage() {
           <CardHeader>
             <CardTitle>Unggah Dokumen</CardTitle>
             <CardDescription>
-              Unggah file PDF untuk dokumen hukum
+              Unggah file PDF, DOC, atau DOCX untuk dokumen hukum
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="file">File PDF *</Label>
-                <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-muted-foreground/25 rounded-md hover:border-muted-foreground/50 transition-colors">
-                  <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <div className="flex text-sm text-muted-foreground">
-                      <label
-                        htmlFor="file"
-                        className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/90 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
-                      >
-                        <span>Unggah file</span>
-                        <input
-                          id="file"
-                          name="file"
-                          type="file"
-                          accept=".pdf"
-                          onChange={handleFileChange}
-                          required
-                          className="sr-only"
-                        />
-                      </label>
-                      <p className="pl-1">atau drag and drop</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">File PDF saja, maksimal 10MB</p>
-                  </div>
-                </div>
-              </div>
-
-              {formData.file && (
-                <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-md">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-primary">{formData.file.name}</span>
-                  <span className="text-xs text-primary ml-auto">
-                    {(formData.file.size / 1024 / 1024).toFixed(2)} MB
-                  </span>
-                </div>
-              )}
-            </div>
+            <DocumentUpload
+              onUploadSuccess={handleDocumentUploadSuccess}
+              onUploadError={handleDocumentUploadError}
+              onRemoveDocument={handleDocumentRemove}
+              existingDocument={currentDocument}
+              accept=".pdf,.doc,.docx"
+              maxSizeMB={10}
+              uploadType="legal-document"
+            />
           </CardContent>
         </Card>
 

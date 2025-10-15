@@ -10,6 +10,10 @@ const createLegalDocumentSchema = z.object({
   year: z.string().min(4, 'Year is required'),
   category: z.string().min(1, 'Category is required'),
   relativePath: z.string().min(1, 'File path is required'),
+  fileName: z.string().optional(),
+  fileSize: z.string().optional(),
+  fileType: z.string().optional(),
+  originalName: z.string().optional(),
   description: z.string().optional(),
 });
 

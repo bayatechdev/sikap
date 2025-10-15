@@ -28,6 +28,14 @@ interface DocumentUploadProps {
     originalName: string;
   };
   accept?: string;
+  customUploadFunction?: (file: File) => Promise<{
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  }>;
+  uploadType?: 'cooperation-type-document' | 'legal-document';
 }
 
 interface UploadState {
@@ -54,7 +62,9 @@ export function DocumentUpload({
   maxSizeMB = DEFAULT_MAX_SIZE,
   cooperationTypeId,
   existingDocument,
-  accept = '.pdf,.doc,.docx'
+  accept = '.pdf,.doc,.docx',
+  customUploadFunction,
+  uploadType = 'cooperation-type-document'
 }: DocumentUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadState, setUploadState] = useState<UploadState>({
@@ -84,6 +94,8 @@ export function DocumentUpload({
   }, [maxSizeMB]);
 
   const uploadDocument = useCallback(async (file: File) => {
+    console.log('🚀 Starting document upload:', { fileName: file.name, fileSize: file.size, uploadType });
+
     setUploadState(prev => ({
       ...prev,
       isUploading: true,
@@ -92,38 +104,68 @@ export function DocumentUpload({
     }));
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('type', 'cooperation-type-document');
-      if (cooperationTypeId) {
-        formData.append('cooperationTypeId', cooperationTypeId.toString());
+      let result;
+
+      // Use custom upload function if provided, otherwise use default
+      if (customUploadFunction) {
+        console.log('📤 Using custom upload function');
+        result = await customUploadFunction(file);
+      } else {
+        console.log('📤 Using default upload function with type:', uploadType);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', uploadType);
+        if (cooperationTypeId && uploadType === 'cooperation-type-document') {
+          formData.append('cooperationTypeId', cooperationTypeId.toString());
+        }
+
+        const uploadUrl = uploadType === 'legal-document'
+          ? '/api/legal-documents/upload'
+          : '/api/cooperation-types/documents/upload';
+
+        console.log('📤 Uploading to:', uploadUrl);
+        console.log('📤 Form data:', {
+          fileName: file.name,
+          fileSize: file.size,
+          type: uploadType,
+          cooperationTypeId: cooperationTypeId
+        });
+
+        const response = await fetch(uploadUrl, {
+          method: 'POST',
+          body: formData
+        });
+
+        console.log('📤 Response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ Upload failed:', errorData);
+          throw new Error(errorData.error || 'Upload failed');
+        }
+
+        const apiResult = await response.json();
+        console.log('✅ Upload API response:', apiResult);
+
+        // Format file size
+        const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(1);
+        const fileSize = `${fileSizeInMB}MB`;
+
+        result = {
+          fileName: apiResult.fileName || file.name,
+          fileSize: fileSize,
+          fileType: file.type === 'application/pdf' ? 'PDF' :
+                   file.type.includes('word') ? 'DOCX' : 'DOC',
+          relativePath: apiResult.relativePath,
+          originalName: file.name
+        };
+
+        console.log('✅ Formatted result:', result);
       }
-
-      const response = await fetch('/api/cooperation-types/documents/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
-      }
-
-      const result = await response.json();
-
-      // Format file size
-      const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(1);
-      const fileSize = `${fileSizeInMB}MB`;
 
       // Call success callback with document data
-      onUploadSuccess({
-        fileName: result.fileName || file.name,
-        fileSize: fileSize,
-        fileType: file.type === 'application/pdf' ? 'PDF' :
-                 file.type.includes('word') ? 'DOCX' : 'DOC',
-        relativePath: result.relativePath,
-        originalName: file.name
-      });
+      console.log('🎉 Calling onUploadSuccess with:', result);
+      onUploadSuccess(result);
 
       // Reset input
       if (fileInputRef.current) {
@@ -132,21 +174,25 @@ export function DocumentUpload({
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      console.error('❌ Upload error:', errorMessage);
       setUploadState(prev => ({ ...prev, error: errorMessage }));
       if (onUploadError) onUploadError(errorMessage);
     } finally {
       setUploadState(prev => ({ ...prev, isUploading: false, progress: 0 }));
     }
-  }, [cooperationTypeId, onUploadSuccess, onUploadError]);
+  }, [cooperationTypeId, onUploadSuccess, onUploadError, customUploadFunction, uploadType]);
 
   const handleFileSelect = useCallback((file: File) => {
+    console.log('📂 File selected:', file.name);
     const error = validateFile(file);
     if (error) {
+      console.log('❌ File validation failed:', error);
       setUploadState(prev => ({ ...prev, error }));
       if (onUploadError) onUploadError(error);
       return;
     }
 
+    console.log('✅ File validation passed, starting upload');
     uploadDocument(file);
   }, [validateFile, onUploadError, uploadDocument]);
 
@@ -158,11 +204,13 @@ export function DocumentUpload({
   }, [handleFileSelect]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
+    console.log('🎯 File dropped on upload area');
     e.preventDefault();
     setUploadState(prev => ({ ...prev, dragActive: false }));
 
     const files = e.dataTransfer.files;
     const file = files[0];
+    console.log('📂 Files dropped:', files.length, 'First file:', file?.name);
 
     if (file) {
       handleFileSelect(file);
@@ -170,11 +218,13 @@ export function DocumentUpload({
   }, [handleFileSelect]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
+    console.log('🎯 Drag over event');
     e.preventDefault();
     setUploadState(prev => ({ ...prev, dragActive: true }));
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    console.log('🎯 Drag leave event');
     e.preventDefault();
     setUploadState(prev => ({ ...prev, dragActive: false }));
   }, []);
@@ -186,6 +236,7 @@ export function DocumentUpload({
   };
 
   const openFileDialog = () => {
+    console.log('🖱️ Opening file dialog');
     fileInputRef.current?.click();
   };
 

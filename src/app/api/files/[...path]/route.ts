@@ -38,7 +38,16 @@ export async function GET(
       isPublicFile = false;
     } else {
       return NextResponse.json(
-        { error: 'File not found' },
+        {
+          error: 'File not found',
+          details: {
+            requestedPath: relativePath,
+            publicPath: publicFilePath,
+            privatePath: privateFilePath,
+            publicExists: existsSync(publicFilePath),
+            privateExists: existsSync(privateFilePath)
+          }
+        },
         { status: 404 }
       );
     }

@@ -81,6 +81,7 @@ export interface DownloadInfo {
   docType: string;
   color: string;
   icon: string;
+  relativePath?: string;
 }
 
 export interface KerjasamaType {

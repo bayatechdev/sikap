@@ -91,11 +91,11 @@ export async function POST(request: NextRequest) {
     if (cooperationTypeId) {
       uploadPath = createUploadPath(
         validation.sanitizedFilename!,
-        'cooperation-types',
+        'document',
         cooperationTypeId
       );
     } else {
-      uploadPath = createUploadPath(validation.sanitizedFilename!, 'cooperation-types');
+      uploadPath = createUploadPath(validation.sanitizedFilename!, 'document');
     }
 
     // Ensure upload directory exists

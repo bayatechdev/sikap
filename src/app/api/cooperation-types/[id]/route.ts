@@ -147,6 +147,10 @@ export async function PUT(
     // Remove the array fields that are now in JSON format
     const { features, examples, downloadInfo, requiredDocuments, workflowSteps, ...updateData } = dbData;
 
+    // These variables are intentionally extracted to remove them from updateData
+    void requiredDocuments;
+    void workflowSteps;
+
     // Update cooperation type
     const cooperationType = await prisma.cooperationType.update({
       where: { id: parseInt(id) },

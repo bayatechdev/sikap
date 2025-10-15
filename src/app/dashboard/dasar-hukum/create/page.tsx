@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -242,7 +242,7 @@ export default function CreateLegalDocumentPage() {
               onUploadSuccess={handleDocumentUploadSuccess}
               onUploadError={handleDocumentUploadError}
               onRemoveDocument={handleDocumentRemove}
-              existingDocument={currentDocument}
+              existingDocument={currentDocument || undefined}
               accept=".pdf,.doc,.docx"
               maxSizeMB={10}
               uploadType="legal-document"

@@ -29,6 +29,7 @@ export async function GET(
           select: {
             id: true,
             publicToken: true,
+            trackingNumber: true,
             isPublicSubmission: true,
             userId: true,
           },
@@ -45,7 +46,7 @@ export async function GET(
 
     // Access control for public submissions
     if (document.application.isPublicSubmission) {
-      if (!token || token !== document.application.publicToken) {
+      if (!token || (token !== document.application.publicToken && token !== document.application.trackingNumber)) {
         return NextResponse.json(
           { error: 'Invalid access token' },
           { status: 403 }
@@ -83,24 +84,8 @@ export async function GET(
       },
     });
 
-    // Log download activity - use system user for public downloads
-    const systemUser = await prisma.user.findUnique({
-      where: { username: 'system' }
-    });
-
-    if (systemUser) {
-      await prisma.activityLog.create({
-        data: {
-          userId: document.application.userId || systemUser.id,
-          entityType: 'document',
-          entityId: document.id,
-          action: 'DOWNLOAD',
-          description: `Document downloaded: ${document.originalFilename}`,
-          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-          userAgent: request.headers.get('user-agent') || 'unknown',
-        },
-      });
-    }
+    // Log download activity - skip activity log for public downloads (no user associated)
+    // Activity logs are only created for authenticated downloads from dashboard
 
     return response;
 

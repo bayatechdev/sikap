@@ -409,7 +409,7 @@ export default function TrackingDetailPage() {
                             </div>
                           </div>
                           <button
-                            onClick={() => window.open(`/api/documents/${doc.id}/download`, '_blank')}
+                            onClick={() => window.open(`/api/documents/${doc.id}/download?token=${application.trackingNumber}`, '_blank')}
                             className="px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-2 flex-shrink-0 font-medium"
                             style={{
                               backgroundColor: '#b7eb38',

@@ -161,18 +161,6 @@ export async function POST(request: NextRequest) {
     // Save document record to database (only for application type)
     let document = null;
     if (type === 'application') {
-      // Get system user for public uploads
-      const systemUser = await prisma.user.findUnique({
-        where: { username: 'system' }
-      });
-
-      if (!systemUser) {
-        return NextResponse.json(
-          { error: 'System user not found. Please run database seed.' },
-          { status: 500 }
-        );
-      }
-
       document = await prisma.document.create({
         data: {
           application: {
@@ -189,35 +177,14 @@ export async function POST(request: NextRequest) {
             scanTime: virusScanResult.scanTime,
             threat: virusScanResult.threat,
           }),
-          uploader: {
-            connect: { id: systemUser.id }
-          }, // Use system user for public submissions
           documentType,
+          // uploader is left as null for public submissions
         },
       });
     }
 
-    // Create activity log (only for application type)
+    // Return success response for application uploads
     if (type === 'application' && document) {
-      // Get system user for activity log
-      const systemUser = await prisma.user.findUnique({
-        where: { username: 'system' }
-      });
-
-      if (systemUser) {
-        await prisma.activityLog.create({
-          data: {
-            userId: systemUser.id,
-            entityType: 'document',
-            entityId: document.id,
-            action: 'UPLOAD',
-            description: `Document uploaded: ${file.name} for application ${applicationId}`,
-            ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-            userAgent: request.headers.get('user-agent') || 'unknown',
-          },
-        });
-      }
-
       return NextResponse.json({
         success: true,
         document: {

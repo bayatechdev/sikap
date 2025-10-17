@@ -113,20 +113,29 @@ export default function ApplicationDetailPage() {
 
   const handleDocumentDownload = async (documentId: string, filename: string) => {
     try {
-      const response = await fetch(`/api/documents/${documentId}/download?token=${application?.trackingNumber || ''}`);
-      if (!response.ok) {
-        throw new Error('Failed to download document');
-      }
+      const doc = application?.documents.find(doc => doc.id === documentId);
+      const isPDF = doc?.mimeType === 'application/pdf';
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (isPDF) {
+        // Open PDF in new tab
+        window.open(`/api/documents/${documentId}/download?token=${application?.trackingNumber || ''}`, '_blank');
+      } else {
+        // Download non-PDF files normally
+        const response = await fetch(`/api/documents/${documentId}/download?token=${application?.trackingNumber || ''}`);
+        if (!response.ok) {
+          throw new Error('Failed to download document');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = window.document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        window.document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        window.document.body.removeChild(a);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to download document');
     }

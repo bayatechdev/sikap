@@ -1,16 +1,18 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react"
+import { ArrowLeft, Trash2, Save, FileText, Settings } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { FormTabs } from "@/components/ui/FormTabs"
+import { TagInput } from "@/components/ui/TagInput"
+import { AccordionForm } from "@/components/ui/AccordionForm"
 
 interface RequiredDocument {
   name: string;
@@ -51,34 +53,7 @@ export default function CreateJenisKerjasamaPage() {
     { step: 1, name: '', description: '' }
   ]);
 
-  const handleAddFeature = () => {
-    setFeatures([...features, '']);
-  };
-
-  const handleRemoveFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index));
-  };
-
-  const handleFeatureChange = (index: number, value: string) => {
-    const newFeatures = [...features];
-    newFeatures[index] = value;
-    setFeatures(newFeatures);
-  };
-
-  const handleAddExample = () => {
-    setExamples([...examples, '']);
-  };
-
-  const handleRemoveExample = (index: number) => {
-    setExamples(examples.filter((_, i) => i !== index));
-  };
-
-  const handleExampleChange = (index: number, value: string) => {
-    const newExamples = [...examples];
-    newExamples[index] = value;
-    setExamples(newExamples);
-  };
-
+  
   const handleAddDocument = () => {
     setRequiredDocuments([...requiredDocuments, { name: '', required: true, formats: 'PDF, DOC, DOCX', maxSize: 10 }]);
   };
@@ -164,34 +139,17 @@ export default function CreateJenisKerjasamaPage() {
     }
   };
 
-  return (
-    <div className="@container/main space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Link href="/dashboard/jenis-kerjasama">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Kembali
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Tambah Jenis Kerjasama</h1>
-            <p className="text-muted-foreground">
-              Buat jenis kerjasama baru dengan mengisi form berikut
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informasi Dasar</CardTitle>
-            <CardDescription>Informasi dasar jenis kerjasama</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+  const tabs = [
+    {
+      id: 'basic',
+      label: 'Informasi Utama',
+      description: 'Data dasar dan pengaturan tampilan untuk jenis kerjasama',
+      icon: <FileText className="h-4 w-4" />,
+      content: (
+        <div className="space-y-6">
+          {/* Basic Information Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Informasi Dasar</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="code">Kode *</Label>
@@ -216,10 +174,10 @@ export default function CreateJenisKerjasamaPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Deskripsi</Label>
+              <Label htmlFor="description">Deskripsi Singkat</Label>
               <Input
                 id="description"
-                placeholder="Deskripsi singkat"
+                placeholder="Deskripsi singkat untuk overview"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -245,19 +203,14 @@ export default function CreateJenisKerjasamaPage() {
                 rows={3}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Display Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pengaturan Tampilan</CardTitle>
-            <CardDescription>Pengaturan untuk tampilan di homepage dan dashboard</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          {/* Display Settings Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Pengaturan Tampilan</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="color">Warna</Label>
+                <Label htmlFor="color">Warna Tema</Label>
                 <Select value={color} onValueChange={setColor}>
                   <SelectTrigger>
                     <SelectValue placeholder="Pilih warna" />
@@ -293,14 +246,16 @@ export default function CreateJenisKerjasamaPage() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="showOnHomepage"
                   checked={showOnHomepage}
                   onCheckedChange={setShowOnHomepage}
                 />
-                <Label htmlFor="showOnHomepage">Tampilkan di Homepage</Label>
+                <Label htmlFor="showOnHomepage" className="cursor-pointer">
+                  Tampilkan di Homepage
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -308,204 +263,206 @@ export default function CreateJenisKerjasamaPage() {
                   checked={active}
                   onCheckedChange={setActive}
                 />
-                <Label htmlFor="active">Aktif</Label>
+                <Label htmlFor="active" className="cursor-pointer">
+                  Aktif
+                </Label>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Features */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Fitur</CardTitle>
-            <CardDescription>Fitur-fitur yang akan ditampilkan di homepage</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  placeholder={`Fitur ${index + 1}`}
-                  value={feature}
-                  onChange={(e) => handleFeatureChange(index, e.target.value)}
-                />
-                {features.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRemoveFeature(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <Button type="button" variant="outline" onClick={handleAddFeature}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Fitur
-            </Button>
-          </CardContent>
-        </Card>
+          {/* Content Management Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Konten Homepage</h3>
 
-        {/* Examples */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contoh</CardTitle>
-            <CardDescription>Contoh-contoh yang akan ditampilkan di homepage</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {examples.map((example, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  placeholder={`Contoh ${index + 1}`}
-                  value={example}
-                  onChange={(e) => handleExampleChange(index, e.target.value)}
-                />
-                {examples.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRemoveExample(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <Button type="button" variant="outline" onClick={handleAddExample}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Contoh
-            </Button>
-          </CardContent>
-        </Card>
+            <TagInput
+              value={features.filter(f => f.trim() !== '')}
+              onChange={(newFeatures) => {
+                // Always keep at least one empty field for editing
+                const adjustedFeatures = newFeatures.length > 0 ? newFeatures : [''];
+                setFeatures(adjustedFeatures);
+              }}
+              label="Fitur Unggulan"
+              description="Fitur-fitur yang akan ditampilkan di homepage"
+              placeholder="Tambah fitur..."
+              maxLength={8}
+            />
 
-        {/* Required Documents */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Dokumen Yang Diperlukan</CardTitle>
-            <CardDescription>Dokumen yang harus diunggah untuk jenis kerjasama ini</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {requiredDocuments.map((doc, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Dokumen {index + 1}</h4>
+            <TagInput
+              value={examples.filter(e => e.trim() !== '')}
+              onChange={(newExamples) => {
+                // Always keep at least one empty field for editing
+                const adjustedExamples = newExamples.length > 0 ? newExamples : [''];
+                setExamples(adjustedExamples);
+              }}
+              label="Contoh Implementasi"
+              description="Contoh-contoh yang akan ditampilkan di homepage"
+              placeholder="Tambah contoh..."
+              maxLength={6}
+            />
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'advanced',
+      label: 'Pengaturan Lanjutan',
+      description: 'Dokumen yang diperlukan dan workflow proses persetujuan',
+      icon: <Settings className="h-4 w-4" />,
+      content: (
+        <div className="space-y-6">
+          {/* Required Documents */}
+          <AccordionForm
+            title="Dokumen Persyaratan"
+            description="Dokumen yang harus diunggah oleh pengguna"
+            addButtonText="Tambah Dokumen"
+            onAddItem={handleAddDocument}
+            items={requiredDocuments.map((doc, index) => ({
+              id: `doc-${index}`,
+              title: doc.name || `Dokumen ${index + 1}`,
+              subtitle: `${doc.formats} • Maks ${doc.maxSize}MB • ${doc.required ? 'Wajib' : 'Opsional'}`,
+              content: (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nama Dokumen</Label>
+                      <Input
+                        placeholder="Contoh: Proposal Kerjasama"
+                        value={doc.name}
+                        onChange={(e) => handleDocumentChange(index, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Format File</Label>
+                      <Input
+                        placeholder="PDF, DOC, DOCX"
+                        value={doc.formats}
+                        onChange={(e) => handleDocumentChange(index, 'formats', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Ukuran Maksimal (MB)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={doc.maxSize}
+                        onChange={(e) => handleDocumentChange(index, 'maxSize', parseInt(e.target.value))}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2 pt-6">
+                      <Switch
+                        checked={doc.required}
+                        onCheckedChange={(checked) => handleDocumentChange(index, 'required', checked)}
+                      />
+                      <Label className="cursor-pointer">Dokumen Wajib</Label>
+                    </div>
+                  </div>
                   {requiredDocuments.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemoveDocument(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveDocument(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus Dokumen
+                      </Button>
+                    </div>
                   )}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>Nama Dokumen</Label>
-                    <Input
-                      placeholder="Proposal Kerjasama"
-                      value={doc.name}
-                      onChange={(e) => handleDocumentChange(index, 'name', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Format File</Label>
-                    <Input
-                      placeholder="PDF, DOC, DOCX"
-                      value={doc.formats}
-                      onChange={(e) => handleDocumentChange(index, 'formats', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>Ukuran Maksimal (MB)</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={doc.maxSize}
-                      onChange={(e) => handleDocumentChange(index, 'maxSize', parseInt(e.target.value))}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2 pt-6">
-                    <Switch
-                      checked={doc.required}
-                      onCheckedChange={(checked) => handleDocumentChange(index, 'required', checked)}
-                    />
-                    <Label>Wajib</Label>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <Button type="button" variant="outline" onClick={handleAddDocument}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Dokumen
-            </Button>
-          </CardContent>
-        </Card>
+              )
+            }))}
+          />
 
-        {/* Workflow Steps */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Langkah Workflow</CardTitle>
-            <CardDescription>Langkah-langkah proses persetujuan untuk jenis kerjasama ini</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {workflowSteps.map((step, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Langkah {step.step}</h4>
+          {/* Workflow Steps */}
+          <AccordionForm
+            title="Langkah Workflow"
+            description="Proses alur persetujuan untuk jenis kerjasama ini"
+            addButtonText="Tambah Langkah"
+            onAddItem={handleAddWorkflowStep}
+            items={workflowSteps.map((step, index) => ({
+              id: `step-${index}`,
+              title: step.name || `Langkah ${step.step}`,
+              subtitle: step.description || 'Belum ada deskripsi',
+              content: (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nama Langkah</Label>
+                      <Input
+                        placeholder="Contoh: Pengajuan Proposal"
+                        value={step.name}
+                        onChange={(e) => handleWorkflowStepChange(index, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Deskripsi Langkah</Label>
+                      <Input
+                        placeholder="Contoh: User mengajukan proposal kerjasama"
+                        value={step.description}
+                        onChange={(e) => handleWorkflowStepChange(index, 'description', e.target.value)}
+                      />
+                    </div>
+                  </div>
                   {workflowSteps.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRemoveWorkflowStep(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveWorkflowStep(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus Langkah
+                      </Button>
+                    </div>
                   )}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>Nama Langkah</Label>
-                    <Input
-                      placeholder="Pengajuan Proposal"
-                      value={step.name}
-                      onChange={(e) => handleWorkflowStepChange(index, 'name', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Deskripsi</Label>
-                    <Input
-                      placeholder="Deskripsi langkah"
-                      value={step.description}
-                      onChange={(e) => handleWorkflowStepChange(index, 'description', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-            <Button type="button" variant="outline" onClick={handleAddWorkflowStep}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Langkah
+              )
+            }))}
+          />
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="@container/main space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Link href="/dashboard/jenis-kerjasama">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Kembali
             </Button>
-          </CardContent>
-        </Card>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Tambah Jenis Kerjasama</h1>
+            <p className="text-muted-foreground">
+              Buat jenis kerjasama baru dengan form yang terstruktur
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <FormTabs tabs={tabs} />
 
         {/* Actions */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 pt-6 border-t">
           <Link href="/dashboard/jenis-kerjasama">
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" size="lg">
               Batal
             </Button>
           </Link>
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} size="lg">
             <Save className="h-4 w-4 mr-2" />
-            {loading ? 'Menyimpan...' : 'Simpan'}
+            {loading ? 'Menyimpan...' : 'Simpan Jenis Kerjasama'}
           </Button>
         </div>
       </form>

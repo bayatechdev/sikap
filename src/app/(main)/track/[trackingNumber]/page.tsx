@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, CheckCircle2, AlertCircle, FileText, ChevronRight, X } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, AlertCircle, FileText, ChevronRight, X, Eye } from "lucide-react";
 
 
 
@@ -20,6 +20,7 @@ interface Document {
   type: string;
   size: number;
   uploadedAt: string;
+  mimeType?: string;
 }
 
 interface TimelineItem {
@@ -422,8 +423,12 @@ export default function TrackingDetailPage() {
                               e.currentTarget.style.backgroundColor = '#b7eb38';
                             }}
                           >
-                            <FileText className="w-4 h-4" />
-                            Download
+                            {doc.mimeType === 'application/pdf' ? (
+                              <Eye className="w-4 h-4" />
+                            ) : (
+                              <FileText className="w-4 h-4" />
+                            )}
+                            {doc.mimeType === 'application/pdf' ? 'View' : 'Download'}
                           </button>
                         </div>
                       ))}

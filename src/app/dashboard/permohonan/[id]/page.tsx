@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, FileText, Download, User, Calendar, Tag } from "lucide-react";
+import { ArrowLeft, FileText, Download, Eye, User, Calendar, Tag } from "lucide-react";
 
 interface ApplicationDetail {
   id: string;
@@ -333,7 +333,11 @@ export default function ApplicationDetailPage() {
                         variant="outline"
                         onClick={() => handleDocumentDownload(document.id, document.originalFilename)}
                       >
-                        <Download className="h-4 w-4" />
+                        {document.mimeType === 'application/pdf' ? (
+                          <Eye className="h-4 w-4" />
+                        ) : (
+                          <Download className="h-4 w-4" />
+                        )}
                       </Button>
                     </div>
                   ))}

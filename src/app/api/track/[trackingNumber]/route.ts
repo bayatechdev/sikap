@@ -60,6 +60,7 @@ export async function GET(
             originalFilename: true,
             documentType: true,
             fileSize: true,
+            mimeType: true,
             uploadedAt: true
           },
           orderBy: { uploadedAt: 'desc' }
@@ -108,6 +109,7 @@ export async function GET(
         filename: doc.originalFilename,
         type: doc.documentType,
         size: doc.fileSize,
+        mimeType: doc.mimeType,
         uploadedAt: doc.uploadedAt
       })),
       timeline: generateTimeline(application.status, application.statusHistory)

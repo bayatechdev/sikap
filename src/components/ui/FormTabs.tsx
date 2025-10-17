@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TabItem {
@@ -38,29 +37,27 @@ export function FormTabs({
   return (
     <div className={cn("space-y-6", className)}>
       {/* Tab Navigation */}
-      <div className="border-b">
-        <nav className="flex space-x-8">
+      <div className="border-b border-border">
+        <nav className="flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (
-            <Button
+            <button
               key={tab.id}
-              variant="ghost"
+              type="button"
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "relative px-1 py-2 text-sm font-medium transition-colors",
+                "relative px-1 py-4 text-sm font-medium transition-colors",
                 "border-b-2 border-transparent",
+                "hover:text-foreground",
                 activeTab === tab.id
                   ? "border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:border-muted"
+                  : "text-muted-foreground hover:border-muted"
               )}
             >
               <span className="flex items-center gap-2">
                 {tab.icon}
                 {tab.label}
               </span>
-              {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
-            </Button>
+            </button>
           ))}
         </nav>
       </div>

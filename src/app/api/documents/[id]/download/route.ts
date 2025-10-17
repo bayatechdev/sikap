@@ -68,15 +68,21 @@ export async function GET(
     // Read file
     const fileBuffer = await readFile(fullFilePath);
 
+    // Determine content disposition based on file type
+    const isPDF = document.mimeType === 'application/pdf';
+    const contentDisposition = isPDF
+      ? `inline; filename="${encodeURIComponent(document.originalFilename)}"`
+      : `attachment; filename="${encodeURIComponent(document.originalFilename)}"`;
+
     // Create response with security headers
     const response = new NextResponse(fileBuffer as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type': document.mimeType,
         'Content-Length': document.fileSize.toString(),
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(document.originalFilename)}"`,
+        'Content-Disposition': contentDisposition,
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
+        'X-Frame-Options': isPDF ? 'SAMEORIGIN' : 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Cache-Control': 'private, no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',

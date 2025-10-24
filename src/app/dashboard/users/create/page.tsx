@@ -3,7 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Save, User, Mail, Lock, Shield, Eye, EyeOff } from "lucide-react"
+import { BackButton } from "@/components/ui/BackButton"
+import { Save, User, Mail, Lock, Shield, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -113,19 +114,14 @@ export default function CreateUserPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link href="/dashboard/users">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Users
-          </Button>
-        </Link>
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Create New User</h1>
           <p className="text-muted-foreground">
             Add a new user to the system
           </p>
         </div>
+        <BackButton href="/dashboard/users" size="icon" iconOnly />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -236,11 +232,9 @@ export default function CreateUserPage() {
 
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Link href="/dashboard/users">
-                    <Button variant="outline" type="button">
-                      Cancel
-                    </Button>
-                  </Link>
+                  <BackButton href="/dashboard/users" variant="outline">
+                    Cancel
+                  </BackButton>
                   <Button type="submit" disabled={loading}>
                     {loading ? (
                       <>

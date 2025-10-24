@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Upload, FileText, Download } from "lucide-react";
-import Link from "next/link";
+import { Upload, FileText, Download } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -233,29 +233,24 @@ export default function EditLegalDocumentPage({
     <div className="@container/main space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Link href="/dashboard/dasar-hukum">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Kembali
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Edit Dasar Hukum</h1>
-            <p className="text-muted-foreground">
-              Perbarui informasi dokumen hukum yang ada
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Edit Dasar Hukum</h1>
+          <p className="text-muted-foreground">
+            Perbarui informasi dokumen hukum yang ada
+          </p>
         </div>
-        {document && (
-          <Button
-            variant="outline"
-            onClick={() => window.open(`/api/legal-documents/${document.id}/download`, '_blank')}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Unduh File Saat Ini
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {document && (
+            <Button
+              variant="outline"
+              onClick={() => window.open(`/api/legal-documents/${document.id}/download`, '_blank')}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Unduh File Saat Ini
+            </Button>
+          )}
+          <BackButton href="/dashboard/dasar-hukum" size="icon" iconOnly />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -398,11 +393,9 @@ export default function EditLegalDocumentPage({
 
         {/* Actions */}
         <div className="flex justify-end space-x-4">
-          <Link href="/dashboard/dasar-hukum">
-            <Button type="button" variant="outline">
-              Batal
-            </Button>
-          </Link>
+          <BackButton href="/dashboard/dasar-hukum" variant="outline">
+            Batal
+          </BackButton>
           <Button type="submit" disabled={saving}>
             {saving ? "Memperbarui..." : "Perbarui Dokumen"}
           </Button>

@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DocumentUpload } from "@/components/ui/DocumentUpload";
+import { BackButton } from "@/components/ui/BackButton";
 
 interface FormData {
   title: string;
@@ -122,23 +121,16 @@ export default function CreateLegalDocumentPage() {
   };
 
   return (
-    <div className="@container/main space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Link href="/dashboard/dasar-hukum">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Kembali
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Tambah Dasar Hukum</h1>
-            <p className="text-muted-foreground">
-              Tambah dokumen hukum atau peraturan baru
-            </p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Tambah Dasar Hukum</h1>
+          <p className="text-muted-foreground">
+            Buat dokumen dasar hukum baru
+          </p>
         </div>
+        <BackButton href="/dashboard/dasar-hukum" size="icon" iconOnly />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -251,12 +243,10 @@ export default function CreateLegalDocumentPage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex justify-end space-x-4">
-          <Link href="/dashboard/dasar-hukum">
-            <Button type="button" variant="outline">
-              Batal
-            </Button>
-          </Link>
+        <div className="flex justify-end space-x-4 pt-6">
+          <BackButton href="/dashboard/dasar-hukum">
+            Batal
+          </BackButton>
           <Button type="submit" disabled={loading}>
             {loading ? "Menyimpan..." : "Simpan Dokumen"}
           </Button>

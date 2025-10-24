@@ -24,7 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Minus, Upload, ArrowLeft } from 'lucide-react';
+import { Plus, Minus, Upload } from 'lucide-react';
+import { BackButton } from '@/components/ui/BackButton';
 import { CenterLoadingSkeleton } from '@/components/ui/skeleton-variants';
 import { useToast } from '@/hooks/use-toast';
 
@@ -223,20 +224,14 @@ export default function EditSOPPage() {
   return (
     <div className="container mx-auto py-6 max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Edit SOP</h1>
           <p className="text-muted-foreground">
             Update the Standard Operating Procedure document
           </p>
         </div>
+        <BackButton href="/dashboard/sop" size="icon" iconOnly />
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -440,13 +435,9 @@ export default function EditSOPPage() {
 
         {/* Submit */}
         <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
+          <BackButton href="/dashboard/sop" variant="outline">
             Cancel
-          </Button>
+          </BackButton>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Updating...' : 'Update SOP Document'}
           </Button>

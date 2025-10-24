@@ -1,0 +1,680 @@
+"use client";
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Trash2, Save, FileText, Settings, Upload } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
+import { DocumentUpload } from "@/components/ui/DocumentUpload"
+import { FormTabs } from "@/components/ui/FormTabs"
+import { TagInput } from "@/components/ui/TagInput"
+import { AccordionForm } from "@/components/ui/AccordionForm"
+
+// Types
+export interface RequiredDocument {
+  name: string;
+  required: boolean;
+  formats: string;
+  maxSize: number;
+}
+
+export interface WorkflowStep {
+  step: number;
+  name: string;
+  description: string;
+}
+
+export interface CooperationType {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  displayTitle: string;
+  longDescription: string;
+  features: string[];
+  examples: string[];
+  downloadInfo: {
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    docType: string;
+    color: string;
+    icon: string;
+    relativePath?: string;
+    originalName?: string;
+  };
+  color: string;
+  icon: string;
+  displayOrder: number;
+  showOnHomepage: boolean;
+  requiredDocuments: RequiredDocument[];
+  workflowSteps: WorkflowStep[];
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DocumentUploadData {
+  fileName: string;
+  fileSize: string;
+  fileType: string;
+  relativePath: string;
+  originalName: string;
+}
+
+export interface JenisKerjasamaFormProps {
+  mode: 'create' | 'edit';
+  initialData?: CooperationType;
+  cooperationTypeId?: number;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+export default function JenisKerjasamaForm({
+  mode,
+  initialData,
+  cooperationTypeId,
+  onSuccess,
+  onCancel
+}: JenisKerjasamaFormProps) {
+  const params = useParams();
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(mode === 'edit');
+
+  // Form data
+  const [code, setCode] = useState(initialData?.code || '');
+  const [name, setName] = useState(initialData?.name || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [displayTitle, setDisplayTitle] = useState(initialData?.displayTitle || '');
+  const [longDescription, setLongDescription] = useState(initialData?.longDescription || '');
+  const [color, setColor] = useState(initialData?.color || 'primary');
+  const [icon, setIcon] = useState(initialData?.icon || '');
+  const [displayOrder, setDisplayOrder] = useState(initialData?.displayOrder || 1);
+  const [showOnHomepage, setShowOnHomepage] = useState(initialData?.showOnHomepage ?? true);
+  const [active, setActive] = useState(initialData?.active ?? true);
+
+  // Arrays
+  const [features, setFeatures] = useState<string[]>(
+    initialData?.features && initialData.features.length > 0
+      ? initialData.features
+      : ['']
+  );
+  const [examples, setExamples] = useState<string[]>(
+    initialData?.examples && initialData.examples.length > 0
+      ? initialData.examples
+      : ['']
+  );
+  const [requiredDocuments, setRequiredDocuments] = useState<RequiredDocument[]>(
+    initialData?.requiredDocuments && initialData.requiredDocuments.length > 0
+      ? initialData.requiredDocuments
+      : [{ name: '', required: true, formats: 'PDF, DOC, DOCX', maxSize: 10 }]
+  );
+  const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>(
+    initialData?.workflowSteps && initialData.workflowSteps.length > 0
+      ? initialData.workflowSteps
+      : [{ step: 1, name: '', description: '' }]
+  );
+
+  // Document upload state (only for edit mode)
+  const [currentDocument, setCurrentDocument] = useState<DocumentUploadData | null>(
+    initialData?.downloadInfo && initialData.downloadInfo.relativePath
+      ? {
+          fileName: initialData.downloadInfo.fileName,
+          fileSize: initialData.downloadInfo.fileSize,
+          fileType: initialData.downloadInfo.fileType,
+          relativePath: initialData.downloadInfo.relativePath,
+          originalName: initialData.downloadInfo.originalName || initialData.downloadInfo.fileName
+        }
+      : null
+  );
+
+  // Fetch data for edit mode
+  useEffect(() => {
+    if (mode === 'edit' && params.id && !initialData) {
+      const fetchCooperationType = async () => {
+        try {
+          const response = await fetch(`/api/cooperation-types/${params.id}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch cooperation type');
+          }
+          const data: CooperationType = await response.json();
+
+          // Populate form
+          setCode(data.code);
+          setName(data.name);
+          setDescription(data.description || '');
+          setDisplayTitle(data.displayTitle || '');
+          setLongDescription(data.longDescription || '');
+          setColor(data.color || 'primary');
+          setIcon(data.icon || '');
+          setDisplayOrder(data.displayOrder || 1);
+          setShowOnHomepage(data.showOnHomepage);
+          setActive(data.active);
+
+          // Handle arrays - parse JSON strings if needed
+          setFeatures(data.features && Array.isArray(data.features) && data.features.length > 0
+            ? data.features
+            : data.features && typeof data.features === 'string'
+              ? JSON.parse(data.features)
+              : ['']
+          );
+          setExamples(data.examples && Array.isArray(data.examples) && data.examples.length > 0
+            ? data.examples
+            : data.examples && typeof data.examples === 'string'
+              ? JSON.parse(data.examples)
+              : ['']
+          );
+          setRequiredDocuments(data.requiredDocuments && data.requiredDocuments.length > 0
+            ? data.requiredDocuments
+            : [{ name: '', required: true, formats: 'PDF, DOC, DOCX', maxSize: 10 }]
+          );
+          setWorkflowSteps(data.workflowSteps && data.workflowSteps.length > 0
+            ? data.workflowSteps
+            : [{ step: 1, name: '', description: '' }]
+          );
+
+          // Set current document if available
+          if (data.downloadInfo && data.downloadInfo.relativePath) {
+            setCurrentDocument({
+              fileName: data.downloadInfo.fileName,
+              fileSize: data.downloadInfo.fileSize,
+              fileType: data.downloadInfo.fileType,
+              relativePath: data.downloadInfo.relativePath,
+              originalName: data.downloadInfo.originalName || data.downloadInfo.fileName
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching cooperation type:', error);
+          alert('Gagal memuat data jenis kerjasama');
+          onCancel?.();
+        } finally {
+          setInitialLoading(false);
+        }
+      };
+
+      fetchCooperationType();
+    }
+  }, [mode, params.id, initialData, onCancel]);
+
+  // Handlers
+  const handleAddDocument = () => {
+    setRequiredDocuments([...requiredDocuments, { name: '', required: true, formats: 'PDF, DOC, DOCX', maxSize: 10 }]);
+  };
+
+  const handleRemoveDocument = (index: number) => {
+    setRequiredDocuments(requiredDocuments.filter((_, i) => i !== index));
+  };
+
+  const handleDocumentChange = (index: number, field: keyof RequiredDocument, value: string | boolean | number) => {
+    const newDocuments = [...requiredDocuments];
+    newDocuments[index] = { ...newDocuments[index], [field]: value };
+    setRequiredDocuments(newDocuments);
+  };
+
+  const handleAddWorkflowStep = () => {
+    const nextStep = workflowSteps.length + 1;
+    setWorkflowSteps([...workflowSteps, { step: nextStep, name: '', description: '' }]);
+  };
+
+  const handleRemoveWorkflowStep = (index: number) => {
+    const newSteps = workflowSteps.filter((_, i) => i !== index);
+    // Reorder step numbers
+    const reorderedSteps = newSteps.map((step, i) => ({ ...step, step: i + 1 }));
+    setWorkflowSteps(reorderedSteps);
+  };
+
+  const handleWorkflowStepChange = (index: number, field: keyof WorkflowStep, value: string | number) => {
+    const newSteps = [...workflowSteps];
+    newSteps[index] = { ...newSteps[index], [field]: value };
+    setWorkflowSteps(newSteps);
+  };
+
+  // Document upload handlers
+  const handleDocumentUploadSuccess = (documentData: DocumentUploadData) => {
+    setCurrentDocument(documentData);
+  };
+
+  const handleDocumentUploadError = (error: string) => {
+    console.error('Document upload error:', error);
+    alert(`Gagal mengupload dokumen: ${error}`);
+  };
+
+  const handleDocumentRemove = () => {
+    setCurrentDocument(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const downloadInfo = mode === 'edit' && currentDocument ? {
+        fileName: currentDocument.fileName,
+        fileSize: currentDocument.fileSize,
+        fileType: currentDocument.fileType,
+        docType: name,
+        color: color,
+        icon: icon || '📄',
+        relativePath: currentDocument.relativePath,
+        originalName: currentDocument.originalName
+      } : {
+        fileName: `Template_${code.toUpperCase()}`,
+        fileSize: '150KB',
+        fileType: 'PDF',
+        docType: name,
+        color: color,
+        icon: icon || '📄'
+      };
+
+      const data = {
+        code,
+        name,
+        description,
+        displayTitle,
+        longDescription,
+        features: features.filter(f => f.trim() !== ''),
+        examples: examples.filter(e => e.trim() !== ''),
+        downloadInfo,
+        color,
+        icon: icon || '📄',
+        displayOrder,
+        showOnHomepage,
+        requiredDocuments: requiredDocuments.filter(d => d.name.trim() !== ''),
+        workflowSteps: workflowSteps.filter(s => s.name.trim() !== ''),
+        active
+      };
+
+      const response = await fetch(
+        mode === 'edit' ? `/api/cooperation-types/${params.id}` : '/api/cooperation-types',
+        {
+          method: mode === 'edit' ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${mode === 'edit' ? 'update' : 'create'} cooperation type`);
+      }
+
+      onSuccess?.();
+    } catch (error) {
+      console.error(`Error ${mode === 'edit' ? 'updating' : 'creating'} cooperation type:`, error);
+      alert(`Gagal ${mode === 'edit' ? 'mengupdate' : 'membuat'} jenis kerjasama. Silakan coba lagi.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="@container/main space-y-6">
+        <div className="space-y-6">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-6 bg-muted rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const tabs = [
+    {
+      id: 'basic',
+      label: 'Informasi Utama',
+      description: 'Data dasar dan pengaturan tampilan untuk jenis kerjasama',
+      icon: <FileText className="h-4 w-4" />,
+      content: (
+        <div className="space-y-6">
+          {/* Basic Information Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Informasi Dasar</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="code">Kode *</Label>
+                <Input
+                  id="code"
+                  placeholder="mou, pks, dll"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  required
+                  disabled={mode === 'edit'}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Nama *</Label>
+                <Input
+                  id="name"
+                  placeholder="Memorandum of Understanding"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Deskripsi Singkat</Label>
+              <Input
+                id="description"
+                placeholder="Deskripsi singkat untuk overview"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="displayTitle">Judul Tampilan</Label>
+              <Input
+                id="displayTitle"
+                placeholder="Judul yang akan ditampilkan di homepage"
+                value={displayTitle}
+                onChange={(e) => setDisplayTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="longDescription">Deskripsi Panjang</Label>
+              <Textarea
+                id="longDescription"
+                placeholder="Deskripsi lengkap untuk homepage"
+                value={longDescription}
+                onChange={(e) => setLongDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          {/* Display Settings Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Pengaturan Tampilan</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="color">Warna Tema</Label>
+                <Select value={color} onValueChange={setColor}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih warna" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="primary">Primary</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="icon">Icon</Label>
+                <Input
+                  id="icon"
+                  placeholder="📄, 📋, 🤝"
+                  value={icon}
+                  onChange={(e) => setIcon(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="displayOrder">Urutan Tampilan</Label>
+                <Input
+                  id="displayOrder"
+                  type="number"
+                  min="1"
+                  value={displayOrder}
+                  onChange={(e) => setDisplayOrder(parseInt(e.target.value))}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showOnHomepage"
+                  checked={showOnHomepage}
+                  onCheckedChange={setShowOnHomepage}
+                />
+                <Label htmlFor="showOnHomepage" className="cursor-pointer">
+                  Tampilkan di Homepage
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="active"
+                  checked={active}
+                  onCheckedChange={setActive}
+                />
+                <Label htmlFor="active" className="cursor-pointer">
+                  Aktif
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Management Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Konten Homepage</h3>
+
+            <TagInput
+              value={features.filter(f => f.trim() !== '')}
+              onChange={(newFeatures) => {
+                // Always keep at least one empty field for editing
+                const adjustedFeatures = newFeatures.length > 0 ? newFeatures : [''];
+                setFeatures(adjustedFeatures);
+              }}
+              label="Fitur Unggulan"
+              description="Fitur-fitur yang akan ditampilkan di homepage"
+              placeholder="Tambah fitur..."
+              maxLength={8}
+            />
+
+            <TagInput
+              value={examples.filter(e => e.trim() !== '')}
+              onChange={(newExamples) => {
+                // Always keep at least one empty field for editing
+                const adjustedExamples = newExamples.length > 0 ? newExamples : [''];
+                setExamples(adjustedExamples);
+              }}
+              label="Contoh Implementasi"
+              description="Contoh-contoh yang akan ditampilkan di homepage"
+              placeholder="Tambah contoh..."
+              maxLength={6}
+            />
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'advanced',
+      label: 'Pengaturan Lanjutan',
+      description: mode === 'edit'
+        ? 'Dokumen yang diperlukan, workflow, dan template dokumen'
+        : 'Dokumen yang diperlukan dan workflow proses persetujuan',
+      icon: <Settings className="h-4 w-4" />,
+      content: (
+        <div className="space-y-6">
+          {/* Document Template - Only for Edit Mode */}
+          {mode === 'edit' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Dokumen Template
+                </CardTitle>
+                <CardDescription>
+                  Upload dokumen template yang dapat diunduh oleh pengguna untuk jenis kerjasama ini
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DocumentUpload
+                  onUploadSuccess={handleDocumentUploadSuccess}
+                  onUploadError={handleDocumentUploadError}
+                  onRemoveDocument={handleDocumentRemove}
+                  cooperationTypeId={cooperationTypeId ? cooperationTypeId : parseInt(params.id as string)}
+                  existingDocument={currentDocument || undefined}
+                  maxSizeMB={10}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Required Documents */}
+          <AccordionForm
+            title="Dokumen Persyaratan"
+            description="Dokumen yang harus diunggah oleh pengguna"
+            addButtonText="Tambah Dokumen"
+            onAddItem={handleAddDocument}
+            items={requiredDocuments.map((doc, index) => ({
+              id: `doc-${index}`,
+              title: doc.name || `Dokumen ${index + 1}`,
+              subtitle: `${doc.formats} • Maks ${doc.maxSize}MB • ${doc.required ? 'Wajib' : 'Opsional'}`,
+              content: (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nama Dokumen</Label>
+                      <Input
+                        placeholder="Contoh: Proposal Kerjasama"
+                        value={doc.name}
+                        onChange={(e) => handleDocumentChange(index, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Format File</Label>
+                      <Input
+                        placeholder="PDF, DOC, DOCX"
+                        value={doc.formats}
+                        onChange={(e) => handleDocumentChange(index, 'formats', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Ukuran Maksimal (MB)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={doc.maxSize}
+                        onChange={(e) => handleDocumentChange(index, 'maxSize', parseInt(e.target.value))}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2 pt-6">
+                      <Switch
+                        checked={doc.required}
+                        onCheckedChange={(checked) => handleDocumentChange(index, 'required', checked)}
+                      />
+                      <Label className="cursor-pointer">Dokumen Wajib</Label>
+                    </div>
+                  </div>
+                  {requiredDocuments.length > 1 && (
+                    <div className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveDocument(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus Dokumen
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )
+            }))}
+          />
+
+          {/* Workflow Steps */}
+          <AccordionForm
+            title="Langkah Workflow"
+            description="Proses alur persetujuan untuk jenis kerjasama ini"
+            addButtonText="Tambah Langkah"
+            onAddItem={handleAddWorkflowStep}
+            items={workflowSteps.map((step, index) => ({
+              id: `step-${index}`,
+              title: step.name || `Langkah ${step.step}`,
+              subtitle: step.description || 'Belum ada deskripsi',
+              content: (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nama Langkah</Label>
+                      <Input
+                        placeholder="Contoh: Pengajuan Proposal"
+                        value={step.name}
+                        onChange={(e) => handleWorkflowStepChange(index, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Deskripsi Langkah</Label>
+                      <Input
+                        placeholder="Contoh: User mengajukan proposal kerjasama"
+                        value={step.description}
+                        onChange={(e) => handleWorkflowStepChange(index, 'description', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  {workflowSteps.length > 1 && (
+                    <div className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveWorkflowStep(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Hapus Langkah
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )
+            }))}
+          />
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <FormTabs tabs={tabs} />
+
+      {/* Actions */}
+      <div className="flex justify-end space-x-4 pt-6 border-t">
+        <Button type="button" variant="outline" size="lg" onClick={onCancel}>
+          Batal
+        </Button>
+        <Button type="submit" disabled={loading} size="lg">
+          <Save className="h-4 w-4 mr-2" />
+          {loading
+            ? 'Menyimpan...'
+            : mode === 'edit'
+              ? 'Update Jenis Kerjasama'
+              : 'Simpan Jenis Kerjasama'
+          }
+        </Button>
+      </div>
+    </form>
+  );
+}

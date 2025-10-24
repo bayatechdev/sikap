@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { HeroSlideManager, HeroSlide } from '@/components/ui/HeroSlideManager';
 import { Partner } from '@/components/ui/PartnerManager';
+import { DocumentUpload } from '@/components/ui/DocumentUpload';
 import { Loader2, Save, RefreshCw, AlertCircle, CheckCircle, Globe, Phone, MessageSquare, Users } from 'lucide-react';
 import { CenterLoadingSkeleton } from '@/components/ui/skeleton-variants';
 
@@ -35,6 +36,41 @@ export default function WebsiteSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Welcome section handlers
+  const handleWelcomePhotoUploadSuccess = (documentData: {
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  }) => {
+    setSettings(prev => ({
+      ...prev,
+      welcome_photo: documentData.relativePath,
+    }));
+    console.log('Welcome photo uploaded successfully:', documentData);
+  };
+
+  const handleWelcomePhotoUploadError = (error: string) => {
+    console.error('Welcome photo upload error:', error);
+    toast({
+      title: 'Error',
+      description: 'Failed to upload welcome photo',
+      variant: 'destructive',
+    });
+  };
+
+  const handleWelcomePhotoRemove = () => {
+    setSettings(prev => ({
+      ...prev,
+      welcome_photo: '',
+    }));
+    toast({
+      title: 'Success',
+      description: 'Welcome photo removed',
+    });
+  };
 
   // Fetch settings from API
   const fetchSettings = useCallback(async () => {
@@ -108,6 +144,61 @@ export default function WebsiteSettingsPage() {
       toast({
         title: 'Error',
         description: 'Failed to save settings',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveWelcomeSection = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+
+      // Don't save welcome_photo in saveSection as it's handled separately
+      const { welcome_photo, ...otherWelcomeSettings } = settings;
+
+      const response = await fetch('/api/settings/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          welcome_enabled: otherWelcomeSettings.welcome_enabled,
+          welcome_title: otherWelcomeSettings.welcome_title,
+          welcome_person_name: otherWelcomeSettings.welcome_person_name,
+          welcome_person_title: otherWelcomeSettings.welcome_person_title,
+          welcome_message: otherWelcomeSettings.welcome_message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save welcome settings');
+      }
+
+      setSettings(prev => ({ ...prev,
+        welcome_enabled: otherWelcomeSettings.welcome_enabled,
+        welcome_title: otherWelcomeSettings.welcome_title,
+        welcome_person_name: otherWelcomeSettings.welcome_person_name,
+        welcome_person_title: otherWelcomeSettings.welcome_person_title,
+        welcome_message: otherWelcomeSettings.welcome_message,
+      }));
+
+      setSuccess('Welcome settings saved successfully!');
+
+      toast({
+        title: 'Success',
+        description: 'Welcome section saved successfully',
+      });
+
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error saving welcome settings:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save welcome settings');
+      toast({
+        title: 'Error',
+        description: 'Failed to save welcome settings',
         variant: 'destructive',
       });
     } finally {
@@ -378,26 +469,28 @@ export default function WebsiteSettingsPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="welcome_photo">Photo URL</Label>
-                  <Input
-                    id="welcome_photo"
-                    value={settings.welcome_photo || ''}
-                    onChange={(e) => setSettings(prev => ({ ...prev, welcome_photo: e.target.value }))}
-                    placeholder="Enter photo URL"
+                  <Label htmlFor="welcome_photo">Welcome Photo</Label>
+                  <DocumentUpload
+                    onUploadSuccess={handleWelcomePhotoUploadSuccess}
+                    onUploadError={handleWelcomePhotoUploadError}
+                    onRemoveDocument={handleWelcomePhotoRemove}
+                    existingDocument={settings.welcome_photo ? {
+                      fileName: settings.welcome_photo.split('/').pop() || 'photo.jpg',
+                      fileSize: '1MB',
+                      fileType: 'JPG',
+                      relativePath: settings.welcome_photo,
+                      originalName: settings.welcome_photo.split('/').pop() || 'photo.jpg'
+                    } : undefined}
+                    accept="image/*"
+                    maxSizeMB={5}
+                    uploadType="welcome-photo"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end pt-4">
                 <Button
-                  onClick={() => saveSection({
-                    welcome_enabled: settings.welcome_enabled,
-                    welcome_title: settings.welcome_title,
-                    welcome_person_name: settings.welcome_person_name,
-                    welcome_person_title: settings.welcome_person_title,
-                    welcome_message: settings.welcome_message,
-                    welcome_photo: settings.welcome_photo,
-                  })}
+                  onClick={saveWelcomeSection}
                   disabled={saving}
                 >
                   {saving ? (

@@ -11,7 +11,9 @@ export async function GET() {
       approvedApplications,
       rejectedApplications,
       totalUsers,
-      totalDocuments
+      totalDocuments,
+      totalCooperations,
+      totalPartners
     ] = await Promise.all([
       // Total applications
       prisma.application.count(),
@@ -56,7 +58,17 @@ export async function GET() {
       }),
 
       // Total documents uploaded
-      prisma.document.count()
+      prisma.document.count(),
+
+      // Total cooperation records
+      prisma.cooperation.count(),
+
+      // Total active partners
+      prisma.partner.count({
+        where: {
+          isActive: true
+        }
+      })
     ]);
 
     // Get recent applications
@@ -127,6 +139,8 @@ export async function GET() {
         rejectedApplications,
         totalUsers,
         totalDocuments,
+        totalCooperations,
+        totalPartners,
         trends: {
           applications: applicationTrend,
           approved: approvedTrend

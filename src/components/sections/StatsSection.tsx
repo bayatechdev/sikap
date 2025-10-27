@@ -1,10 +1,46 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 
+interface StatsData {
+  totalCooperations: number;
+  totalPartners: number;
+}
+
 export default function StatsSection() {
+  const [stats, setStats] = useState<StatsData>({
+    totalCooperations: 456,
+    totalPartners: 123
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/dashboard/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setStats({
+            totalCooperations: data.stats.totalCooperations || 0,
+            totalPartners: data.stats.totalPartners || 0
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // Format number with separator
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('id-ID').format(num);
+  };
   return (
     <AnimatedSection
       className="flex justify-center h-auto lg:h-[216px] bg-foreground"
@@ -27,7 +63,7 @@ export default function StatsSection() {
               </div>
               <div className="flex flex-col gap-2">
                 <h3 className="font-poppins text-[32px] lg:text-[42px] leading-[46px] font-bold">
-                  456
+                  {loading ? '...' : formatNumber(stats.totalCooperations)}
                 </h3>
                 <p className="text-lg leading-8">
                   Kerjasama
@@ -46,7 +82,7 @@ export default function StatsSection() {
               </div>
               <div className="flex flex-col gap-2">
                 <h3 className="font-poppins text-[32px] lg:text-[42px] leading-[46px] font-bold">
-                  123
+                  {loading ? '...' : formatNumber(stats.totalPartners)}
                 </h3>
                 <p className="text-lg leading-8">
                   Partner

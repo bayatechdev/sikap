@@ -93,6 +93,8 @@ export default function Header({ navigation }: HeaderProps) {
             width={120}
             height={40}
             className="h-auto w-auto"
+            priority
+            loading="eager"
           />
         </div>
 

@@ -20,11 +20,13 @@ export const ALLOWED_MIME_TYPES = [
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'image/jpeg',
-  'image/png',
   'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp',
 ];
 
-export const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+export const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -34,7 +36,10 @@ const FILE_SIGNATURES: Record<string, number[]> = {
   'application/msword': [0xD0, 0xCF, 0x11, 0xE0], // MS Office legacy
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [0x50, 0x4B, 0x03, 0x04], // ZIP/DOCX
   'image/jpeg': [0xFF, 0xD8, 0xFF], // JPEG
+  'image/jpg': [0xFF, 0xD8, 0xFF], // JPEG (alternative)
   'image/png': [0x89, 0x50, 0x4E, 0x47], // PNG
+  'image/gif': [0x47, 0x49, 0x46, 0x38], // GIF8
+  'image/webp': [0x52, 0x49, 0x46, 0x46], // WebP (RIFF)
 };
 
 /**
@@ -174,6 +179,12 @@ function validateFileContent(buffer: Buffer, mimeType: string): FileValidationRe
       case 'image/png':
         return validatePNGContent(buffer);
 
+      case 'image/gif':
+        return validateGIFContent(buffer);
+
+      case 'image/webp':
+        return validateWebPContent(buffer);
+
       default:
         return { isValid: true };
     }
@@ -263,6 +274,47 @@ function validatePNGContent(buffer: Buffer): FileValidationResult {
     return {
       isValid: false,
       error: 'Invalid PNG file structure',
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validate GIF content structure
+ */
+function validateGIFContent(buffer: Buffer): FileValidationResult {
+  // GIF should start with 'GIF87a' or 'GIF89a'
+  const gifHeader = buffer.toString('ascii', 0, 6);
+  if (!gifHeader.startsWith('GIF')) {
+    return {
+      isValid: false,
+      error: 'Invalid GIF file structure',
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Validate WebP content structure
+ */
+function validateWebPContent(buffer: Buffer): FileValidationResult {
+  // WebP should start with RIFF and contain WEBP
+  const riffHeader = buffer.toString('ascii', 0, 4);
+  if (riffHeader !== 'RIFF') {
+    return {
+      isValid: false,
+      error: 'Invalid WebP file structure - missing RIFF header',
+    };
+  }
+
+  // Check for WEBP identifier at bytes 8-11
+  const webpIdentifier = buffer.toString('ascii', 8, 4);
+  if (webpIdentifier !== 'WEBP') {
+    return {
+      isValid: false,
+      error: 'Invalid WebP file structure - missing WEBP identifier',
     };
   }
 

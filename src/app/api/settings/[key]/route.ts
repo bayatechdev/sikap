@@ -244,19 +244,97 @@ export async function POST(
     }
 
     const body = await request.json();
-    const validatedData = createSettingSchema.parse(body);
 
-    // Convert value to string if it's JSON type
-    const settingData = {
-      ...validatedData,
-      value: validatedData.type === 'json' ? JSON.stringify(validatedData.value) : validatedData.value,
-    };
+    // Handle both single setting and bulk update
+    if (Array.isArray(body)) {
+      // Filter out any undefined or invalid entries
+      const validSettings = body.filter(setting =>
+        setting &&
+        setting.key &&
+        setting.value !== undefined &&
+        setting.value !== null
+      );
 
-    const setting = await prisma.setting.create({
-      data: settingData,
-    });
+      if (validSettings.length === 0) {
+        return NextResponse.json(
+          { error: 'No valid settings provided' },
+          { status: 400 }
+        );
+      }
 
-    return NextResponse.json(setting, { status: 201 });
+      console.log('📝 Processing bulk settings update:', validSettings);
+
+      const updatePromises = validSettings.map(async (settingData) => {
+        try {
+          const existingSetting = await prisma.setting.findUnique({
+            where: { key: settingData.key },
+          });
+
+          if (!existingSetting) {
+            // Create new setting
+            const createData = {
+              key: settingData.key,
+              value: settingData.type === 'json' ? JSON.stringify(settingData.value) : settingData.value,
+              description: settingData.description || '',
+              type: settingData.type || 'text',
+            };
+
+            console.log('➕ Creating new setting:', createData);
+            await prisma.setting.create({
+              data: createData,
+            });
+          } else {
+            // Update existing setting
+            const updateData = {
+              value: settingData.type === 'json' ? JSON.stringify(settingData.value) : settingData.value,
+              description: settingData.description,
+              type: settingData.type || existingSetting.type,
+            };
+
+            console.log('✏️ Updating existing setting:', settingData.key, updateData);
+            await prisma.setting.update({
+              where: { key: settingData.key },
+              data: updateData,
+            });
+          }
+
+          return { ok: true, key: settingData.key };
+        } catch (error) {
+          console.error(`❌ Failed to process setting ${settingData.key}:`, error);
+          return { ok: false, key: settingData.key, error: error instanceof Error ? error.message : 'Unknown error' };
+        }
+      });
+
+      const results = await Promise.all(updatePromises);
+      const failedResults = results.filter(result => !result.ok);
+
+      if (failedResults.length > 0) {
+        console.error('❌ Some settings failed to update:', failedResults);
+        return NextResponse.json({
+          error: 'Failed to update some settings',
+          details: failedResults
+        }, { status: 500 });
+      }
+
+      console.log('✅ All settings updated successfully');
+      return NextResponse.json({ message: 'Settings updated successfully' });
+    } else {
+      // Single setting creation
+      const validatedData = createSettingSchema.parse(body);
+
+      // Convert value to string if it's JSON type
+      const settingData = {
+        ...validatedData,
+        value: validatedData.type === 'json' ? JSON.stringify(validatedData.value) : validatedData.value,
+      };
+
+      const setting = await prisma.setting.create({
+        data: settingData,
+      });
+      
+      return NextResponse.json(setting, { status: 201 });
+    }
+
   } catch (error) {
     console.error('Error creating setting:', error);
 

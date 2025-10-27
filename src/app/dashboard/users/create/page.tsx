@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { BackButton } from "@/components/ui/BackButton"
 import { Save, User, Mail, Lock, Shield, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 const roles = [
@@ -232,9 +231,7 @@ export default function CreateUserPage() {
 
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-2 pt-4">
-                  <BackButton href="/dashboard/users" variant="outline">
-                    Cancel
-                  </BackButton>
+                  <BackButton href="/dashboard/users" variant="outline" label="Cancel" />
                   <Button type="submit" disabled={loading}>
                     {loading ? (
                       <>

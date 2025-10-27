@@ -393,9 +393,7 @@ export default function EditLegalDocumentPage({
 
         {/* Actions */}
         <div className="flex justify-end space-x-4">
-          <BackButton href="/dashboard/dasar-hukum" variant="outline">
-            Batal
-          </BackButton>
+          <BackButton href="/dashboard/dasar-hukum" variant="outline" label="Batal" />
           <Button type="submit" disabled={saving}>
             {saving ? "Memperbarui..." : "Perbarui Dokumen"}
           </Button>

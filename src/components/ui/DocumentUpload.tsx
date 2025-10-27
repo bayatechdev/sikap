@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, FileText, AlertCircle, Download, Trash2 } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Download, Trash2, Image as ImageIcon } from 'lucide-react';
 
 interface DocumentUploadProps {
   onUploadSuccess: (documentData: {
@@ -35,7 +35,7 @@ interface DocumentUploadProps {
     relativePath: string;
     originalName: string;
   }>;
-  uploadType?: 'cooperation-type-document' | 'legal-document';
+  uploadType?: 'cooperation-type-document' | 'legal-document' | 'welcome-photo';
 }
 
 interface UploadState {
@@ -45,13 +45,25 @@ interface UploadState {
   dragActive: boolean;
 }
 
-const ALLOWED_TYPES = [
+// Document types
+const DOCUMENT_TYPES = [
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ];
 
-const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx'];
+
+// Image types for welcome photos
+const IMAGE_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp'
+];
+
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 const DEFAULT_MAX_SIZE = 10; // MB
 
 export function DocumentUpload({
@@ -62,7 +74,7 @@ export function DocumentUpload({
   maxSizeMB = DEFAULT_MAX_SIZE,
   cooperationTypeId,
   existingDocument,
-  accept = '.pdf,.doc,.docx',
+  accept,
   customUploadFunction,
   uploadType = 'cooperation-type-document'
 }: DocumentUploadProps) {
@@ -74,15 +86,22 @@ export function DocumentUpload({
   });
 
   const validateFile = useCallback((file: File): string | null => {
+    const isWelcomePhoto = uploadType === 'welcome-photo';
+
+    // Determine allowed types and extensions based on upload type
+    const allowedTypes = isWelcomePhoto ? IMAGE_TYPES : DOCUMENT_TYPES;
+    const allowedExtensions = isWelcomePhoto ? IMAGE_EXTENSIONS : DOCUMENT_EXTENSIONS;
+    const fileTypeName = isWelcomePhoto ? 'Image files (JPG, PNG, GIF, WebP)' : 'PDF, DOC, and DOCX files';
+
     // Check file extension
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-    if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
-      return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
+    if (!allowedExtensions.includes(fileExtension)) {
+      return `Invalid file type. Only ${fileTypeName} are allowed.`;
     }
 
     // Check MIME type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
+    if (!allowedTypes.includes(file.type)) {
+      return `Invalid file type. Only ${fileTypeName} are allowed.`;
     }
 
     // Size validation
@@ -91,7 +110,7 @@ export function DocumentUpload({
     }
 
     return null;
-  }, [maxSizeMB]);
+  }, [maxSizeMB, uploadType]);
 
   const uploadDocument = useCallback(async (file: File) => {
     console.log('🚀 Starting document upload:', { fileName: file.name, fileSize: file.size, uploadType });
@@ -119,7 +138,9 @@ export function DocumentUpload({
           formData.append('cooperationTypeId', cooperationTypeId.toString());
         }
 
-        const uploadUrl = uploadType === 'legal-document'
+        const uploadUrl = uploadType === 'welcome-photo'
+          ? '/api/welcome-photo/upload'
+          : uploadType === 'legal-document'
           ? '/api/legal-documents/upload'
           : '/api/cooperation-types/documents/upload';
 
@@ -151,11 +172,23 @@ export function DocumentUpload({
         const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(1);
         const fileSize = `${fileSizeInMB}MB`;
 
+        // Format file type based on upload type
+        let formattedFileType;
+        if (uploadType === 'welcome-photo') {
+          if (file.type === 'image/jpeg' || file.type === 'image/jpg') formattedFileType = 'JPG';
+          else if (file.type === 'image/png') formattedFileType = 'PNG';
+          else if (file.type === 'image/gif') formattedFileType = 'GIF';
+          else if (file.type === 'image/webp') formattedFileType = 'WebP';
+          else formattedFileType = 'Image';
+        } else {
+          formattedFileType = file.type === 'application/pdf' ? 'PDF' :
+                            file.type.includes('word') ? 'DOCX' : 'DOC';
+        }
+
         result = {
           fileName: apiResult.fileName || file.name,
           fileSize: fileSize,
-          fileType: file.type === 'application/pdf' ? 'PDF' :
-                   file.type.includes('word') ? 'DOCX' : 'DOC',
+          fileType: formattedFileType,
           relativePath: apiResult.relativePath,
           originalName: file.name
         };
@@ -265,7 +298,11 @@ export function DocumentUpload({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-green-100 rounded-full">
-                  <FileText className="w-5 h-5 text-green-600" />
+                  {uploadType === 'welcome-photo' ? (
+                    <ImageIcon className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <FileText className="w-5 h-5 text-green-600" />
+                  )}
                 </div>
                 <div>
                   <p className="font-medium text-sm text-gray-900">
@@ -319,7 +356,7 @@ export function DocumentUpload({
           <input
             ref={fileInputRef}
             type="file"
-            accept={accept}
+            accept={accept || (uploadType === 'welcome-photo' ? '.jpg,.jpeg,.png,.gif,.webp' : '.pdf,.doc,.docx')}
             onChange={handleFileInput}
             className="hidden"
           />
@@ -328,6 +365,8 @@ export function DocumentUpload({
             <div className="flex justify-center">
               {uploadState.dragActive ? (
                 <Upload className="w-12 h-12 text-primary" />
+              ) : uploadType === 'welcome-photo' ? (
+                <ImageIcon className="w-12 h-12 text-gray-400" />
               ) : (
                 <FileText className="w-12 h-12 text-gray-400" />
               )}
@@ -337,7 +376,10 @@ export function DocumentUpload({
                 {uploadState.isUploading ? 'Uploading...' : 'Click to upload or drag & drop'}
               </p>
               <p className="text-sm text-gray-500">
-                PDF, DOC, DOCX up to {maxSizeMB}MB
+                {uploadType === 'welcome-photo'
+                  ? `Image files (JPG, PNG, GIF, WebP) up to ${maxSizeMB}MB`
+                  : `PDF, DOC, DOCX up to ${maxSizeMB}MB`
+                }
               </p>
             </div>
           </div>

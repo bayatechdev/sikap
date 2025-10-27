@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import path from 'path';
-import { prisma } from '@/lib/prisma';
 import {
   validateFile,
   performVirusScan,
-  calculateFileHash,
-  MAX_FILE_SIZE
 } from '@/lib/file-security';
 import {
-  getUploadDir,
-  getRelativePath,
   createUploadPath,
-  ensureUploadDir
+  getPublicUploadDir
 } from '@/lib/file-paths';
 
 export async function POST(request: NextRequest) {
@@ -64,11 +59,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create upload directory for welcome photos
-    const uploadDir = createUploadPath('welcome-photos');
-    await ensureUploadDir(uploadDir);
-    const fullUploadPath = path.join(uploadDir, validation.sanitizedFilename!);
-    const relativePath = getRelativePath(fullUploadPath);
+    // Create upload directory for welcome photos in public directory
+    const uploadPath = createUploadPath(validation.sanitizedFilename!, 'image', 'welcome');
+    console.log('📁 Creating upload path:', uploadPath);
+
+    // For welcome photos, we use public directory for direct web access
+    const publicDir = getPublicUploadDir();
+    const targetDir = path.join(publicDir, path.dirname(uploadPath));
+    console.log('📁 Target directory:', targetDir);
+
+    // Ensure directory exists
+    const { mkdir } = await import('fs/promises');
+    await mkdir(targetDir, { recursive: true });
+
+    const fullUploadPath = path.join(targetDir, validation.sanitizedFilename!);
+    const relativePath = uploadPath; // Use the upload path directly as relative path
+
+    console.log('📁 Full upload path:', fullUploadPath);
+    console.log('📁 Relative path:', relativePath);
 
     // Save file to disk
     await writeFile(fullUploadPath, buffer);

@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/uploads/images/**',
+      },
+      {
         protocol: 'https',
         hostname: 'localhost',
         pathname: '/uploads/**',

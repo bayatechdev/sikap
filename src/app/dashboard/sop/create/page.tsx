@@ -375,9 +375,7 @@ export default function CreateSOPPage() {
 
         {/* Submit */}
         <div className="flex gap-4">
-          <BackButton href="/dashboard/sop" variant="outline">
-            Cancel
-          </BackButton>
+          <BackButton href="/dashboard/sop" variant="outline" label="Cancel" />
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Creating...' : 'Create SOP Document'}
           </Button>

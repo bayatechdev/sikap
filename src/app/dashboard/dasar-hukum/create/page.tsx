@@ -244,9 +244,7 @@ export default function CreateLegalDocumentPage() {
 
         {/* Actions */}
         <div className="flex justify-end space-x-4 pt-6">
-          <BackButton href="/dashboard/dasar-hukum">
-            Batal
-          </BackButton>
+          <BackButton href="/dashboard/dasar-hukum" label="Batal" />
           <Button type="submit" disabled={loading}>
             {loading ? "Menyimpan..." : "Simpan Dokumen"}
           </Button>

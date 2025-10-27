@@ -156,34 +156,34 @@ export default function WebsiteSettingsPage() {
       setSaving(true);
       setError(null);
 
-      // Don't save welcome_photo in saveSection as it's handled separately
-      const { welcome_photo, ...otherWelcomeSettings } = settings;
+      // Prepare welcome settings in the correct format for the API
+      const welcomeSettingsArray = [
+        { key: 'welcome_enabled', value: settings.welcome_enabled || 'false' },
+        { key: 'welcome_title', value: settings.welcome_title || '' },
+        { key: 'welcome_person_name', value: settings.welcome_person_name || '' },
+        { key: 'welcome_person_title', value: settings.welcome_person_title || '' },
+        { key: 'welcome_message', value: settings.welcome_message || '' },
+        { key: 'welcome_photo', value: settings.welcome_photo || '' },
+      ];
+
+      console.log('📝 Sending welcome settings:', welcomeSettingsArray);
 
       const response = await fetch('/api/settings/bulk', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          welcome_enabled: otherWelcomeSettings.welcome_enabled,
-          welcome_title: otherWelcomeSettings.welcome_title,
-          welcome_person_name: otherWelcomeSettings.welcome_person_name,
-          welcome_person_title: otherWelcomeSettings.welcome_person_title,
-          welcome_message: otherWelcomeSettings.welcome_message,
-        }),
+        body: JSON.stringify(welcomeSettingsArray),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save welcome settings');
+        const errorData = await response.json();
+        console.error('❌ API response error:', errorData);
+        throw new Error(errorData.error || 'Failed to save welcome settings');
       }
 
-      setSettings(prev => ({ ...prev,
-        welcome_enabled: otherWelcomeSettings.welcome_enabled,
-        welcome_title: otherWelcomeSettings.welcome_title,
-        welcome_person_name: otherWelcomeSettings.welcome_person_name,
-        welcome_person_title: otherWelcomeSettings.welcome_person_title,
-        welcome_message: otherWelcomeSettings.welcome_message,
-      }));
+      const result = await response.json();
+      console.log('✅ Welcome settings saved:', result);
 
       setSuccess('Welcome settings saved successfully!');
 

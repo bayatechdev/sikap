@@ -8,6 +8,7 @@ import { Save, User, Mail, Shield, Trash2 } from "lucide-react"
 import { FormSkeleton } from "@/components/ui/skeleton-variants"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 const roles = [
   { value: 'admin', label: 'Administrator', description: 'Full system access' },
@@ -207,7 +208,6 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
           <p className="text-muted-foreground">User not found</p>
           <Link href="/dashboard/users">
             <Button className="mt-4">
-              <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Users
             </Button>
           </Link>

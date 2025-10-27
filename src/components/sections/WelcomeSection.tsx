@@ -45,6 +45,27 @@ export default function WelcomeSection() {
   );
   const welcomePhoto = getSetting('welcome_photo', '/assets/images/thumbnails/testimonial.png');
 
+  // Validate and format welcome photo URL for Next.js Image component
+  const getValidatedPhotoUrl = (photoPath: string) => {
+    if (!photoPath || photoPath === '') {
+      return '/assets/images/thumbnails/testimonial.png'; // fallback
+    }
+
+    // If it's already a full URL (starts with http), return as is
+    if (photoPath.startsWith('http')) {
+      return photoPath;
+    }
+
+    // If it doesn't start with /uploads/, add it
+    if (!photoPath.startsWith('/uploads/')) {
+      return `/uploads/${photoPath}`;
+    }
+
+    return photoPath;
+  };
+
+  const validatedPhotoUrl = getValidatedPhotoUrl(welcomePhoto);
+
   return (
     <AnimatedSection className="py-[60px] md:py-[100px]" animationType="fadeUp">
       <div className="mx-auto px-4 md:px-0 max-w-[1280px]">
@@ -53,29 +74,32 @@ export default function WelcomeSection() {
           <div className="relative shrink-0 w-full lg:w-[456px] h-[350px] lg:h-[510px]">
             <div className="absolute w-[70%] lg:w-[350px] h-[70%] lg:h-[470px] left-[15%] lg:left-10 bottom-0 rounded-[26px] overflow-hidden">
               <Image
-                src={welcomePhoto}
+                src={validatedPhotoUrl}
                 alt={`${personName} - ${personTitle}`}
                 fill
                 className="object-cover"
               />
             </div>
-            <div className="absolute w-[100px] lg:w-[174px] top-0 left-0">
-              <Image
-                src="/assets/images/thumbnails/growth.png"
-                alt="Growth"
-                width={174}
-                height={120}
-                className="drop-shadow-custom w-auto h-auto max-w-[100px] lg:max-w-[174px]"
-              />
-            </div>
-            <div className="absolute w-[80px] lg:w-[136px] bottom-[50px] right-0">
-              <Image
-                src="/assets/images/thumbnails/funding.png"
-                alt="Funding"
-                width={136}
-                height={100}
-                className="drop-shadow-custom w-auto h-auto max-w-[80px] lg:max-w-[136px]"
-              />
+            {/* Thumbnail Images */}
+            <div className="absolute  p-6 bg-white rounded-2xl shadow-2xl text-accent-foreground">
+              <div className="flex gap-4 items-center">
+                <div className="flex items-center justify-center bg-primary rounded-full w-[50px] h-[50px] shrink-0">
+                  <Image
+                    src="/assets/images/icons/crown.svg"
+                    alt="crown icon"
+                    width={24}
+                    height={24}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-poppins text-[12px] lg:text-[22px] leading-[22px] font-semibold">
+                    Welcome
+                  </h3>
+                  <p className="text-[16px]">
+                    to <span className="font-bold">SIKAP</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

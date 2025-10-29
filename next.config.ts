@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Generate unique build ID setiap deploy
+  generateBuildId: async () => {
+    return `build-${Date.now()}`;
+  },
+
   images: {
     remotePatterns: [
       // Development localhost patterns - support multiple ports
@@ -37,6 +42,40 @@ const nextConfig: NextConfig = {
       {
         source: '/uploads/:path*',
         destination: '/api/files/:path*',
+      },
+    ];
+  },
+
+  // Set proper cache headers
+  async headers() {
+    return [
+      {
+        // Cache static assets dengan hash (immutable)
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Jangan cache HTML pages
+        source: '/:path((?!_next/static|_next/image|favicon.ico).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+        ],
       },
     ];
   },

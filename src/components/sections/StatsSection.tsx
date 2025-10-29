@@ -51,9 +51,9 @@ export default function StatsSection() {
           <h2 className="text-[24px] lg:text-[32px] z-10 leading-tight lg:leading-[46px] font-bold max-w-[425px] text-center lg:text-left">
             Bersama membangun Kabupaten Tana Tidung
           </h2>
-          <div className="flex flex-col sm:flex-row gap-8 lg:gap-20">
+          <div className="flex flex-row gap-8 lg:gap-20">
             <div className="flex gap-4 items-center">
-              <div className="flex items-center justify-center w-[50px] h-[50px] bg-primary rounded-full shrink-0">
+              <div className="flex items-center justify-center w-[64px] h-[64px] bg-primary rounded-full shrink-0">
                 <Image
                   src="/assets/images/icons/3dcube.svg"
                   alt="cube icon"
@@ -61,18 +61,17 @@ export default function StatsSection() {
                   height={24}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-poppins text-[32px] lg:text-[42px] leading-[46px] font-bold">
+              <div className="flex flex-col gap-3 justify-center translate-y-1.5">
+                <h3 className="font-poppins text-[32px] lg:text-[42px] leading-[18px] font-bold">
                   {loading ? '...' : formatNumber(stats.totalCooperations)}
                 </h3>
                 <p className="text-lg leading-8">
-                  Kerjasama
+                  Kerjasamaa
                 </p>
               </div>
             </div>
-
             <div className="flex gap-4 items-center">
-              <div className="flex items-center justify-center bg-primary rounded-full w-[50px] h-[50px] shrink-0">
+              <div className="flex items-center justify-center w-[64px] h-[64px] bg-primary rounded-full shrink-0">
                 <Image
                   src="/assets/images/icons/crown.svg"
                   alt="crown icon"
@@ -80,8 +79,8 @@ export default function StatsSection() {
                   height={24}
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-poppins text-[32px] lg:text-[42px] leading-[46px] font-bold">
+              <div className="flex flex-col gap-3 justify-center translate-y-1.5">
+                <h3 className="font-poppins text-[32px] lg:text-[42px] leading-[18px] font-bold">
                   {loading ? '...' : formatNumber(stats.totalPartners)}
                 </h3>
                 <p className="text-lg leading-8">

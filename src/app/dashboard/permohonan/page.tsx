@@ -133,9 +133,9 @@ export default function ApplicationManagementPage() {
     <div className="@container/main space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Application Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Permohonan Kerjasama</h1>
         <p className="text-muted-foreground">
-          Manage and review submitted applications
+          Pengaturan dan Review Data Permohonan Kerjasama
         </p>
       </div>
 

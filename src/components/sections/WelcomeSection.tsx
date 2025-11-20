@@ -72,7 +72,7 @@ export default function WelcomeSection() {
         <div className="flex flex-col lg:flex-row w-full items-center gap-[30px] lg:gap-[70px]">
           {/* Left Image Section */}
           <div className="relative shrink-0 w-full lg:w-[456px] h-[350px] lg:h-[510px]">
-            <div className="absolute w-[70%] lg:w-[350px] h-[70%] lg:h-[470px] left-[15%] lg:left-10 bottom-0 rounded-[26px] overflow-hidden">
+            <div className="absolute w-[70%] lg:w-[350px] h-[70%] lg:h-[470px] left-[15%] lg:left-10 bottom-0 rounded-[26px] overflow-hidden bg-gray-100">
               <Image
                 src={validatedPhotoUrl}
                 alt={`${personName} - ${personTitle}`}

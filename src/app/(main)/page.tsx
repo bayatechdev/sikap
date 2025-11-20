@@ -18,6 +18,9 @@ const content = contentData as ContentData;
 const kerjasama = kerjasamaData as KerjasamaData;
 // const sop = sopData as SOPData;
 
+// Enable Incremental Static Regeneration - auto update every 5 minutes
+export const revalidate = 300;
+
 export default function Home() {
   return (
     <div className="min-h-screen">

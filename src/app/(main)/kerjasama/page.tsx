@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 
 interface CooperationData {
   id: string;
@@ -13,6 +14,10 @@ interface CooperationData {
   partnerInstitution: string;
   cooperationDate: string;
   location: string;
+  documentPath?: string | null;
+  documentNumber?: string | null;
+  documentSize?: number | null;
+  documentMimeType?: string | null;
   application?: {
     id: string;
     title: string;
@@ -697,18 +702,24 @@ export default function KerjasamaPage() {
                               right: 0,
                             }}
                           >
-                            <a
-                              href="#"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-primary hover:text-foreground rounded-lg text-[12px] font-semibold text-gray-700 transition-all duration-200 hover:shadow-sm"
+                            <button
+                              onClick={() => {
+                                if (row.documentPath) {
+                                  window.open(`/api/files/${encodeURIComponent(row.documentPath)}`, '_blank');
+                                }
+                              }}
+                              disabled={!row.documentPath}
+                              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-semibold transition-all duration-200 hover:shadow-sm ${
+                                row.documentPath
+                                  ? 'bg-gray-100 hover:bg-primary hover:text-foreground text-gray-700 cursor-pointer'
+                                  : 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                              }`}
                             >
-                              <Image
-                                src="/assets/images/icons/ic_download.svg"
-                                alt="download"
-                                width={16}
-                                height={16}
+                              <Eye
+                                className="w-4 h-4"
                               />
-                              Download
-                            </a>
+                              Preview
+                            </button>
                           </td>
                         )}
                       </tr>

@@ -52,13 +52,13 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
 
   const colors = getColorClasses(data?.downloadInfo?.color || "primary");
 
-  const handleDownload = () => {
-    // If there's a real document with relativePath, download it
+  const handlePreview = () => {
+    // If there's a real document with relativePath, preview it
     if (data?.downloadInfo?.relativePath) {
       window.open(`/api/files/${encodeURIComponent(data.downloadInfo.relativePath)}`, '_blank');
     } else {
       // Fallback - could show a message or handle differently
-      console.log('No document available for download');
+      console.log('No document available for preview');
     }
   };
 
@@ -92,23 +92,23 @@ const DownloadCard: React.FC<DownloadCardProps> = ({ data }) => {
 
       <div className="mb-6">
         <button
-          onClick={handleDownload}
+          onClick={handlePreview}
           className={`inline-flex items-center justify-center gap-3 px-6 py-3 font-semibold rounded-[100px] transition-all duration-300 hover:-translate-y-1 ${colors.button} ${
             !data?.downloadInfo?.relativePath ? 'opacity-50 cursor-not-allowed' : ''
           }`}
           disabled={!data?.downloadInfo?.relativePath}
         >
           <Image
-            src="/assets/images/icons/ic_download.svg"
-            alt="download icon"
+            src="/assets/images/icons/note-2.svg"
+            alt="preview icon"
             width={20}
             height={20}
           />
           <span className="hidden md:inline">
-            {data?.downloadInfo?.relativePath ? 'Download File' : 'Template Tersedia'}
+            {data?.downloadInfo?.relativePath ? 'Preview File' : 'Template Tersedia'}
           </span>
           <span className="md:hidden">
-            {data?.downloadInfo?.relativePath ? 'Download' : 'N/A'}
+            {data?.downloadInfo?.relativePath ? 'Preview' : 'N/A'}
           </span>
           <div className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center">
             <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 8 8">

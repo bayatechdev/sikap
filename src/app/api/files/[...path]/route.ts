@@ -106,7 +106,7 @@ export async function GET(
     const headers: Record<string, string> = {
       'Content-Type': contentType,
       'Cache-Control': 'public, max-age=31536000, immutable',
-      'Content-Disposition': isPublicFile ? 'inline' : 'attachment',
+      'Content-Disposition': contentType === 'application/pdf' ? 'inline' : (isPublicFile ? 'inline' : 'attachment'),
     };
 
     // Add security headers for private files

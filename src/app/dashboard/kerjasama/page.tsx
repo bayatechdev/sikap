@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, RefreshCw, FileText, Plus, Edit, Trash2, Calendar, Building } from "lucide-react";
+import { Search, RefreshCw, FileText, Plus, Edit, Trash2, Calendar, Building, Upload, File, Download, Eye } from "lucide-react";
 import { DataTableSkeleton } from "@/components/ui/skeleton-variants";
+import { DocumentUpload } from "@/components/ui/DocumentUpload";
 
 interface Cooperation {
   id: string;
@@ -29,6 +30,10 @@ interface Cooperation {
   scope?: string;
   status: string;
   notes?: string;
+  documentPath?: string | null;
+  documentNumber?: string | null;
+  documentSize?: number | null;
+  documentMimeType?: string | null;
   application?: {
     id: string;
     title: string;
@@ -77,6 +82,7 @@ export default function CooperationManagementPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBrowseModalOpen, setIsBrowseModalOpen] = useState(false);
+  const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
   const [selectedCooperation, setSelectedCooperation] = useState<Cooperation | null>(null);
   const [formData, setFormData] = useState({
     applicationId: '',
@@ -93,8 +99,20 @@ export default function CooperationManagementPage() {
     objectives: '',
     scope: '',
     status: 'ACTIVE' as 'ACTIVE' | 'EXPIRED' | 'TERMINATED' | 'DRAFT',
-    notes: ''
+    notes: '',
+    documentPath: '',
+    documentNumber: '',
+    documentSize: 0,
+    documentMimeType: ''
   });
+
+  const [uploadedDocument, setUploadedDocument] = useState<{
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    relativePath: string;
+    originalName: string;
+  } | null>(null);
 
   // Browse applications states
   const [approvedApplications, setApprovedApplications] = useState<ApprovedApplication[]>([]);
@@ -182,16 +200,31 @@ export default function CooperationManagementPage() {
       objectives: '',
       scope: '',
       status: 'ACTIVE',
-      notes: ''
+      notes: '',
+      documentPath: '',
+      documentNumber: '',
+      documentSize: 0,
+      documentMimeType: ''
     });
+    setUploadedDocument(null);
   };
 
   const handleCreateCooperation = async () => {
     try {
+      const dataToSend = {
+        ...formData,
+        documentPath: uploadedDocument?.relativePath || '',
+        documentNumber: uploadedDocument?.fileName || '',
+        documentSize: uploadedDocument?.fileSize.includes('MB')
+          ? parseFloat(uploadedDocument.fileSize) * 1024 * 1024
+          : parseFloat(uploadedDocument?.fileSize || '0') * 1024,
+        documentMimeType: uploadedDocument?.fileType === 'PDF' ? 'application/pdf' : 'application/msword'
+      };
+
       const response = await fetch('/api/cooperations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {
@@ -210,10 +243,24 @@ export default function CooperationManagementPage() {
     if (!selectedCooperation) return;
 
     try {
+      const dataToSend = {
+        ...formData,
+        documentPath: uploadedDocument?.relativePath || formData.documentPath,
+        documentNumber: uploadedDocument?.fileName || formData.documentNumber,
+        documentSize: uploadedDocument?.fileSize.includes('MB')
+          ? parseFloat(uploadedDocument.fileSize) * 1024 * 1024
+          : uploadedDocument?.fileSize.includes('KB')
+          ? parseFloat(uploadedDocument.fileSize) * 1024
+          : formData.documentSize,
+        documentMimeType: uploadedDocument?.fileType === 'PDF' ? 'application/pdf' :
+                          uploadedDocument?.fileType === 'DOCX' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
+                          formData.documentMimeType
+      };
+
       const response = await fetch(`/api/cooperations/${selectedCooperation.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {
@@ -264,8 +311,76 @@ export default function CooperationManagementPage() {
     setIsBrowseModalOpen(false);
   };
 
+  const handleDocumentUpload = async (file: File, cooperationId: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('cooperationId', cooperationId);
+
+      const response = await fetch('/api/cooperations/documents', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload document');
+      }
+
+      await fetchCooperations(); // Refresh data
+      return true;
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      return false;
+    }
+  };
+
+  const handleDocumentDelete = async (cooperationId: string) => {
+    try {
+      const response = await fetch(`/api/cooperations/documents?cooperationId=${cooperationId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      await fetchCooperations(); // Refresh data
+      return true;
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      return false;
+    }
+  };
+
+  const openDocumentModal = (cooperation: Cooperation) => {
+    setSelectedCooperation(cooperation);
+    setIsDocumentModalOpen(true);
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return 'N/A';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
   const openEditModal = (cooperation: Cooperation) => {
     setSelectedCooperation(cooperation);
+
+    // Set uploaded document if exists
+    if (cooperation.documentPath) {
+      setUploadedDocument({
+        fileName: cooperation.documentNumber || cooperation.title,
+        fileSize: cooperation.documentSize ? formatFileSize(cooperation.documentSize) : '0KB',
+        fileType: cooperation.documentMimeType?.includes('pdf') ? 'PDF' :
+                  cooperation.documentMimeType?.includes('docx') ? 'DOCX' : 'DOC',
+        relativePath: cooperation.documentPath,
+        originalName: cooperation.documentNumber || cooperation.title
+      });
+    } else {
+      setUploadedDocument(null);
+    }
+
     setFormData({
       applicationId: cooperation.application?.id || '',
       title: cooperation.title,
@@ -281,7 +396,11 @@ export default function CooperationManagementPage() {
       objectives: cooperation.objectives || '',
       scope: cooperation.scope || '',
       status: cooperation.status as 'ACTIVE' | 'EXPIRED' | 'TERMINATED' | 'DRAFT',
-      notes: cooperation.notes || ''
+      notes: cooperation.notes || '',
+      documentPath: cooperation.documentPath || '',
+      documentNumber: cooperation.documentNumber || '',
+      documentSize: cooperation.documentSize || 0,
+      documentMimeType: cooperation.documentMimeType || ''
     });
     setIsEditModalOpen(true);
   };
@@ -458,6 +577,7 @@ export default function CooperationManagementPage() {
                     <TableHead>Date</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Dokumen</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -504,6 +624,39 @@ export default function CooperationManagementPage() {
                         <Badge variant={getStatusColor(cooperation.status)}>
                           {cooperation.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {cooperation.documentPath ? (
+                          <div className="flex items-center space-x-2">
+                            <File className="h-4 w-4 text-blue-600" />
+                            <div className="flex flex-col">
+                              <span className="text-xs font-medium">PDF</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatFileSize(cooperation.documentSize || 0)}
+                              </span>
+                            </div>
+                            <div className="flex space-x-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(`/api/files/${cooperation.documentPath!}`, '_blank')}
+                                className="h-7 w-7 p-0"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openDocumentModal(cooperation)}
+                            className="h-8 px-2"
+                          >
+                            <Upload className="h-3 w-3 mr-1" />
+                            Upload
+                          </Button>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
@@ -734,6 +887,61 @@ export default function CooperationManagementPage() {
               </div>
             </div>
 
+            {/* Document Section */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-primary pl-4">
+                <h3 className="text-lg font-semibold">Document</h3>
+                <p className="text-sm text-muted-foreground">Upload cooperation agreement document</p>
+              </div>
+
+              <div className="space-y-6">
+                <DocumentUpload
+                  onUploadSuccess={(documentData) => {
+                    setUploadedDocument(documentData);
+                  }}
+                  onUploadError={(error) => {
+                    console.error('Document upload error:', error);
+                  }}
+                  onRemoveDocument={() => {
+                    setUploadedDocument(null);
+                  }}
+                  accept=".pdf,.doc,.docx"
+                  maxSizeMB={10}
+                  uploadType="cooperation"
+                  customUploadFunction={async (file: File) => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('cooperationId', selectedCooperation?.id || '');
+
+                    const response = await fetch('/api/cooperations/documents', {
+                      method: 'POST',
+                      body: formData,
+                    });
+
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      throw new Error(errorData.error || 'Upload failed');
+                    }
+
+                    const apiResult = await response.json();
+                    const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(1);
+
+                    // Refresh cooperations list to show the uploaded document
+                    await fetchCooperations();
+
+                    return {
+                      fileName: apiResult.document.originalFilename,
+                      fileSize: `${fileSizeInMB}MB`,
+                      fileType: file.type === 'application/pdf' ? 'PDF' :
+                               file.type.includes('word') ? 'DOCX' : 'DOC',
+                      relativePath: apiResult.document.documentPath,
+                      originalName: file.name
+                    };
+                  }}
+                />
+              </div>
+            </div>
+
             {/* Additional Information Section */}
             <div className="space-y-4">
               <div className="border-l-4 border-primary pl-4">
@@ -957,6 +1165,62 @@ export default function CooperationManagementPage() {
               </div>
             </div>
 
+            {/* Document Section */}
+            <div className="space-y-4">
+              <div className="border-l-4 border-primary pl-4">
+                <h3 className="text-lg font-semibold">Document</h3>
+                <p className="text-sm text-muted-foreground">Upload cooperation agreement document</p>
+              </div>
+
+              <div className="space-y-6">
+                <DocumentUpload
+                  onUploadSuccess={(documentData) => {
+                    setUploadedDocument(documentData);
+                  }}
+                  onUploadError={(error) => {
+                    console.error('Document upload error:', error);
+                  }}
+                  onRemoveDocument={() => {
+                    setUploadedDocument(null);
+                  }}
+                  existingDocument={uploadedDocument || undefined}
+                  accept=".pdf,.doc,.docx"
+                  maxSizeMB={10}
+                  uploadType="cooperation"
+                  customUploadFunction={async (file: File) => {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('cooperationId', selectedCooperation?.id || '');
+
+                    const response = await fetch('/api/cooperations/documents', {
+                      method: 'POST',
+                      body: formData,
+                    });
+
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      throw new Error(errorData.error || 'Upload failed');
+                    }
+
+                    const apiResult = await response.json();
+                    const fileSizeInMB = (file.size / (1024 * 1024)).toFixed(1);
+
+                    // Refresh cooperations list to show the uploaded document
+                    await fetchCooperations();
+
+                    return {
+                      fileName: apiResult.document.originalFilename,
+                      fileSize: `${fileSizeInMB}MB`,
+                      fileType: file.type === 'application/pdf' ? 'PDF' :
+                               file.type.includes('word') ? 'DOCX' : 'DOC',
+                      relativePath: apiResult.document.documentPath,
+                      originalName: file.name
+                    };
+                  }}
+                />
+              </div>
+            </div>
+
             {/* Additional Information Section */}
             <div className="space-y-4">
               <div className="border-l-4 border-primary pl-4">
@@ -1105,6 +1369,115 @@ export default function CooperationManagementPage() {
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsBrowseModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Upload Modal */}
+      <Dialog open={isDocumentModalOpen} onOpenChange={setIsDocumentModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Document Management</DialogTitle>
+            <DialogDescription>
+              Upload or manage documents for {selectedCooperation?.title}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {selectedCooperation?.documentPath ? (
+              // Document exists - show info and actions
+              <div className="space-y-4">
+                <div className="bg-muted/30 rounded-lg p-4 border border-muted">
+                  <div className="flex items-center space-x-4">
+                    <File className="h-8 w-8 text-blue-600" />
+                    <div className="flex-1">
+                      <h4 className="font-medium">Current Document</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedCooperation.documentMimeType} • {formatFileSize(selectedCooperation.documentSize)}
+                      </p>
+                      {selectedCooperation.documentNumber && (
+                        <p className="text-sm text-muted-foreground">
+                          Document #: {selectedCooperation.documentNumber}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(`/api/files/${selectedCooperation.documentPath!}`, '_blank')}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={async () => {
+                          if (confirm('Are you sure you want to delete this document?')) {
+                            const success = await handleDocumentDelete(selectedCooperation.id);
+                            if (success) {
+                              setIsDocumentModalOpen(false);
+                              setSelectedCooperation(null);
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center text-sm text-muted-foreground">
+                  Or upload a new document to replace the current one
+                </div>
+              </div>
+            ) : (
+              // No document - show upload prompt
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No Document Uploaded</h3>
+                <p className="text-muted-foreground mb-4">
+                  Upload a PDF document for this cooperation agreement
+                </p>
+              </div>
+            )}
+
+            {/* Upload Area */}
+            <div className="space-y-4">
+              <Label className="text-sm font-medium">Upload Document</Label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file && selectedCooperation) {
+                      const success = await handleDocumentUpload(file, selectedCooperation.id);
+                      if (success) {
+                        setIsDocumentModalOpen(false);
+                        setSelectedCooperation(null);
+                      }
+                    }
+                  }}
+                  className="hidden"
+                  id="document-upload"
+                />
+                <label htmlFor="document-upload" className="cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-sm font-medium mb-1">Click to upload or drag and drop</p>
+                  <p className="text-xs text-muted-foreground">PDF files only (MAX. 10MB)</p>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsDocumentModalOpen(false)}>
               Close
             </Button>
           </DialogFooter>

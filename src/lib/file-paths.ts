@@ -132,36 +132,46 @@ export async function ensureUploadDir(relativePath?: string, isPublic = false): 
 /**
  * Create upload path for a file based on its type
  * @param filename - The sanitized filename
- * @param fileType - Type of file: 'image', 'document', 'legal', 'sop'
+ * @param fileType - Type of file: 'image', 'document', 'legal', 'sop', 'cooperation', 'cooperation-type'
  * @param subPath - Optional subpath for additional organization
  * @returns Upload path structure
  */
 export function createUploadPath(
   filename: string,
-  fileType: 'image' | 'document' | 'legal' | 'sop' = 'document',
+  fileType: 'image' | 'document' | 'legal' | 'sop' | 'cooperation' | 'cooperation-type' = 'document',
   subPath?: string
 ): string {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
 
   switch (fileType) {
     case 'image':
       return subPath
         ? `images/${subPath}/${filename}`
-        : `images/${year}/${month}/${day}/${filename}`;
+        : `images/${filename}`;
     case 'legal':
-      return `legal-documents/${filename}`;
+      return `dasar-hukum/${filename}`;
     case 'sop':
-      return `sop-documents/${filename}`;
-    case 'document':
+      return `sop/${filename}`;
+    case 'cooperation':
+      // Cooperation documents (kerjasama agreements)
       return subPath
-        ? `documents/${subPath}/${filename}`
-        : `documents/${year}/${month}/${day}/${filename}`;
+        ? `kerjasama/${subPath}/${filename}`
+        : `kerjasama/${filename}`;
+    case 'cooperation-type':
+      // Cooperation type documents (templates)
+      return subPath
+        ? `jenis-kerjasama/${subPath}/${filename}`
+        : `jenis-kerjasama/${filename}`;
+    case 'document':
+      // Application documents (permohonan)
+      return subPath
+        ? `applications/${subPath}/${filename}`
+        : `applications/${year}/${month}/${filename}`;
     default:
       return subPath
         ? `${fileType}/${subPath}/${filename}`
-        : `${fileType}/${year}/${month}/${day}/${filename}`;
+        : `${fileType}/${filename}`;
   }
 }

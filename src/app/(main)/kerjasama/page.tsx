@@ -718,7 +718,7 @@ export default function KerjasamaPage() {
                               <Eye
                                 className="w-4 h-4"
                               />
-                              Preview
+                              Lihat
                             </button>
                           </td>
                         )}

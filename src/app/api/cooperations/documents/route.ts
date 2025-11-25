@@ -5,7 +5,6 @@ import { prisma } from '@/lib/prisma';
 import {
   validateFile,
   performVirusScan,
-  calculateFileHash,
   MAX_FILE_SIZE,
 } from '@/lib/file-security';
 import { getUploadDir, getRelativePath, createUploadPath, ensureUploadDir } from '@/lib/file-paths';
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate file hash for integrity
-    const fileHash = calculateFileHash(buffer);
+    // const fileHash = calculateFileHash(buffer); // Not currently used but available for future integrity checks
 
     // Create upload directory structure
     const uploadPath = createUploadPath(validation.sanitizedFilename!, 'cooperation');
@@ -174,7 +173,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remove document information from cooperation
-    const updatedCooperation = await prisma.cooperation.update({
+    await prisma.cooperation.update({
       where: { id: cooperationId },
       data: {
         documentPath: null,

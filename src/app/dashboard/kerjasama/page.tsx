@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, RefreshCw, FileText, Plus, Edit, Trash2, Calendar, Building, Upload, File, Download, Eye } from "lucide-react";
+import { Search, RefreshCw, FileText, Plus, Edit, Trash2, Calendar, Building, Upload, File, Eye } from "lucide-react";
 import { DataTableSkeleton } from "@/components/ui/skeleton-variants";
 import { DocumentUpload } from "@/components/ui/DocumentUpload";
 

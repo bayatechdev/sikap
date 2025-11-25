@@ -110,7 +110,7 @@ function renameFolders() {
         try {
           fs.rmdirSync(oldPath);
           console.log(`  🗑️  Removed empty folder: ${old}`);
-        } catch (error) {
+        } catch {
           console.log(`  ⚠️  Could not remove folder (may not be empty): ${old}`);
         }
       } else {

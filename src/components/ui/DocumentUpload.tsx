@@ -35,7 +35,7 @@ interface DocumentUploadProps {
     relativePath: string;
     originalName: string;
   }>;
-  uploadType?: 'cooperation-type-document' | 'legal-document' | 'welcome-photo';
+  uploadType?: 'cooperation-type-document' | 'legal-document' | 'welcome-photo' | 'cooperation';
 }
 
 interface UploadState {

@@ -1395,7 +1395,7 @@ export default function CooperationManagementPage() {
                     <div className="flex-1">
                       <h4 className="font-medium">Current Document</h4>
                       <p className="text-sm text-muted-foreground">
-                        {selectedCooperation.documentMimeType} • {formatFileSize(selectedCooperation.documentSize)}
+                        {selectedCooperation.documentMimeType} • {formatFileSize(selectedCooperation.documentSize || undefined)}
                       </p>
                       {selectedCooperation.documentNumber && (
                         <p className="text-sm text-muted-foreground">

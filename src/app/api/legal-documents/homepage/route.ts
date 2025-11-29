@@ -27,21 +27,38 @@ const categoryConfig = {
   },
 };
 
-// Helper function to get file size
-async function getFileSize(relativePath: string): Promise<string | null> {
+// Helper function to check if file exists and get file size
+async function getFileInfo(relativePath: string): Promise<{ hasFile: boolean; fileSize: string | null }> {
+  // Return false immediately if path is empty or null
+  if (!relativePath || relativePath.trim() === '') {
+    return { hasFile: false, fileSize: null };
+  }
+
   try {
-    const filePath = path.join(process.cwd(), 'public', relativePath);
+    const uploadDir = process.env.UPLOAD_DIR || './uploads';
+    // Remove /uploads prefix if present in relativePath
+    const cleanPath = relativePath.startsWith('/uploads/') ? relativePath.substring(8) : relativePath;
+    const filePath = path.join(process.cwd(), uploadDir, cleanPath);
+
     const stats = await fs.stat(filePath);
     const fileSizeInBytes = stats.size;
 
-    // Convert to human readable format
-    if (fileSizeInBytes < 1024 * 1024) {
-      return `${Math.round(fileSizeInBytes / 1024)} KB`;
-    } else {
-      return `${(fileSizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+    // File is considered available only if it has content (size > 0)
+    if (fileSizeInBytes === 0) {
+      return { hasFile: false, fileSize: null };
     }
-  } catch {
-    return null;
+
+    // Convert to human readable format
+    let fileSize: string;
+    if (fileSizeInBytes < 1024 * 1024) {
+      fileSize = `${Math.round(fileSizeInBytes / 1024)} KB`;
+    } else {
+      fileSize = `${(fileSizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    return { hasFile: true, fileSize };
+  } catch (error) {
+    return { hasFile: false, fileSize: null };
   }
 }
 
@@ -85,16 +102,17 @@ export async function GET() {
         });
       }
 
-      // Get file size
-      const fileSize = await getFileSize(doc.relativePath);
+      // Get file info
+      const fileInfo = await getFileInfo(doc.relativePath);
 
       const category = categoriesMap.get(categoryKey);
       category.items.push({
         id: doc.id,
         title: doc.title,
         year: doc.year,
-        pdfUrl: `/api/legal-documents/${doc.id}/download`,
-        fileSize: fileSize || 'N/A',
+        pdfUrl: `/api/legal-documents/${doc.id}/view`,
+        fileSize: fileInfo.fileSize || 'N/A',
+        hasFile: fileInfo.hasFile,
         documentNumber: doc.documentNumber,
         description: doc.description,
       });

@@ -100,6 +100,7 @@ export interface DasarHukumItem {
   year: string;
   pdfUrl: string;
   fileSize?: string;
+  hasFile: boolean;
 }
 
 export interface DasarHukumCategory {

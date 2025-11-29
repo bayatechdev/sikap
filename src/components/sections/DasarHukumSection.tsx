@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { DasarHukumData, DasarHukumCategory } from "@/types";
+import { Button } from "../ui/button";
+import { Eye } from "lucide-react";
 
 interface DasarHukumSectionProps {
   // Optional initial data, will fetch from API if not provided
@@ -113,28 +115,21 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
                         </div>
                       </div>
                     </div>
-                    <a
-                      href={item.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-primary hover:bg-primary/90 text-foreground text-[12px] md:text-[14px] font-semibold rounded-[100px] transition-all duration-300 hover:shadow-primary whitespace-nowrap"
+                    <Button
+                      onClick={() => {
+                        // Try to open PDF in new tab for viewing
+                        const pdfWindow = window.open(item.pdfUrl, '_blank');
+                        if (pdfWindow) {
+                          pdfWindow.focus();
+                        }
+                      }}
+                      disabled={!item.hasFile}
+                      className="inline-flex items-center gap-1.5 md:gap-2 py-1.5 md:py-2 bg-primary hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-foreground text-[11px] md:text-[12px] font-semibold rounded-[100px] transition-all duration-300 hover:shadow-primary whitespace-nowrap"
                     >
                       <span className="hidden md:inline">Lihat PDF</span>
-                      <span className="md:hidden">PDF</span>
-                      <svg
-                        className="w-3 h-3 md:w-4 md:h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
-                    </a>
+                      <span className="md:hidden">Lihat</span>
+                      <Eye size={14} />
+                    </Button>
                   </div>
                 ))}
               </div>

@@ -13,6 +13,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2014",
           pdfUrl: "#",
           fileSize: "2.3 MB",
+          hasFile:true
         },
         {
           id: 2,
@@ -20,6 +21,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2014",
           pdfUrl: "#",
           fileSize: "3.1 MB",
+          hasFile:true
         },
         {
           id: 3,
@@ -27,6 +29,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2014",
           pdfUrl: "#",
           fileSize: "1.8 MB",
+          hasFile:true
         },
       ],
     },
@@ -41,6 +44,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2018",
           pdfUrl: "#",
           fileSize: "2.7 MB",
+          hasFile:true
         },
         {
           id: 5,
@@ -48,6 +52,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2019",
           pdfUrl: "#",
           fileSize: "4.2 MB",
+          hasFile:true
         },
         {
           id: 6,
@@ -55,6 +60,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2018",
           pdfUrl: "#",
           fileSize: "3.5 MB",
+          hasFile:true
         },
       ],
     },
@@ -69,6 +75,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2019",
           pdfUrl: "#",
           fileSize: "1.9 MB",
+          hasFile:true
         },
         {
           id: 8,
@@ -76,6 +83,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2013",
           pdfUrl: "#",
           fileSize: "2.1 MB",
+          hasFile:true
         },
       ],
     },
@@ -90,6 +98,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2020",
           pdfUrl: "#",
           fileSize: "1.5 MB",
+          hasFile:true
         },
         {
           id: 10,
@@ -97,6 +106,7 @@ export const dasarHukumData: DasarHukumData = {
           year: "2021",
           pdfUrl: "#",
           fileSize: "5.8 MB",
+          hasFile:true
         },
       ],
     },

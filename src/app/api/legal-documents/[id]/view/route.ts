@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import fs from 'fs/promises';
 import path from 'path';
 
-// GET /api/legal-documents/[id]/download - Download legal document file
+// GET /api/legal-documents/[id]/view - View PDF inline in browser
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -54,7 +54,7 @@ export async function GET(
     const fileBuffer = await fs.readFile(filePath);
     const filename = path.basename(legalDocument.relativePath);
 
-    // Set appropriate headers for PDF viewing
+    // Set headers optimized for inline viewing
     const headers = new Headers();
     headers.set('Content-Type', 'application/pdf');
     headers.set('Content-Disposition', `inline; filename="${filename}"`);
@@ -62,6 +62,12 @@ export async function GET(
     headers.set('Accept-Ranges', 'bytes');
     headers.set('X-Content-Type-Options', 'nosniff');
     headers.set('Content-Transfer-Encoding', 'binary');
+
+    // Remove potential caching issues
+    headers.set('Pragma', 'no-cache');
+    headers.set('Expires', '0');
+
+    // CORS headers
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Access-Control-Allow-Methods', 'GET');
     headers.set('Access-Control-Allow-Headers', 'Content-Type');
@@ -71,9 +77,9 @@ export async function GET(
       headers,
     });
   } catch (error) {
-    console.error('Error downloading legal document:', error);
+    console.error('Error viewing legal document:', error);
     return NextResponse.json(
-      { error: 'Failed to download legal document' },
+      { error: 'Failed to view legal document' },
       { status: 500 }
     );
   }

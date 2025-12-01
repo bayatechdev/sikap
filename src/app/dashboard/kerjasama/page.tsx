@@ -719,7 +719,7 @@ export default function CooperationManagementPage() {
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader className="border-b pb-4">
-            <DialogTitle className="text-xl font-semibold">Create New Cooperation</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">Tambah Data Kerjasama</DialogTitle>
             <DialogDescription className="text-base">
               Add a new cooperation agreement. You can import data from approved applications or enter manually.
             </DialogDescription>
@@ -754,7 +754,7 @@ export default function CooperationManagementPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="title" className="text-sm font-medium">Title *</Label>
+                  <Label htmlFor="title" className="text-sm font-medium">Judul *</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -765,7 +765,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="partnerInstitution" className="text-sm font-medium">Partner Institution *</Label>
+                  <Label htmlFor="partnerInstitution" className="text-sm font-medium">Instansi/Institusi *</Label>
                   <Input
                     id="partnerInstitution"
                     value={formData.partnerInstitution}
@@ -776,7 +776,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="cooperationType" className="text-sm font-medium">Cooperation Type *</Label>
+                  <Label htmlFor="cooperationType" className="text-sm font-medium">Jenis Kerjasama *</Label>
                   <Select
                     value={formData.cooperationType}
                     onValueChange={(value) => setFormData({ ...formData, cooperationType: value as 'MOU' | 'PKS' | 'NK' })}
@@ -821,7 +821,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="location" className="text-sm font-medium">Location *</Label>
+                  <Label htmlFor="location" className="text-sm font-medium">Lokasi *</Label>
                   <Input
                     id="location"
                     value={formData.location}
@@ -832,7 +832,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="cooperationDate" className="text-sm font-medium">Cooperation Date *</Label>
+                  <Label htmlFor="cooperationDate" className="text-sm font-medium">Tanggal Kerjasama *</Label>
                   <Input
                     id="cooperationDate"
                     type="date"
@@ -864,7 +864,7 @@ export default function CooperationManagementPage() {
               {/* Dates Section */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <div className="space-y-3">
-                  <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
+                  <Label htmlFor="startDate" className="text-sm font-medium">Tanggal Mulai</Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -875,7 +875,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="endDate" className="text-sm font-medium">End Date</Label>
+                  <Label htmlFor="endDate" className="text-sm font-medium">Tanggal Selesai</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -888,7 +888,7 @@ export default function CooperationManagementPage() {
             </div>
 
             {/* Document Section */}
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <div className="border-l-4 border-primary pl-4">
                 <h3 className="text-lg font-semibold">Document</h3>
                 <p className="text-sm text-muted-foreground">Upload cooperation agreement document</p>
@@ -940,18 +940,18 @@ export default function CooperationManagementPage() {
                   }}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Additional Information Section */}
             <div className="space-y-4">
               <div className="border-l-4 border-primary pl-4">
-                <h3 className="text-lg font-semibold">Additional Information</h3>
+                <h3 className="text-lg font-semibold">Informasi Tambahan</h3>
                 <p className="text-sm text-muted-foreground">Detailed description and objectives</p>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+                  <Label htmlFor="description" className="text-sm font-medium">Keterangan</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -962,7 +962,7 @@ export default function CooperationManagementPage() {
                   />
                 </div>
 
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   <Label htmlFor="objectives" className="text-sm font-medium">Objectives</Label>
                   <Textarea
                     id="objectives"
@@ -996,7 +996,7 @@ export default function CooperationManagementPage() {
                     rows={3}
                     className="resize-none"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -1016,7 +1016,7 @@ export default function CooperationManagementPage() {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader className="border-b pb-4">
-            <DialogTitle className="text-xl font-semibold">Edit Cooperation</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">Ubah Data Kerjasama</DialogTitle>
             <DialogDescription className="text-base">
               Update cooperation agreement details and information.
             </DialogDescription>
@@ -1032,7 +1032,7 @@ export default function CooperationManagementPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="edit-title" className="text-sm font-medium">Title *</Label>
+                  <Label htmlFor="edit-title" className="text-sm font-medium">Judul *</Label>
                   <Input
                     id="edit-title"
                     value={formData.title}
@@ -1043,7 +1043,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="edit-partnerInstitution" className="text-sm font-medium">Partner Institution *</Label>
+                  <Label htmlFor="edit-partnerInstitution" className="text-sm font-medium">Instansi/Institusi *</Label>
                   <Input
                     id="edit-partnerInstitution"
                     value={formData.partnerInstitution}
@@ -1054,7 +1054,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="edit-cooperationType" className="text-sm font-medium">Cooperation Type *</Label>
+                  <Label htmlFor="edit-cooperationType" className="text-sm font-medium">Jenis Kerjasama *</Label>
                   <Select
                     value={formData.cooperationType}
                     onValueChange={(value) => setFormData({ ...formData, cooperationType: value as 'MOU' | 'PKS' | 'NK' })}
@@ -1099,7 +1099,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="edit-location" className="text-sm font-medium">Location *</Label>
+                  <Label htmlFor="edit-location" className="text-sm font-medium">Lokasi *</Label>
                   <Input
                     id="edit-location"
                     value={formData.location}
@@ -1110,7 +1110,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="edit-cooperationDate" className="text-sm font-medium">Cooperation Date *</Label>
+                  <Label htmlFor="edit-cooperationDate" className="text-sm font-medium">Tanggal Kerjasama *</Label>
                   <Input
                     id="edit-cooperationDate"
                     type="date"
@@ -1142,7 +1142,7 @@ export default function CooperationManagementPage() {
               {/* Dates Section */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <div className="space-y-3">
-                  <Label htmlFor="edit-startDate" className="text-sm font-medium">Start Date</Label>
+                  <Label htmlFor="edit-startDate" className="text-sm font-medium">Tanggal Mulai</Label>
                   <Input
                     id="edit-startDate"
                     type="date"
@@ -1153,7 +1153,7 @@ export default function CooperationManagementPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="edit-endDate" className="text-sm font-medium">End Date</Label>
+                  <Label htmlFor="edit-endDate" className="text-sm font-medium">Tanggal Selesai</Label>
                   <Input
                     id="edit-endDate"
                     type="date"
@@ -1224,13 +1224,13 @@ export default function CooperationManagementPage() {
             {/* Additional Information Section */}
             <div className="space-y-4">
               <div className="border-l-4 border-primary pl-4">
-                <h3 className="text-lg font-semibold">Additional Information</h3>
+                <h3 className="text-lg font-semibold">Informasi Tambahan</h3>
                 <p className="text-sm text-muted-foreground">Detailed description and objectives</p>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label htmlFor="edit-description" className="text-sm font-medium">Description</Label>
+                  <Label htmlFor="edit-description" className="text-sm font-medium">Keterangan</Label>
                   <Textarea
                     id="edit-description"
                     value={formData.description}
@@ -1241,7 +1241,7 @@ export default function CooperationManagementPage() {
                   />
                 </div>
 
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                   <Label htmlFor="edit-objectives" className="text-sm font-medium">Objectives</Label>
                   <Textarea
                     id="edit-objectives"
@@ -1275,7 +1275,7 @@ export default function CooperationManagementPage() {
                     rows={3}
                     className="resize-none"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

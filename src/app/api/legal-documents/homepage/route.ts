@@ -58,6 +58,7 @@ async function getFileInfo(relativePath: string): Promise<{ hasFile: boolean; fi
 
     return { hasFile: true, fileSize };
   } catch (error) {
+    console.log(error)
     return { hasFile: false, fileSize: null };
   }
 }

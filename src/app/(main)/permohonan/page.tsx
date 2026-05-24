@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -44,44 +44,69 @@ interface FormErrors {
   [key: string]: string;
 }
 
+interface RequiredDocumentDB {
+  name: string;
+  required: boolean;
+  formats: string;
+  maxSize: number;
+}
+
+interface CooperationTypeInfo {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  requiredDocuments: RequiredDocumentDB[];
+}
+
+interface DocumentFile {
+  key: string;
+  label: string;
+  required: boolean;
+  maxSizeMB: number;
+}
+
+const toDocumentKey = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
 const tabsConfig = {
   mou: {
     label: "MOU",
     title: "Memorandum of Understanding",
     description: "Pengajuan permohonan MOU untuk kerjasama antar instansi",
-    files: [
-      { key: "suratPermohonan", label: "Surat Permohonan", required: true },
-      { key: "draftMou", label: "Draft MOU", required: true },
-      { key: "studiKelayakan", label: "Studi Kelayakan Kerjasama / KAK", required: true },
-      { key: "profilKota", label: "Profil Kota", required: true },
-      { key: "legalStanding", label: "Legal Standing Perusahaan", required: true },
+    fallbackFiles: [
+      { key: "suratPermohonan", label: "Surat Permohonan", required: true, maxSizeMB: 5 },
+      { key: "draftMou", label: "Draft MOU", required: true, maxSizeMB: 5 },
+      { key: "studiKelayakan", label: "Studi Kelayakan Kerjasama / KAK", required: true, maxSizeMB: 5 },
+      { key: "profilKota", label: "Profil Kota", required: true, maxSizeMB: 5 },
+      { key: "legalStanding", label: "Legal Standing Perusahaan", required: true, maxSizeMB: 5 },
     ],
   },
   pks: {
     label: "PKS",
     title: "Perjanjian Kerjasama",
     description: "Pengajuan permohonan PKS untuk kerjasama operasional",
-    files: [
-      { key: "suratPermohonan", label: "Surat Permohonan", required: true },
-      { key: "draftPks", label: "Draft PKS", required: true },
+    fallbackFiles: [
+      { key: "suratPermohonan", label: "Surat Permohonan", required: true, maxSizeMB: 5 },
+      { key: "draftPks", label: "Draft PKS", required: true, maxSizeMB: 5 },
     ],
   },
   surat_kuasa: {
     label: "Surat Kuasa",
     title: "Surat Kuasa",
     description: "Pengajuan permohonan surat kuasa untuk representasi legal",
-    files: [
-      { key: "suratPermohonan", label: "Surat Permohonan", required: true },
-      { key: "draftPks", label: "Draft PKS", required: true },
+    fallbackFiles: [
+      { key: "suratPermohonan", label: "Surat Permohonan", required: true, maxSizeMB: 5 },
+      { key: "draftPks", label: "Draft PKS", required: true, maxSizeMB: 5 },
     ],
   },
   nota_kesepakatan: {
     label: "Nota Kesepakatan",
     title: "Nota Kesepakatan",
     description: "Pengajuan permohonan nota kesepakatan untuk kerjasama strategis",
-    files: [
-      { key: "suratPermohonan", label: "Surat Permohonan", required: true },
-      { key: "draftPks", label: "Draft PKS", required: true },
+    fallbackFiles: [
+      { key: "suratPermohonan", label: "Surat Permohonan", required: true, maxSizeMB: 5 },
+      { key: "draftPks", label: "Draft PKS", required: true, maxSizeMB: 5 },
     ],
   },
 };
@@ -89,6 +114,7 @@ const tabsConfig = {
 export default function PermohonanPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<keyof typeof tabsConfig>("mou");
+  const [cooperationTypes, setCooperationTypes] = useState<Record<string, CooperationTypeInfo>>({});
   const [formData, setFormData] = useState<FormData>({
     nama: "",
     email: "",
@@ -105,6 +131,34 @@ export default function PermohonanPage() {
 
   // React Query hooks
   const createApplicationMutation = useCreateApplication();
+
+  // Fetch cooperation types for dynamic required documents
+  useEffect(() => {
+    fetch('/api/cooperation-types?active=true')
+      .then(res => res.json())
+      .then((data: { cooperationTypes?: CooperationTypeInfo[] }) => {
+        if (data.cooperationTypes) {
+          const map: Record<string, CooperationTypeInfo> = {};
+          data.cooperationTypes.forEach(ct => { map[ct.code] = ct; });
+          setCooperationTypes(map);
+        }
+      })
+      .catch(() => {/* use fallback silently */});
+  }, []);
+
+  // Derive current tab's document list from DB, fall back to static config
+  const currentFiles: DocumentFile[] = (() => {
+    const ct = cooperationTypes[activeTab];
+    if (ct?.requiredDocuments?.length > 0) {
+      return ct.requiredDocuments.map(doc => ({
+        key: toDocumentKey(doc.name),
+        label: doc.name,
+        required: doc.required,
+        maxSizeMB: doc.maxSize,
+      }));
+    }
+    return tabsConfig[activeTab].fallbackFiles;
+  })();
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -249,7 +303,7 @@ export default function PermohonanPage() {
     }
 
     // Check required files
-    const requiredFiles = currentTab.files.filter(file => file.required);
+    const requiredFiles = currentFiles.filter(file => file.required);
     const missingRequiredFiles = requiredFiles.filter(required =>
       !selectedFiles.some(selected => selected.documentType === required.key)
     );
@@ -567,7 +621,7 @@ export default function PermohonanPage() {
                       Dokumen Pendukung
                     </h3>
                     <div className="space-y-4">
-                      {currentTab.files.map((file) => {
+                      {currentFiles.map((file) => {
                         const selectedFile = selectedFiles.find(f => f.documentType === file.key);
                         return (
                           <div key={file.key}>
@@ -582,7 +636,7 @@ export default function PermohonanPage() {
                               uploadProgress={selectedFile?.uploadProgress || 0}
                               error={selectedFile?.error}
                               uploaded={selectedFile?.uploaded || false}
-                              maxSizeMB={5}
+                              maxSizeMB={file.maxSizeMB}
                             />
                           </div>
                         );

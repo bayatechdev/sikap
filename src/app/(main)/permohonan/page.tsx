@@ -45,10 +45,11 @@ interface FormErrors {
 }
 
 interface RequiredDocumentDB {
+  key?: string;
   name: string;
   required: boolean;
-  formats: string;
-  maxSize: number;
+  formats?: string;
+  maxSize?: number;
 }
 
 interface CooperationTypeInfo {
@@ -151,10 +152,10 @@ export default function PermohonanPage() {
     const ct = cooperationTypes[activeTab];
     if (ct?.requiredDocuments?.length > 0) {
       return ct.requiredDocuments.map(doc => ({
-        key: toDocumentKey(doc.name),
+        key: doc.key || toDocumentKey(doc.name),
         label: doc.name,
         required: doc.required,
-        maxSizeMB: doc.maxSize,
+        maxSizeMB: doc.maxSize ?? 5,
       }));
     }
     return tabsConfig[activeTab].fallbackFiles;

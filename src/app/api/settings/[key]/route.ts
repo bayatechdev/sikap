@@ -137,30 +137,24 @@ export async function PUT(
     const body = await request.json();
     const validatedData = updateSettingSchema.parse(body);
 
-    // Check if setting exists
-    const existingSetting = await prisma.setting.findUnique({
+    const type = validatedData.type || 'text';
+    const value = type === 'json'
+      ? JSON.stringify(validatedData.value)
+      : validatedData.value;
+
+    const updatedSetting = await prisma.setting.upsert({
       where: { key },
-    });
-
-    if (!existingSetting) {
-      return NextResponse.json(
-        { error: 'Setting not found' },
-        { status: 404 }
-      );
-    }
-
-    // Convert value to string if it's JSON type
-    const updateData = {
-      value: validatedData.type === 'json' || existingSetting.type === 'json'
-        ? JSON.stringify(validatedData.value)
-        : validatedData.value,
-      description: validatedData.description,
-      type: validatedData.type || existingSetting.type,
-    };
-
-    const updatedSetting = await prisma.setting.update({
-      where: { key },
-      data: updateData,
+      update: {
+        value,
+        description: validatedData.description,
+        type,
+      },
+      create: {
+        key,
+        value,
+        description: validatedData.description || '',
+        type,
+      },
     });
 
     return NextResponse.json(updatedSetting);

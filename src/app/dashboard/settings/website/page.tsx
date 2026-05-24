@@ -119,7 +119,7 @@ export default function WebsiteSettingsPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ value }),
+          body: JSON.stringify({ value: value ?? '' }),
         })
       );
 

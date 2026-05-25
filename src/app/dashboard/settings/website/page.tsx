@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,68 @@ interface Setting {
   type: string;
   createdAt: string;
   updatedAt: string;
+}
+
+const LINK_SUGGESTIONS = ['/permohonan', '/kerjasama'];
+
+const isExternalLink = (url: string) => /^https?:\/\//.test(url);
+
+function LinkInput({ id, value, onChange, placeholder }: {
+  id: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const isExternal = value ? isExternalLink(value) : false;
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <Input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+      />
+      {value && (
+        <p className={`mt-1 text-xs flex items-center gap-1 ${isExternal ? 'text-blue-600' : 'text-muted-foreground'}`}>
+          {isExternal ? (
+            <><span>↗</span> External link — akan dibuka di tab baru</>
+          ) : (
+            <><span>→</span> Internal link</>
+          )}
+        </p>
+      )}
+      {open && (
+        <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
+          {LINK_SUGGESTIONS.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              className="w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onChange(suggestion);
+                setOpen(false);
+              }}
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function WebsiteSettingsPage() {
@@ -336,24 +398,46 @@ export default function WebsiteSettingsPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="hero_primary_button">Primary Button Text</Label>
-                      <Input
-                        id="hero_primary_button"
-                        value={settings.hero_primary_button || ''}
-                        onChange={(e) => setSettings(prev => ({ ...prev, hero_primary_button: e.target.value }))}
-                        placeholder="e.g., Get Started"
-                      />
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="hero_primary_button">Primary Button Text</Label>
+                        <Input
+                          id="hero_primary_button"
+                          value={settings.hero_primary_button || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, hero_primary_button: e.target.value }))}
+                          placeholder="e.g., Ajukan Permohonan"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero_primary_button_link">Primary Button Link</Label>
+                        <LinkInput
+                          id="hero_primary_button_link"
+                          value={settings.hero_primary_button_link || ''}
+                          onChange={(val) => setSettings(prev => ({ ...prev, hero_primary_button_link: val }))}
+                          placeholder="e.g., /permohonan"
+                        />
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="hero_secondary_button">Secondary Button Text</Label>
-                      <Input
-                        id="hero_secondary_button"
-                        value={settings.hero_secondary_button || ''}
-                        onChange={(e) => setSettings(prev => ({ ...prev, hero_secondary_button: e.target.value }))}
-                        placeholder="e.g., Learn More"
-                      />
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="hero_secondary_button">Secondary Button Text</Label>
+                        <Input
+                          id="hero_secondary_button"
+                          value={settings.hero_secondary_button || ''}
+                          onChange={(e) => setSettings(prev => ({ ...prev, hero_secondary_button: e.target.value }))}
+                          placeholder="e.g., Lihat Kerjasama"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hero_secondary_button_link">Secondary Button Link</Label>
+                        <LinkInput
+                          id="hero_secondary_button_link"
+                          value={settings.hero_secondary_button_link || ''}
+                          onChange={(val) => setSettings(prev => ({ ...prev, hero_secondary_button_link: val }))}
+                          placeholder="e.g., /kerjasama"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -364,7 +448,9 @@ export default function WebsiteSettingsPage() {
                       hero_title: settings.hero_title,
                       hero_subtitle: settings.hero_subtitle,
                       hero_primary_button: settings.hero_primary_button,
+                      hero_primary_button_link: settings.hero_primary_button_link,
                       hero_secondary_button: settings.hero_secondary_button,
+                      hero_secondary_button_link: settings.hero_secondary_button_link,
                     })}
                     disabled={saving}
                   >

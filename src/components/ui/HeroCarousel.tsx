@@ -2,15 +2,31 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { HeroSlide } from "@/hooks/use-settings";
+
+const isExternalLink = (url: string) => /^https?:\/\//.test(url);
+
+function ButtonLink({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
+  if (isExternalLink(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {children}
+      </a>
+    );
+  }
+  return <Link href={href} className={className}>{children}</Link>;
+}
 
 interface HeroCarouselProps {
   slides: HeroSlide[];
   globalTitle: string;
   globalSubtitle: string;
   primaryButton: string;
+  primaryButtonLink: string;
   secondaryButton: string;
+  secondaryButtonLink: string;
   autoPlayInterval?: number;
 }
 
@@ -19,12 +35,14 @@ interface SplitSlideContentProps {
   title: string;
   subtitle: string;
   primaryButton: string;
+  primaryButtonLink: string;
   secondaryButton: string;
+  secondaryButtonLink: string;
   imageUrl: string;
   imageAlt: string;
 }
 
-function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, imageUrl, imageAlt }: SplitSlideContentProps) {
+function SplitSlideContent({ title, subtitle, primaryButton, primaryButtonLink, secondaryButton, secondaryButtonLink, imageUrl, imageAlt }: SplitSlideContentProps) {
   const leftVariants = {
     hidden: { opacity: 0, x: -60 },
     visible: { opacity: 1, x: 0 },
@@ -57,12 +75,12 @@ function SplitSlideContent({ title, subtitle, primaryButton, secondaryButton, im
               {subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-3.5">
-              <button className="px-[30px] py-[20px] rounded-[100px] bg-primary text-[16px] font-bold leading-[19px] transition-all duration-300 hover:shadow-primary hover:-translate-y-1">
+              <ButtonLink href={primaryButtonLink} className="px-[30px] py-[20px] rounded-[100px] bg-primary text-[16px] font-bold leading-[19px] transition-all duration-300 hover:shadow-primary hover:-translate-y-1 text-center">
                 {primaryButton}
-              </button>
-              <button className="px-[30px] py-[20px] rounded-[100px] border border-foreground text-[16px] font-bold leading-[19px] transition-all duration-300 hover:ring-2 hover:ring-primary hover:bg-primary hover:border-primary hover:text-foreground">
+              </ButtonLink>
+              <ButtonLink href={secondaryButtonLink} className="px-[30px] py-[20px] rounded-[100px] border border-foreground text-[16px] font-bold leading-[19px] transition-all duration-300 hover:ring-2 hover:ring-primary hover:bg-primary hover:border-primary hover:text-foreground text-center">
                 {secondaryButton}
-              </button>
+              </ButtonLink>
             </div>
           </motion.div>
 
@@ -122,12 +140,14 @@ interface FullSlideContentProps {
   title: string;
   subtitle: string;
   primaryButton: string;
+  primaryButtonLink: string;
   secondaryButton: string;
+  secondaryButtonLink: string;
   imageUrl: string;
   imageAlt: string;
 }
 
-function FullSlideContent({ title, subtitle, primaryButton, secondaryButton, imageUrl, imageAlt }: FullSlideContentProps) {
+function FullSlideContent({ title, subtitle, primaryButton, primaryButtonLink, secondaryButton, secondaryButtonLink, imageUrl, imageAlt }: FullSlideContentProps) {
   const textVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -174,12 +194,12 @@ function FullSlideContent({ title, subtitle, primaryButton, secondaryButton, ima
               {subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <button className="px-8 py-4 rounded-full bg-primary text-foreground text-base font-bold transition-all duration-300 hover:shadow-lg hover:shadow-primary/50 hover:-translate-y-1">
+              <ButtonLink href={primaryButtonLink} className="px-8 py-4 rounded-full bg-primary text-foreground text-base font-bold transition-all duration-300 hover:shadow-lg hover:shadow-primary/50 hover:-translate-y-1 text-center">
                 {primaryButton}
-              </button>
-              <button className="px-8 py-4 rounded-full border-2 border-white text-white text-base font-bold transition-all duration-300 hover:bg-white hover:text-foreground">
+              </ButtonLink>
+              <ButtonLink href={secondaryButtonLink} className="px-8 py-4 rounded-full border-2 border-white text-white text-base font-bold transition-all duration-300 hover:bg-white hover:text-foreground text-center">
                 {secondaryButton}
-              </button>
+              </ButtonLink>
             </div>
           </motion.div>
         </div>
@@ -194,7 +214,9 @@ export default function HeroCarousel({
   globalTitle,
   globalSubtitle,
   primaryButton,
+  primaryButtonLink,
   secondaryButton,
+  secondaryButtonLink,
   autoPlayInterval = 6000,
 }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -321,7 +343,9 @@ export default function HeroCarousel({
                 title={slideTitle}
                 subtitle={slideSubtitle}
                 primaryButton={primaryButton}
+                primaryButtonLink={primaryButtonLink}
                 secondaryButton={secondaryButton}
+                secondaryButtonLink={secondaryButtonLink}
                 imageUrl={slideImage.url}
                 imageAlt={slideImage.alt}
               />
@@ -330,7 +354,9 @@ export default function HeroCarousel({
                 title={slideTitle}
                 subtitle={slideSubtitle}
                 primaryButton={primaryButton}
+                primaryButtonLink={primaryButtonLink}
                 secondaryButton={secondaryButton}
+                secondaryButtonLink={secondaryButtonLink}
                 imageUrl={slideImage.url}
                 imageAlt={slideImage.alt}
               />

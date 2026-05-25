@@ -136,7 +136,9 @@ export function useHeroSettings() {
       'hero_title',
       'hero_subtitle',
       'hero_primary_button',
+      'hero_primary_button_link',
       'hero_secondary_button',
+      'hero_secondary_button_link',
       'hero_images',
       'hero_images_split',
       'hero_images_fullslider'

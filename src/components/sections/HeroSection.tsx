@@ -24,7 +24,9 @@ export default function HeroSection({ data }: HeroSectionProps) {
   const globalHeroTitle = getSetting('hero_title', data?.title || 'Selamat datang di Website SIKAP');
   const globalHeroSubtitle = getSetting('hero_subtitle', data?.subtitle || 'Sistem kerjasama berbasis digital Kabupaten Tana Tidung yang akuntabel dan transparan');
   const primaryButton = getSetting('hero_primary_button', data?.cta?.primary || 'Ajukan Kerjasama');
+  const primaryButtonLink = getSetting('hero_primary_button_link', '/permohonan');
   const secondaryButton = getSetting('hero_secondary_button', data?.cta?.secondary || 'Lihat Data');
+  const secondaryButtonLink = getSetting('hero_secondary_button_link', '/kerjasama');
 
   const scaleVariants = {
     hidden: { opacity: 0, scale: 0.9 },
@@ -54,7 +56,9 @@ export default function HeroSection({ data }: HeroSectionProps) {
           globalTitle={globalHeroTitle}
           globalSubtitle={globalHeroSubtitle}
           primaryButton={primaryButton}
+          primaryButtonLink={primaryButtonLink}
           secondaryButton={secondaryButton}
+          secondaryButtonLink={secondaryButtonLink}
           autoPlayInterval={6000}
         />
       )}

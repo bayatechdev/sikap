@@ -64,6 +64,7 @@ export default function KerjasamaPage() {
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const getBadgeClasses = (cooperationType: string, color?: string) => {
@@ -113,7 +114,11 @@ export default function KerjasamaPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        if (data) {
+          setIsFetching(true);
+        } else {
+          setLoading(true);
+        }
         const params = new URLSearchParams({
           page: currentPage.toString(),
           limit: ITEMS_PER_PAGE.toString(),
@@ -137,6 +142,7 @@ export default function KerjasamaPage() {
         console.error('Error fetching cooperations:', err);
       } finally {
         setLoading(false);
+        setIsFetching(false);
       }
     };
 
@@ -565,7 +571,12 @@ export default function KerjasamaPage() {
 
           {/* Table */}
           <div className="relative mb-6">
-            <div className="overflow-x-auto rounded-[20px]">
+            {isFetching && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 rounded-[20px]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            )}
+            <div className={`overflow-x-auto rounded-[20px] transition-opacity duration-200 ${isFetching ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
               <table className="w-full border-collapse bg-white rounded-[20px] shadow-lg min-w-[900px]">
                 <thead>
                   <tr className="bg-foreground text-white">
@@ -608,7 +619,7 @@ export default function KerjasamaPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {loading ? (
+                  {loading && !data ? (
                     <tr>
                       <td
                         colSpan={getVisibleColumnCount()}

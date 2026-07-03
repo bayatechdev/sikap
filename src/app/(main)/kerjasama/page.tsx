@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Eye } from "lucide-react";
@@ -45,6 +45,7 @@ const ITEMS_PER_PAGE = 5;
 
 export default function KerjasamaPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     cooperationType: "",
@@ -57,11 +58,15 @@ export default function KerjasamaPage() {
     no: false,
     tentang: true,
     jenis: true,
+    pihak: true,
     opd: false,
     waktuTempat: true,
     file: true,
   });
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const columnMenuRef = useRef<HTMLDivElement>(null);
+  const hasInitialData = useRef(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
@@ -110,11 +115,32 @@ export default function KerjasamaPage() {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setIsFilterOpen(false);
+      }
+      if (columnMenuRef.current && !columnMenuRef.current.contains(e.target as Node)) {
+        setIsColumnMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (data) {
+        if (hasInitialData.current) {
           setIsFetching(true);
         } else {
           setLoading(true);
@@ -122,7 +148,7 @@ export default function KerjasamaPage() {
         const params = new URLSearchParams({
           page: currentPage.toString(),
           limit: ITEMS_PER_PAGE.toString(),
-          ...(searchTerm && { search: searchTerm }),
+          ...(debouncedSearch && { search: debouncedSearch }),
           ...(filters.cooperationType && { cooperationType: filters.cooperationType }),
           ...(filters.orgUnit && { orgUnit: filters.orgUnit }),
           ...(filters.location && { location: filters.location }),
@@ -136,6 +162,7 @@ export default function KerjasamaPage() {
 
         const result: ApiResponse = await response.json();
         setData(result);
+        hasInitialData.current = true;
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -147,7 +174,7 @@ export default function KerjasamaPage() {
     };
 
     fetchData();
-  }, [currentPage, searchTerm, filters]);
+  }, [currentPage, debouncedSearch, filters]);
 
   const cooperations = data?.cooperations || [];
   const totalPages = data?.pagination.pages || 1;
@@ -297,16 +324,13 @@ export default function KerjasamaPage() {
                     type="text"
                     placeholder="Cari data kerjasama..."
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
                   />
                 </div>
 
                 {/* Filter Button */}
-                <div className="relative">
+                <div className="relative" ref={filterRef}>
                   <button
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                     className="flex items-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-semibold text-gray-700 transition-all duration-200 border border-gray-300"
@@ -433,7 +457,7 @@ export default function KerjasamaPage() {
                 </div>
 
                 {/* Column Visibility Button */}
-                <div className="relative">
+                <div className="relative" ref={columnMenuRef}>
                   <button
                     onClick={() => setIsColumnMenuOpen(!isColumnMenuOpen)}
                     className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-semibold text-gray-700 transition-all duration-200 border border-gray-300"
@@ -520,6 +544,18 @@ export default function KerjasamaPage() {
                         <label className="flex items-center gap-3">
                           <input
                             type="checkbox"
+                            checked={visibleColumns.pihak}
+                            onChange={() => toggleColumn("pihak")}
+                            className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                          />
+                          <span className="text-sm font-medium text-gray-700">
+                            Mitra Kerjasama
+                          </span>
+                        </label>
+
+                        <label className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
                             checked={visibleColumns.opd}
                             onChange={() => toggleColumn("opd")}
                             className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
@@ -586,13 +622,18 @@ export default function KerjasamaPage() {
                       </th>
                     )}
                     {visibleColumns.tentang && (
-                      <th className="px-6 py-4 text-left text-[14px] font-semibold min-w-[450px]">
+                      <th className="px-6 py-4 text-left text-[14px] font-semibold min-w-[350px]">
                         Tentang
                       </th>
                     )}
                     {visibleColumns.jenis && (
                       <th className="px-6 py-4 text-left text-[14px] font-semibold">
                         Jenis
+                      </th>
+                    )}
+                    {visibleColumns.pihak && (
+                      <th className="px-6 py-4 text-left text-[14px] font-semibold min-w-[150px]">
+                        Mitra Kerjasama
                       </th>
                     )}
                     {visibleColumns.opd && (
@@ -669,7 +710,7 @@ export default function KerjasamaPage() {
                         )}
                         {visibleColumns.tentang && (
                           <td className="px-6 py-4 text-[14px] text-gray-800 font-medium">
-                            <div className="line-clamp-3 leading-relaxed w-[450px] max-w-[450px]">
+                            <div className="line-clamp-3 leading-relaxed w-[350px] max-w-[450px]">
                               {row.title}
                             </div>
                           </td>
@@ -686,9 +727,16 @@ export default function KerjasamaPage() {
                             </span>
                           </td>
                         )}
+                        {visibleColumns.pihak && (
+                          <td className="px-6 py-4 text-[14px] text-gray-800">
+                            <div className="line-clamp-2 leading-relaxed w-[150px]">
+                              {row.partnerInstitution}
+                            </div>
+                          </td>
+                        )}
                         {visibleColumns.opd && (
                           <td className="px-6 py-4 text-[14px] text-gray-800">
-                            <div className="line-clamp-2 leading-relaxed w-[350px]">
+                            <div className="line-clamp-2 leading-relaxed w-[150px]">
                               {row.orgUnit}
                             </div>
                           </td>
